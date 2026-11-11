@@ -28,4 +28,7 @@ const holes=parts.filter(n=>n.type==='path');assert.equal(holes.length,2);holes.
 assert.ok(holes[0].props.d.includes('11.2')&&holes[1].props.d.includes('13.1'));
 const body=parts.find(n=>n.type==='g');assert.equal(body.props.fill,'currentColor');assert.ok(body.props.mask.includes(mask.props.id));
 assert.equal(parts.filter(n=>n.type==='rect').length,3);
-console.log(JSON.stringify({render:'passed',sessionSelection:'passed',remoteStringId:'passed',remoteResultUnwrap:'passed',load:'passed',confirmationGate:'passed',save:'passed',workspaceIsolation:'passed',icon:'passed'}));
+const head=nodes().find(n=>n.props&&n.props.className==='csrw-head');assert.ok(head,'panel header renders');
+const logo=head.children[0];assert.equal(logo.props.className,'csrw-logo');assert.equal(logo.children[0].props.size,26,'logo icon is 26px at the top-left');
+assert.ok(head.children[1].children.some(c=>c.type==='h1'),'title stays an h1 next to the logo');
+console.log(JSON.stringify({render:'passed',sessionSelection:'passed',remoteStringId:'passed',remoteResultUnwrap:'passed',load:'passed',confirmationGate:'passed',save:'passed',workspaceIsolation:'passed',icon:'passed',headerIcon:'passed'}));
