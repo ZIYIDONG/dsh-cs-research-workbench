@@ -1,8 +1,8 @@
-# dsh CS 科研工作台
+# dsh CS科研工作台
 
-**dsh 计算机科学与网络安全科研工作台**（`dsh-cs-research-workbench`，简称 `csrw`）是面向 dsh 的代码中心科研插件。这里的 **CS 同时指 Computer Science 与 Cybersecurity**：二者共享问题定义、文献与笔记整理、代码和实验版本管理、结果复现及资料备份流程。本插件抽象这条共同流程，适用于不同计算机科学与网络安全方向，不预设单一子领域。
+**dsh 计算机科学科研工作台**（`dsh-cs-research-workbench`，简称 `csrw`）是面向 dsh 的代码中心科研插件。这里的 **CS 仅指 Computer Science（计算机科学）**。插件围绕计算机科学研究中的问题定义、文献与笔记整理、代码和实验版本管理、结果复现及资料备份组织工作流，适用于不同计算机科学方向，不预设单一子领域。
 
-> A code-centric research workbench for Computer Science and Cybersecurity.
+> A code-centric research workbench for Computer Science.
 
 v0.1 提供本地 Obsidian 文件操作、Git、Zotero 本机只读 API、坚果云 WebDAV 与可校验的本地备份。插件 ID 和 CLI 为 `csrw`，工具统一使用 `csrw_` 前缀，工作区配置目录为 `.csrw`。
 
@@ -27,7 +27,7 @@ node bin/csrw.js health
 
 ## 图形界面
 
-安装并重启 DSH、刷新原有 GUI 后，设置中新增 **CS 科研工作台** 分区，侧边栏新增同名入口；插件管理页也提供配置卡。三个入口复用同一原生 React 面板，不创建其他网页服务。
+安装并重启 DSH、刷新原有 GUI 后，设置中新增 **CS科研工作台** 分区，侧边栏新增同名入口；插件管理页也提供配置卡。三个入口复用同一原生 React 面板，不创建其他网页服务。
 
 1. 选择工作区目录，并从列表选择一个已有会话作为命令的权限和审计上下文；不会启动模型对话。
 2. 点击“加载配置”读取工作区默认值/配置。按字段保存，字符串与布尔类型按白名单校验。密码不在界面中录入或保存。

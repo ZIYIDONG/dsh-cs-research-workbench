@@ -1,7 +1,7 @@
 {
   "name": "dsh-cs-research-workbench",
   "version": "0.1.0",
-  "description": "A code-centric research workbench for Computer Science and Cybersecurity",
+  "description": "A code-centric research workbench for Computer Science",
   "main": "./lib/index.js",
   "type": "module",
   "license": "GPL-3.0-only",
@@ -13,7 +13,6 @@
     "dsh",
     "csrw",
     "research",
-    "cybersecurity",
     "obsidian",
     "zotero",
     "webdav"
@@ -48,7 +47,7 @@
     "check:ui": "node scripts/verify-ui.mjs && node scripts/verify-ui-interaction.mjs"
   },
   "dsh": {
-    "name": "dsh CS 科研工作台",
+    "name": "dsh CS科研工作台",
     "category": "research",
     "bundle": {
       "patch": "./patches/bundle.yaml"
