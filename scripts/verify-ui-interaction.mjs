@@ -23,11 +23,12 @@ const iconSlot=slots.find(s=>s.opts.name==='sidebar.panellist');assert.ok(iconSl
 function walk(node,out=[]){if(node&&typeof node==='object'){out.push(node);(node.children||[]).forEach(child=>walk(child,out));}return out;}
 const svg=iconSlot.component({size:20}),parts=walk(svg);
 assert.equal(svg.type,'svg');assert.equal(svg.props.viewBox,'0 0 24 24');assert.equal(svg.props['aria-hidden'],true);
-const mask=parts.find(n=>n.type==='mask');assert.ok(mask,'icon keeps a mask for the screen glyphs');assert.equal(mask.props.maskUnits,'userSpaceOnUse');
-const holes=parts.filter(n=>n.type==='path');assert.equal(holes.length,2);holes.forEach(p=>{assert.equal(p.props.stroke,'#000');assert.equal(p.props.strokeWidth,0.8);});
-assert.ok(holes[0].props.d.includes('8.95')&&holes[1].props.d.includes('9.9'));
-const body=parts.find(n=>n.type==='g');assert.equal(body.props.fill,'currentColor');assert.ok(body.props.mask.includes(mask.props.id));
-assert.equal(parts.filter(n=>n.type==='rect').length,3);
+const rects=parts.filter(n=>n.type==='rect');assert.equal(rects.length,2,'screen frame + base only');
+assert.deepEqual([rects[0].props.fill,rects[0].props.stroke,rects[0].props.strokeWidth],['none','currentColor',1.5],'screen is a 1.5 stroke frame');
+assert.equal(rects[1].props.fill,'currentColor','base is solid');
+const glyphs=parts.filter(n=>n.type==='path');assert.equal(glyphs.length,2);glyphs.forEach(p=>{assert.equal(p.props.stroke,'currentColor');assert.equal(p.props.strokeWidth,0.85);});
+assert.ok(glyphs[0].props.d.includes('8.95')&&glyphs[1].props.d.includes('9.9'));
+assert.equal(parts.filter(n=>n.type==='mask').length,0,'no mask needed once the screen is a frame');
 const head=nodes().find(n=>n.props&&n.props.className==='csrw-head');assert.ok(head,'panel header renders');
 const logo=head.children[0];assert.equal(logo.props.className,'csrw-logo');assert.equal(logo.children[0].props.size,26,'logo icon is 26px at the top-left');
 assert.ok(head.children[1].children.some(c=>c.type==='h1'),'title stays an h1 next to the logo');
