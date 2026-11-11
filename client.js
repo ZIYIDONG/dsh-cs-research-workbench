@@ -51,9 +51,7 @@ window.__ModuleLoader__.load({
     const zh = {
       workbench: '科研工作台',
       navTodo: '待办', navProject: '项目', navPaper: '文献库', navIdea: '想法', navKb: '知识库',
-      pendingLine: '还有 {n} 件事 等你推进',
-      paperLine: '{n} 篇文献 排在本周',
-      streakLine: '你已经连续记录 {n} 天',
+      pendingLine: '还有{n}件事等你推进',
       heroPlaceholder: '记下一件事、一个想法，或贴一个 DOI / 链接',
       send: '记下',
       related: '找到 {n} 条相关的内容，放在了旁边',
@@ -63,6 +61,10 @@ window.__ModuleLoader__.load({
       scatter: '散落', list: '列表', calendar: '日历',
       all: '全部', task: '任务', project: '项目', paper: '文献', idea: '想法', note: '笔记',
       undo: '撤销上一步', gear: '设置', assistant: '助手',
+      zoomIn: '放大', zoomOut: '缩小', zoomFit: '回到中心',
+      model: '模型', modelPick: '选择助手模型', modelLocal: '本地规则', modelEmpty: '没有可用的模型',
+      modelHint: '选中后助手用该模型回答；不选则用本地规则。',
+      clearSamples: '清空示例数据', undoHint: '撤销：Ctrl / Cmd + Z',
       loading: '正在铺开研究台…',
       error: '工作台加载失败：{error}', retry: '重试',
       empty: '研究台还是空的。记下第一件事，或按 + 快速记录。',
@@ -86,10 +88,8 @@ window.__ModuleLoader__.load({
     }
     const en = {
       workbench: 'Research desk',
-      navTodo: 'Tasks', navProject: 'Projects', navPaper: 'Papers', navIdea: 'Ideas', navKb: 'Knowledge Base',
+      navTodo: 'Todo', navProject: 'Projects', navPaper: 'Papers', navIdea: 'Ideas', navKb: 'KnowledgeBase',
       pendingLine: '{n} things waiting for you',
-      paperLine: '{n} papers this week',
-      streakLine: 'You have logged {n} days in a row',
       heroPlaceholder: 'Log a task, an idea, or paste a DOI / link',
       send: 'Log',
       related: 'Found {n} related items, placed nearby',
@@ -99,6 +99,10 @@ window.__ModuleLoader__.load({
       scatter: 'Scatter', list: 'List', calendar: 'Calendar',
       all: 'All', task: 'Task', project: 'Project', paper: 'Paper', idea: 'Idea', note: 'Note',
       undo: 'Undo', gear: 'Settings', assistant: 'Assistant',
+      zoomIn: 'Zoom in', zoomOut: 'Zoom out', zoomFit: 'Reset view',
+      model: 'Model', modelPick: 'Pick an assistant model', modelLocal: 'Local rules', modelEmpty: 'No model available',
+      modelHint: 'The assistant answers with this model; unset falls back to local rules.',
+      clearSamples: 'Clear sample data', undoHint: 'Undo: Ctrl / Cmd + Z',
       loading: 'Unfolding the desk…',
       error: 'Failed to load the desk: {error}', retry: 'Retry',
       empty: 'The desk is empty. Log something or press + to capture.',
@@ -120,7 +124,7 @@ window.__ModuleLoader__.load({
       cleared: 'Undid: {label}', toastAdd: 'Logged',
       pageSoon: 'This page is coming in the next round; the home page comes first.',
     }
-    let language = 'en'
+    let language = 'zh'
     const dict = () => (language === 'en' ? en : zh)
     function t(key, vars) {
       const value = dict()[key] ?? zh[key] ?? key
@@ -134,6 +138,7 @@ window.__ModuleLoader__.load({
       state: null, canUndo: false, error: null, view: 'todo', mode: 'scatter', kindFilter: 'all',
       query: '', related: null, capture: null, dockOpen: true, chatInput: '', thinking: false,
       toast: null, settingsOpen: false, focusId: null, cam: { x: 0, y: 0, z: 1 }, camAnim: false,
+      modelsOpen: false, models: [], modelsLoading: false,
       month: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
     }
     const listeners = new Set()
@@ -205,6 +210,22 @@ window.__ModuleLoader__.load({
       }
     }
 
+    async function openModels() {
+      setDesk({ modelsOpen: true, modelsLoading: true })
+      try {
+        const data = await request('models')
+        setDesk({ models: data.models ?? [], modelsLoading: false })
+      } catch (err) {
+        setDesk({ models: [], modelsLoading: false })
+        toast(err.message, { error: true })
+      }
+    }
+
+    async function chooseModel(entry) {
+      setDesk({ modelsOpen: false })
+      await saveSettings({ assistant: entry ? { provider: entry.provider, model: entry.id } : null })
+    }
+
     async function sendChat(message) {
       const text = String(message || '').trim()
       if (!text || snapshot.thinking) return
@@ -222,6 +243,15 @@ window.__ModuleLoader__.load({
         setDesk({ thinking: false })
       }
     }
+
+    // ---------- 相机 ----------
+    function zoomCenter(factor) {
+      const cam = snapshot.cam
+      const nextZ = Math.min(2.2, Math.max(0.3, cam.z * factor))
+      const ratio = nextZ / cam.z
+      setDesk({ cam: { z: nextZ, x: cam.x * ratio, y: cam.y * ratio }, camAnim: true })
+    }
+    function resetCamera() { setDesk({ cam: { x: 0, y: 0, z: 1 }, camAnim: true }) }
 
     // ---------- 数据与布局 ----------
     const CATEGORY = { todo: 'task', project: 'project', paper: 'paper', idea: 'idea', note: 'note' }
@@ -333,24 +363,10 @@ window.__ModuleLoader__.load({
     }
 
     function heroNumbers(state) {
-      if (!state) return { pending: 0, papers: 0, streak: 0 }
+      if (!state) return { pending: 0 }
       const todos = state.todos ?? []
       const pending = todos.filter((row) => row.status === 'todo' || row.status === 'doing').length
-      const week = Date.now() + 7 * DAY
-      const papers = (state.papers ?? []).filter((row) => row.status === 'reading' || (row.readBy && new Date(row.readBy).getTime() <= week && row.status !== 'read' && row.status !== 'cited')).length
-      const days = new Set()
-      for (const list of [state.todos, state.projects, state.papers, state.ideas, state.notes]) {
-        for (const row of list ?? []) {
-          for (const value of [row.updatedAt, row.doneAt, row.readBy]) if (value && !Number.isNaN(new Date(value).getTime())) days.add(dateKey(value))
-        }
-      }
-      days.add(dateKey(Date.now()))
-      let streak = 0
-      for (let offset = 0; offset < 400; offset += 1) {
-        if (days.has(dateKey(Date.now() - offset * DAY))) streak += 1
-        else if (offset > 0) break
-      }
-      return { pending, papers, streak }
+      return { pending }
     }
 
     function classify(text) {
@@ -385,9 +401,15 @@ window.__ModuleLoader__.load({
       plus: [['path', { d: 'M12 5v14M5 12h14' }]],
       send: [['path', { d: 'M12 19V5M6 11l6-6 6 6' }]],
       undo: [['path', { d: 'M9 7H5v4M5 11a8 8 0 1 1 2.3 5.7' }]],
-      gear: [['circle', { cx: 12, cy: 12, r: 3 }], ['path', { d: 'M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4' }]],
+      gear: [
+        ['path', { d: 'M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z' }],
+        ['circle', { cx: 12, cy: 12, r: 3.1 }],
+      ],
+      target: [['circle', { cx: 12, cy: 12, r: 3.6 }], ['path', { d: 'M12 2.5v3.2M12 18.3v3.2M2.5 12h3.2M18.3 12h3.2' }]],
+      chevron: [['path', { d: 'M6 9.5 12 15.5 18 9.5' }]],
       chat: [['path', { d: 'M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H9l-5 4z' }]],
       spark: [['path', { d: 'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z' }]],
+      send: [['path', { d: 'M12 19V5M6 11l6-6 6 6' }]],
     }
     function Icon({ name, size = 18 }) {
       return h('svg', { width: size, height: size, viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', strokeWidth: 1.6, strokeLinecap: 'round', strokeLinejoin: 'round', 'aria-hidden': true },
@@ -415,29 +437,59 @@ window.__ModuleLoader__.load({
 .rd-tool{display:flex;align-items:center;gap:6px;margin-left:auto}
 .rd-iconbtn{width:32px;height:32px;display:grid;place-items:center;border-radius:999px;border:.5px solid var(--dsw-alias-border-l1);background:var(--glass);backdrop-filter:blur(24px);color:var(--dsw-alias-label-secondary);cursor:pointer}
 .rd-iconbtn:hover{color:var(--dsw-alias-label-primary)}
+/* 右下角：缩放/定位。吸附在内容区（.rd-main）四角，
+   助手展开时随内容区一起左移，不会压到助手栏。 */
+.rd-corner{position:absolute;bottom:18px;z-index:31;display:flex;align-items:center;gap:8px}
+.rd-corner.is-right{right:18px}
+.rd-root.has-dock .rd-corner.is-right{right:calc(var(--dock-w) + 18px)}
+.rd-zoom{display:flex;align-items:center;gap:2px;padding:3px;border-radius:999px;border:.5px solid var(--dsw-alias-border-l1);background:var(--glass);backdrop-filter:blur(24px);box-shadow:0 8px 30px rgb(0 0 0 / 6%)}
+.rd-zoom button{width:30px;height:30px;display:grid;place-items:center;border:0;border-radius:999px;background:transparent;color:var(--dsw-alias-label-secondary);font:inherit;font-size:16px;line-height:1;cursor:pointer;transition:background .16s,color .16s}
+.rd-zoom button:hover{background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary)}
+.rd-zoom button.rd-zoom-fit{font-size:0}
+/* 右上角模型选择：与设置按钮同高同圆角，长文案省略 */
+.rd-model{height:32px;display:flex;align-items:center;gap:6px;max-width:210px;padding:0 10px 0 11px;border-radius:999px;border:.5px solid var(--dsw-alias-border-l1);background:var(--glass);backdrop-filter:blur(24px);color:var(--dsw-alias-label-secondary);font:inherit;font-size:12px;cursor:pointer}
+.rd-model:hover{color:var(--dsw-alias-label-primary)}
+.rd-model span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* spark 的墨迹中心在 viewBox y=10（不是 12），14px 下高出约 1.2px，单独补偿 */
+.rd-model svg:first-of-type{transform:translateY(2.5px)}
+.rd-model-dialog{width:min(420px,90vw)}
+.rd-model-hint{margin:0 0 12px;color:var(--dsw-alias-label-tertiary,#8a8a8a);font-size:12px;line-height:1.5}
+.rd-model-list{display:flex;flex-direction:column;gap:4px;max-height:320px;overflow:auto;margin:0 0 14px}
+.rd-model-row{display:flex;align-items:baseline;gap:10px;padding:9px 12px;border-radius:10px;border:.5px solid transparent;background:transparent;color:var(--dsw-alias-label-primary);font:inherit;font-size:13px;text-align:left;cursor:pointer}
+.rd-model-row:hover{background:var(--dsw-alias-bg-layer-1)}
+.rd-model-row.is-on{border-color:var(--dsw-alias-brand-primary);background:color-mix(in srgb,var(--dsw-alias-brand-primary) 10%,transparent)}
+.rd-model-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rd-model-provider{color:var(--dsw-alias-label-tertiary,#8a8a8a);font-size:11px}
+.rd-model-empty{margin:0 0 14px;color:var(--dsw-alias-label-tertiary,#8a8a8a);font-size:12px}
 .rd-sample{height:30px;padding:0 12px;border-radius:999px;border:.5px solid var(--dsw-alias-border-l1);background:var(--glass);color:var(--dsw-alias-label-secondary);font:inherit;font-size:12px;cursor:pointer}
 .rd-open-dock{height:32px;display:flex;align-items:center;gap:6px;padding:0 12px;border-radius:999px;border:.5px solid var(--dsw-alias-border-l1);background:var(--glass);color:var(--dsw-alias-label-secondary);font:inherit;font-size:12px;cursor:pointer}
-.rd-content{position:absolute;inset:0;overflow:hidden}
+.rd-content{position:absolute;inset:0;overflow:hidden;transition:right .22s ease}
+/* 右侧助手展开时，内容区整体让出 --dock-w；所有全宽布局都必须放进 .rd-content，
+   不要用 position:fixed 或 100vw 自行定位，否则会被助手栏遮住。 */
+.rd-root.has-dock .rd-content{right:var(--dock-w)}
+.rd-root.has-dock .rd-topbar{right:var(--dock-w)}
 .rd-loading{position:absolute;inset:0;display:grid;place-items:center;color:var(--dsw-alias-label-secondary)}
 .rd-shimmer{animation:rd-pulse 1.6s ease-in-out infinite}
 @keyframes rd-pulse{0%,100%{opacity:.45}50%{opacity:1}}
 .rd-page{position:absolute;inset:0;overflow:auto;padding:96px 28px 120px}
-.rd-hero-anchor{position:absolute;left:50%;top:50%;width:520px;transform:translate(-50%,-50%);z-index:6;pointer-events:none}
+.rd-hero-anchor{position:absolute;left:50%;top:50%;width:576px;transform:translate(-50%,-50%);z-index:6;pointer-events:auto;padding:28px 28px 24px;border-radius:26px;background:color-mix(in srgb,var(--dsw-alias-bg-base) 20%,transparent);border:.5px solid color-mix(in srgb,var(--dsw-alias-border-l1) 55%,transparent);backdrop-filter:blur(26px) saturate(1.02);-webkit-backdrop-filter:blur(26px) saturate(1.02);box-shadow:0 16px 44px rgb(0 0 0 / 5%)}
 .rd-hero{pointer-events:auto;display:flex;flex-direction:column;gap:14px}
-.rd-hero-date{color:var(--dsw-alias-label-tertiary,#8a8a8a);font-size:13px;letter-spacing:.02em}
-.rd-hero-line{font-size:33px;line-height:1.46;font-weight:300;letter-spacing:-.01em;margin:0}
+.rd-hero-date{color:var(--dsw-alias-label-tertiary,#8a8a8a);font-size:13px;letter-spacing:.02em;text-align:center}
+.rd-hero-line{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:33px;line-height:1.46;font-weight:300;letter-spacing:-.01em;margin:0;text-align:center;width:100%}
+.rd-hero-row{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:6px;min-height:48px;width:100%;white-space:pre-wrap}
 .rd-hero-line b{font-weight:600}
-.rd-hero-num{display:inline-grid;place-items:center;vertical-align:-6px;width:36px;height:36px;margin:0 4px;border-radius:50%;font-size:15px;font-weight:600;color:#fff;background:linear-gradient(135deg,var(--dsw-alias-brand-primary),#8f7bff)}
-.rd-hero-num.is-paper{background:linear-gradient(135deg,#4bc0a4,#5f8dff)}
-.rd-hero-num.is-streak{background:linear-gradient(135deg,#ff9f68,#ff6b9a)}
+.rd-hero-num{position:relative;isolation:isolate;flex:none;font-family:"Times New Roman",Times,"Nimbus Roman",serif;font-size:1.06em;font-weight:600;line-height:inherit;letter-spacing:.01em;font-variant-numeric:lining-nums;color:color-mix(in srgb,#8d2733 82%,var(--dsw-alias-label-primary));transform:translateY(calc(.11em + 1.25px))}
+.rd-hero-num::before{content:'';position:absolute;left:50%;bottom:calc(.35em + 2px);width:calc(.92em - 2px);height:calc(.92em - 2px);transform:translateX(-50%);background:color-mix(in srgb,#8d2733 12%,transparent);border-radius:.18em;z-index:-1}
+.rd-hero-num-txt{display:inline-block;transform:translateY(calc(-.07em - 1px))}
 .rd-hero-input{display:flex;align-items:center;gap:8px;height:48px;padding:0 6px 0 16px;border-radius:20px;background:var(--dsw-alias-bg-layer-1);border:.5px solid var(--dsw-alias-border-l1);box-shadow:0 10px 30px rgb(0 0 0 / 7%);transition:transform .18s,box-shadow .18s}
 .rd-hero-input:focus-within{transform:translateY(-1px);box-shadow:0 14px 36px rgb(0 0 0 / 10%)}
-.rd-hero-input svg{flex:none;color:var(--dsw-alias-brand-primary)}
+.rd-hero-input > svg{flex:none;color:var(--dsw-alias-brand-primary);transform:translateY(1.5px)}
+.rd-hero-input button svg{color:inherit}
 .rd-hero-input input{flex:1;min-width:0;border:0;outline:0;background:transparent;color:inherit;font:inherit;font-size:15px}
 .rd-hero-input input::placeholder{color:var(--dsw-alias-label-tertiary,#9a9a9a)}
 .rd-hero-input button{flex:none;width:36px;height:36px;border:0;border-radius:50%;background:var(--dsw-alias-brand-primary);color:#fff;display:grid;place-items:center;cursor:pointer}
-.rd-hero-input button:disabled{opacity:.35;cursor:default}
-.rd-hero-hint{font-size:12px;color:var(--dsw-alias-label-secondary)}
+.rd-hero-input button:disabled{background:color-mix(in srgb,var(--dsw-alias-brand-primary) 16%,transparent);color:var(--dsw-alias-brand-primary);opacity:1;cursor:default}
+.rd-hero-hint{font-size:12px;color:var(--dsw-alias-label-secondary);text-align:center}
 .rd-hero-hint button{border:0;background:none;color:var(--dsw-alias-brand-primary);font:inherit;font-size:12px;cursor:pointer;padding:0 4px}
 .rd-stage{position:absolute;inset:0;cursor:grab;overflow:hidden;touch-action:none}
 .rd-stage.is-panning{cursor:grabbing}
@@ -466,7 +518,7 @@ window.__ModuleLoader__.load({
 .rd-milestones{display:flex;flex-direction:column;gap:5px;font-size:12px;color:var(--dsw-alias-label-secondary)}
 .rd-milestones span{display:flex;align-items:center;gap:6px}
 .rd-dockbar{position:absolute;left:50%;bottom:18px;transform:translateX(-50%);z-index:12;display:flex;align-items:center;gap:10px;padding:7px 10px 7px 7px;border-radius:24px;background:var(--glass);border:.5px solid var(--dsw-alias-border-l1);backdrop-filter:blur(28px);box-shadow:0 14px 40px rgb(0 0 0 / 12%);transition:opacity .2s}
-.rd-root.has-dock .rd-dockbar{left:calc(50% - var(--dock-w)/2)}
+.rd-root.has-dock .rd-toast{left:calc(50% - var(--dock-w)/2)}
 .rd-seg{display:flex;padding:3px;border-radius:999px;background:var(--dsw-alias-bg-layer-2)}
 .rd-seg button{border:0;background:transparent;color:var(--dsw-alias-label-secondary);font:inherit;font-size:12px;height:28px;padding:0 11px;border-radius:999px;cursor:pointer}
 .rd-seg button.is-on{background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);box-shadow:0 1px 3px rgb(0 0 0 / 8%)}
@@ -475,14 +527,19 @@ window.__ModuleLoader__.load({
 .rd-chips button.is-on{background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-primary)}
 .rd-dockbar .rd-divider{width:.5px;height:18px;background:var(--dsw-alias-border-l1)}
 .rd-round-plus{width:34px;height:34px;border-radius:50%;border:0;background:var(--dsw-alias-label-primary);color:var(--dsw-alias-bg-base);display:grid;place-items:center;cursor:pointer}
-.rd-ministamps{position:absolute;left:50%;bottom:80px;transform:translateX(-50%);display:flex;gap:4px;z-index:8}
-.rd-stamp{width:34px;height:43px;border-radius:3px;border:.5px dashed var(--dsw-alias-border-l2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:9px;color:var(--dsw-alias-label-tertiary,#9a9a9a);background:var(--dsw-alias-bg-layer-1);opacity:.7}
-.rd-stamp.is-on{opacity:1;border-style:solid;color:var(--dsw-alias-label-secondary);background:color-mix(in srgb,var(--dsw-alias-brand-primary) 8%,var(--dsw-alias-bg-layer-1))}
-.rd-stamp b{font-size:11px;font-weight:600}
 .rd-list{padding:104px 28px 120px;max-width:1080px;margin:0 auto;overflow:auto;height:100%}
-.rd-list h2{font-size:16px;margin:0 0 10px}
-.rd-list-card{display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:12px;background:var(--dsw-alias-bg-layer-1);border:.5px solid var(--dsw-alias-border-l1);margin-bottom:8px}
-.rd-list-card .rd-card-title{-webkit-line-clamp:2;flex:1;min-width:0}
+.rd-board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:start}
+.rd-board-col{display:flex;flex-direction:column;gap:14px;min-width:0}
+.rd-board-card{padding:16px 16px 12px;border-radius:16px;background:var(--dsw-alias-bg-layer-1);border:.5px solid var(--dsw-alias-border-l1);box-shadow:0 8px 24px rgb(0 0 0 / 5%)}
+.rd-board-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:10px}
+.rd-board-head h2{font-size:14px;font-weight:600;margin:0;letter-spacing:.01em}
+.rd-board-count{font-size:12px;color:var(--dsw-alias-label-tertiary,#8a8a8a);font-variant-numeric:tabular-nums}
+.rd-board-body{display:flex;flex-direction:column;gap:6px}
+.rd-board-row{display:flex;align-items:center;gap:8px;min-width:0;padding:8px 10px;border-radius:10px;background:var(--dsw-alias-bg-layer-2);font-size:13px}
+.rd-board-row .rd-card-title{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rd-board-empty{padding:8px 2px 4px;font-size:12px;color:var(--dsw-alias-label-tertiary,#8a8a8a)}
+.rd-root.is-narrow .rd-board{grid-template-columns:repeat(2,minmax(0,1fr))}
+.rd-root.is-compact .rd-board{grid-template-columns:1fr}
 .rd-calendar{padding:100px 24px 120px;height:100%;display:flex;flex-direction:column;gap:10px}
 .rd-cal-head{display:flex;align-items:center;gap:10px;padding:0 4px}
 .rd-cal-head button{width:28px;height:28px;border-radius:8px;border:.5px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);color:inherit;cursor:pointer}
@@ -531,22 +588,12 @@ window.__ModuleLoader__.load({
 .rd-root.is-compact .rd-hero-anchor{width:340px}
 .rd-root.is-compact .rd-hero-line{font-size:23px}
 .rd-root.is-compact .rd-dock{width:min(320px,88%)}
-@media (prefers-reduced-motion:reduce){.rd-ambient i{animation:none}.rd-node,.rd-hero-input,.rd-world{transition:none}}
+@media (prefers-reduced-motion:reduce){.rd-ambient i{animation:none}.rd-node,.rd-hero-input,.rd-world,.rd-content{transition:none}}
 `
 
     // ---------- 组件 ----------
     function IconButton({ name, label, onClick }) {
       return h('button', { type: 'button', className: 'rd-iconbtn', title: label, 'aria-label': label, onClick }, h(Icon, { name, size: 16 }))
-    }
-
-    function SampleBadge() {
-      const state = useSel((s) => s.state)
-      const hasSample = (state?.todos ?? []).some((row) => row.sample)
-      if (!hasSample) return null
-      return h('button', {
-        type: 'button', className: 'rd-sample', title: t('sampleTitle'),
-        onClick: () => dispatchOps([{ op: 'clear_samples' }], { label: dict() === en ? 'Clear sample data' : '清空示例数据' }),
-      }, t('sample'))
     }
 
     function Toast() {
@@ -564,7 +611,16 @@ window.__ModuleLoader__.load({
       const now = new Date()
       const dateLine = dict() === en
         ? now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' })
-        : `${now.getFullYear()} 年 ${now.getMonth() + 1} 月 ${now.getDate()} 日 · 星期${'日一二三四五六'[now.getDay()]}`
+        : `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日 · 星期${'日一二三四五六'[now.getDay()]}`
+      const heroRow = (key, extraClass, template, number) => {
+        const parts = template.split('{n}')
+        const children = []
+        parts.forEach((part, index) => {
+          if (part) children.push(h('span', { key: `${key}-t${index}` }, part))
+          if (index < parts.length - 1) children.push(h('span', { key: `${key}-n${index}`, className: `rd-hero-num${extraClass ? ` ${extraClass}` : ''}` }, h('span', { className: 'rd-hero-num-txt' }, number)))
+        })
+        return h('span', { key, className: 'rd-hero-row' }, ...children)
+      }
       const submit = () => {
         const plan = classify(value)
         if (!plan) return
@@ -578,15 +634,7 @@ window.__ModuleLoader__.load({
         h('div', { className: 'rd-hero' },
           h('div', { className: 'rd-hero-date' }, dateLine),
           h('h1', { className: 'rd-hero-line' },
-            t('pendingLine').split('{n}').flatMap((part, index) => {
-              if (index === 0) return [part]
-              const icons = [h('span', { key: 'n1', className: 'rd-hero-num' }, numbers.pending)]
-              return [icons[0], part]
-            }),
-            h('br'),
-            t('paperLine').split('{n}').flatMap((part, index) => index === 0 ? [part] : [h('span', { key: 'n2', className: 'rd-hero-num is-paper' }, numbers.papers), part]),
-            h('br'),
-            t('streakLine').split('{n}').flatMap((part, index) => index === 0 ? [part] : [h('span', { key: 'n3', className: 'rd-hero-num is-streak' }, numbers.streak), part])),
+            heroRow('n1', '', t('pendingLine'), numbers.pending)),
           h('div', { className: 'rd-hero-input' },
             h(Icon, { name: 'spark', size: 17 }),
             h('input', {
@@ -596,22 +644,6 @@ window.__ModuleLoader__.load({
             }),
             h('button', { type: 'button', disabled: !value.trim(), 'aria-label': t('send'), onClick: submit }, h(Icon, { name: 'send', size: 16 }))),
           h('div', { className: 'rd-hero-hint' }, dict() === en ? 'Enter to log; DOI / arXiv / links become papers or ideas.' : '回车即记下；DOI、arXiv 和链接会变成文献或想法。')))
-    }
-
-    function MiniStamps() {
-      const state = useSel((s) => s.state)
-      const days = []
-      const active = new Set()
-      for (const list of [state?.todos, state?.papers, state?.notes, state?.ideas, state?.projects]) {
-        for (const row of list ?? []) for (const value of [row.updatedAt, row.doneAt]) if (value) active.add(dateKey(value))
-      }
-      for (let offset = 9; offset >= 0; offset -= 1) {
-        const date = new Date(Date.now() - offset * DAY)
-        days.push({ key: dateKey(date), day: date.getDate(), on: active.has(dateKey(date)) })
-      }
-      return h('div', { className: 'rd-ministamps', 'aria-hidden': true },
-        ...days.map((day) => h('div', { key: day.key, className: `rd-stamp ${day.on ? 'is-on' : ''}` },
-          h('b', null, String(day.day)), h('span', null, day.on ? '✓' : '·'))))
     }
 
     function cardFor(item, projectName) {
@@ -769,18 +801,32 @@ window.__ModuleLoader__.load({
 
     function ListView() {
       const state = useSel((s) => s.state)
-      const filter = useSel((s) => s.kindFilter)
-      const items = displayItems(state).filter((item) => filter === 'all' || item.kind === filter)
-      const groups = ['task', 'project', 'paper', 'idea', 'note'].filter((kind) => items.some((item) => item.kind === kind))
+      const todos = state?.todos ?? []
+      const papers = state?.papers ?? []
+      const ideas = state?.ideas ?? []
+      const notes = state?.notes ?? []
       const projectName = (id) => (state?.projects ?? []).find((row) => row.id === id)?.name
-      return h('div', { className: 'rd-list' },
-        groups.length ? groups.map((kind) => h('section', { key: kind },
-          h('h2', null, t(kind)),
-          ...items.filter((item) => item.kind === kind).map((item) => h('div', { key: item.id, className: 'rd-list-card' },
+      const open = todos.filter((row) => row.status !== 'done')
+      const buckets = {
+        all: { title: 'Todo: All', rows: open.map((row) => ({ id: row.id, title: row.title, meta: statusText('task', row.status) })) },
+        projects: { title: 'Todo: Projects', rows: open.filter((row) => row.projectId).map((row) => ({ id: row.id, title: row.title, meta: projectName(row.projectId) ?? t('navProject') })) },
+        paper: { title: 'Todo: Paper', rows: papers.filter((row) => row.status === 'inbox' || row.status === 'reading').map((row) => ({ id: row.id, title: row.title, meta: statusText('paper', row.status) })) },
+        ideas: { title: 'Todo: Idea 整理', rows: ideas.filter((row) => row.status === 'seed').map((row) => ({ id: row.id, title: row.title, meta: statusText('idea', row.status) })) },
+        notes: { title: 'Todo: 知识库整理', rows: notes.filter((row) => row.status === 'draft').map((row) => ({ id: row.id, title: row.title, meta: row.kb ?? '' })) },
+      }
+      const columns = [['all'], ['projects', 'paper'], ['ideas', 'notes']]
+      const card = (key) => h('section', { key, className: 'rd-board-card' },
+        h('div', { className: 'rd-board-head' },
+          h('h2', null, buckets[key].title),
+          h('span', { className: 'rd-board-count' }, String(buckets[key].rows.length))),
+        buckets[key].rows.length
+          ? h('div', { className: 'rd-board-body' }, ...buckets[key].rows.map((row) => h('div', { key: row.id, className: 'rd-board-row' },
             h('span', { className: 'rd-dot' }),
-            h('span', { className: 'rd-card-title' }, item.kind === 'project' ? item.name : item.title),
-            h('span', { className: 'rd-tag' }, item.kind === 'task' ? statusText('task', item.status) : item.kind === 'paper' ? statusText('paper', item.status) : item.kind === 'idea' ? statusText('idea', item.status) : projectName(item.projectId) ?? ''))))
-        ) : h('div', { className: 'rd-empty' }, t('empty')))
+            h('span', { className: 'rd-card-title' }, row.title),
+            row.meta ? h('span', { className: 'rd-tag' }, row.meta) : null)))
+          : h('div', { className: 'rd-board-empty' }, t('empty')))
+      return h('div', { className: 'rd-list' },
+        h('div', { className: 'rd-board' }, ...columns.map((column, index) => h('div', { key: `col${index}`, className: 'rd-board-col' }, ...column.map(card)))))
     }
 
     function CalendarView() {
@@ -824,11 +870,11 @@ window.__ModuleLoader__.load({
       const filter = useSel((s) => s.kindFilter)
       const dockOpen = useSel((s) => s.dockOpen)
       const modes = [['scatter', t('scatter')], ['list', t('list')], ['calendar', t('calendar')]]
-      const chips = [['all', t('all')], ['task', t('task')], ['project', t('project')], ['paper', t('paper')], ['idea', t('idea')], ['note', t('note')]]
+      const chips = [['all', 'All'], ['task', 'Todo'], ['project', 'Projects'], ['paper', 'Papers'], ['idea', 'Ideas'], ['note', 'KnowledgeBase']]
       return h('div', { className: 'rd-dockbar' },
         h('div', { className: 'rd-seg' }, ...modes.map(([id, label]) => h('button', { key: id, type: 'button', className: mode === id ? 'is-on' : '', onClick: () => setDesk({ mode: id }) }, label))),
-        h('span', { className: 'rd-divider' }),
-        h('div', { className: 'rd-chips' }, ...chips.map(([id, label]) => h('button', { key: id, type: 'button', className: filter === id ? 'is-on' : '', onClick: () => setDesk({ kindFilter: id }) }, label))),
+        mode === 'scatter' ? h('span', { className: 'rd-divider' }) : null,
+        mode === 'scatter' ? h('div', { className: 'rd-chips' }, ...chips.map(([id, label]) => h('button', { key: id, type: 'button', className: filter === id ? 'is-on' : '', onClick: () => setDesk({ kindFilter: id }) }, label))) : null,
         h('button', { type: 'button', className: 'rd-round-plus', title: t('capture'), 'aria-label': t('capture'), onClick: () => setDesk({ capture: 'task' }) }, h(Icon, { name: 'plus', size: 17 })),
         dockOpen ? null : h('button', { type: 'button', className: 'rd-open-dock', onClick: () => setDesk({ dockOpen: true }) }, h(Icon, { name: 'chat', size: 14 }), t('assistant')))
     }
@@ -913,6 +959,42 @@ window.__ModuleLoader__.load({
           h('button', { type: 'submit', disabled: !value.trim() || thinking, 'aria-label': t('send') }, h(Icon, { name: 'send', size: 15 }))))
     }
 
+    function ModelButton() {
+      const state = useSel((s) => s.state)
+      const chosen = state?.settings?.assistant
+      const label = chosen && typeof chosen === 'object' ? (chosen.model ?? t('modelLocal')) : t('modelLocal')
+      return h('button', { type: 'button', className: 'rd-model', title: t('modelPick'), 'aria-label': t('modelPick'), onClick: openModels },
+        h(Icon, { name: 'spark', size: 14 }),
+        h('span', null, label),
+        h(Icon, { name: 'chevron', size: 12 }))
+    }
+
+    function ModelPicker() {
+      const open = useSel((s) => s.modelsOpen)
+      const models = useSel((s) => s.models)
+      const loading = useSel((s) => s.modelsLoading)
+      const state = useSel((s) => s.state)
+      if (!open) return null
+      const chosen = state?.settings?.assistant
+      const active = (entry) => Boolean(chosen && typeof chosen === 'object' && chosen.provider === entry.provider && chosen.model === entry.id)
+      return h('div', { className: 'rd-dialog-backdrop', onPointerDown: (event) => { if (event.target === event.currentTarget) setDesk({ modelsOpen: false }) } },
+        h('div', { className: 'rd-dialog rd-model-dialog' },
+          h('h3', null, t('modelPick')),
+          h('p', { className: 'rd-model-hint' }, t('modelHint')),
+          loading
+            ? h('p', { className: 'rd-model-empty' }, '…')
+            : models.length
+              ? h('div', { className: 'rd-model-list' }, ...models.map((entry) => h('button', {
+                key: `${entry.provider}:${entry.id}`, type: 'button',
+                className: `rd-model-row ${active(entry) ? 'is-on' : ''}`,
+                onClick: () => chooseModel(entry),
+              }, h('span', { className: 'rd-model-name' }, entry.name), h('span', { className: 'rd-model-provider' }, entry.providerName))))
+              : h('p', { className: 'rd-model-empty' }, t('modelEmpty')),
+          h('div', { className: 'rd-form-foot' },
+            h('button', { type: 'button', className: 'rd-btn', onClick: () => chooseModel(null) }, t('modelLocal')),
+            h('button', { type: 'button', className: 'rd-btn', onClick: () => setDesk({ modelsOpen: false }) }, dict() === en ? 'Close' : '关闭'))))
+    }
+
     function SettingsDialog() {
       const open = useSel((s) => s.settingsOpen)
       const state = useSel((s) => s.state)
@@ -927,7 +1009,11 @@ window.__ModuleLoader__.load({
           h('label', { className: 'rd-field' }, h('span', null, t('dockOpen')),
             h('select', { value: String(snapshot.dockOpen), onChange: (event) => saveSettings({ dockOpen: event.target.value === 'true' }) },
               h('option', { value: 'true' }, '√'), h('option', { value: 'false' }, '—'))),
-          h('div', { className: 'rd-form-foot' }, h('button', { type: 'button', className: 'rd-btn', onClick: () => setDesk({ settingsOpen: false }) }, dict() === en ? 'Close' : '关闭'))))
+          h('div', { className: 'rd-form-foot' },
+            h('button', { type: 'button', className: 'rd-btn', onClick: () => { setDesk({ settingsOpen: false }); dispatchOps([{ op: 'clear_samples' }], { label: t('clearSamples') }) } }, t('clearSamples')),
+            h('span', { style: { flex: 1 } }),
+            h('span', { className: 'rd-model-hint', style: { margin: 0 } }, t('undoHint')),
+            h('button', { type: 'button', className: 'rd-btn', onClick: () => setDesk({ settingsOpen: false }) }, dict() === en ? 'Close' : '关闭'))))
     }
 
     function PlaceholderView() {
@@ -948,20 +1034,16 @@ window.__ModuleLoader__.load({
 
     function Topbar() {
       const view = useSel((s) => s.view)
-      const canUndo = useSel((s) => s.canUndo)
       const ready = useSel((s) => Boolean(s.state))
-      const dockOpen = useSel((s) => s.dockOpen)
-      const nav = [['todo', t('navTodo')], ['project', t('navProject')], ['paper', t('navPaper')], ['idea', t('navIdea')], ['kb', t('navKb')]]
+      const nav = [['todo', 'Todo'], ['project', 'Projects'], ['paper', 'Papers'], ['idea', 'Ideas'], ['kb', 'KnowledgeBase']]
       return h('header', { className: 'rd-topbar' },
         h('nav', { className: 'rd-nav', 'aria-label': t('workbench') }, ...nav.map(([id, label]) => h('button', {
           key: id, type: 'button', className: view === id ? 'is-on' : '', 'aria-current': view === id ? 'page' : undefined,
           onClick: () => setDesk({ view: id, focusId: null }),
         }, label))),
         h('span', { style: { flex: 1 } }),
-        ready ? h(SampleBadge) : null,
-        canUndo ? h(IconButton, { name: 'undo', label: t('undo'), onClick: () => undoDesk() }) : null,
-        h(IconButton, { name: 'gear', label: t('gear'), onClick: () => setDesk({ settingsOpen: true }) }),
-        dockOpen ? null : h('button', { type: 'button', className: 'rd-iconbtn', title: t('assistant'), 'aria-label': t('assistant'), onClick: () => { setDesk({ dockOpen: true }); saveSettings({ dockOpen: true }) } }, h(Icon, { name: 'chat', size: 16 })))
+        ready ? h(ModelButton) : null,
+        h(IconButton, { name: 'gear', label: t('gear'), onClick: () => setDesk({ settingsOpen: true }) }))
     }
 
     function Desk() {
@@ -988,6 +1070,10 @@ window.__ModuleLoader__.load({
         return () => observer.disconnect()
       }, [])
       useEffect(() => {
+        // 窄屏下助手栏会盖住内容，默认收起；用户仍可从顶栏重新打开
+        if (compact && snapshot.dockOpen) setDesk({ dockOpen: false })
+      }, [compact])
+      useEffect(() => {
         const onKey = (event) => {
           const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(event.target.tagName) || event.target.isContentEditable
           if ((event.metaKey || event.ctrlKey) && event.key === 'z' && !event.shiftKey && !typing && snapshot.canUndo) {
@@ -1013,12 +1099,17 @@ window.__ModuleLoader__.load({
                   ? h(React.Fragment, null,
                     mode === 'scatter' ? h(ScatterView) : mode === 'list' ? h(ListView) : h(CalendarView),
                     mode === 'scatter' ? h(Hero) : null,
-                    h(MiniStamps),
                     h(Dockbar))
                   : h(Active)),
+          ready && view === 'todo' && mode === 'scatter' ? h('div', { className: 'rd-corner is-right' },
+            h('div', { className: 'rd-zoom' },
+              h('button', { type: 'button', title: t('zoomOut'), 'aria-label': t('zoomOut'), onClick: () => zoomCenter(1 / 1.25) }, '−'),
+              h('button', { type: 'button', className: 'rd-zoom-fit', title: t('zoomFit'), 'aria-label': t('zoomFit'), onClick: resetCamera }, h(Icon, { name: 'target', size: 15 })),
+              h('button', { type: 'button', title: t('zoomIn'), 'aria-label': t('zoomIn'), onClick: () => zoomCenter(1.25) }, '+'))) : null,
         ready ? h(AssistantDock) : null,
         ready ? h(CaptureDialog) : null,
         ready ? h(SettingsDialog) : null,
+        ready ? h(ModelPicker) : null,
         h(Toast))))
     }
 

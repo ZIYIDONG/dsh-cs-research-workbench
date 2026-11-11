@@ -13,7 +13,7 @@ test('seed gives a usable sample workbench',()=>{
   assert.equal(state.todos.length,6);
   assert.equal(state.papers.length,3);
   assert.ok(state.todos.every(row=>row.sample===true));
-  assert.equal(state.settings.language,'en');
+  assert.equal(state.settings.language,'zh');
 });
 
 test('applyOps creates todos and rejects empty titles',()=>{
