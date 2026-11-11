@@ -1,6 +1,4 @@
-# dsh-cs-research-workbench
-
-## CS科研工作台
+# CS科研工作台 (dsh-cs-research-workbench)
 
 **dsh 计算机科学与网络安全科研工作台**（`dsh-cs-research-workbench`，简称 `csrw`）是面向 dsh 的代码中心科研插件。这里的 **CS 同时指 Computer Science（计算机科学）与 Cybersecurity（网络安全）**：本插件抽象二者共通的代码化科研流程——问题定义、文献与笔记整理、代码和实验版本管理、结果复现及资料备份——不绑定单一细分方向。
 
