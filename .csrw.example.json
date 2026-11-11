@@ -1,0 +1,7 @@
+{
+  "git": {"remote":"origin","branch":"main","autoInit":false,"pullRebase":false},
+  "nutstore": {"baseUrl":"https://dav.jianguoyun.com/dav/","remoteRoot":"csrw","username":"","credentialKey":"csrw/nutstore"},
+  "obsidian": {"vaultPath":"","autoDetect":true,"trashDir":".trash"},
+  "zotero": {"localApi":"http://127.0.0.1:23119/api","dataDir":""},
+  "backup": {"target":"local","localDir":".csrw/backups","includeDshSessions":false,"dshHome":"","dshProfile":""}
+}
