@@ -5,12 +5,65 @@
   "main": "./lib/index.js",
   "type": "module",
   "license": "GPL-3.0-only",
-  "engines": {"node": ">=22.16", "dsh": ">=0.2.2-rc.1 <0.3.0"},
-  "keywords": ["dsh","csrw","research","cybersecurity","obsidian","zotero","webdav"],
-  "exports": {".": "./lib/index.js", "./locale/*.json": "./locale/*.json", "./icon": "./icon.svg"},
-  "bin": {"csrw": "./bin/csrw.js"},
-  "files": ["lib","bin","patches","locale","icon.svg","README.md","LICENSE",".csrw.example.json","scripts/check.mjs","test/*.test.js"],
-  "scripts": {"test": "node --test --test-isolation=none --test-concurrency=1 test/*.test.js", "check": "node scripts/check.mjs"},
-  "dsh": {"name": "dsh CS 科研工作台", "category": "research", "bundle": {"patch": "./patches/bundle.yaml"}},
-  "dependencies": {"@deepseek-ai/dsh-tools": "0.2.2-rc.1"}
+  "engines": {
+    "node": ">=22.16",
+    "dsh": ">=0.2.2-rc.1 <0.3.0"
+  },
+  "keywords": [
+    "dsh",
+    "csrw",
+    "research",
+    "cybersecurity",
+    "obsidian",
+    "zotero",
+    "webdav"
+  ],
+  "exports": {
+    ".": "./lib/index.js",
+    "./locale/*.json": "./locale/*.json",
+    "./icon": "./icon.svg",
+    "./client": "./client.js"
+  },
+  "bin": {
+    "csrw": "./bin/csrw.js"
+  },
+  "files": [
+    "lib",
+    "bin",
+    "patches",
+    "locale",
+    "icon.svg",
+    "README.md",
+    "LICENSE",
+    ".csrw.example.json",
+    "scripts/check.mjs",
+    "test/*.test.js",
+    "client.js",
+    "scripts/verify-ui.mjs",
+    "scripts/verify-ui-interaction.mjs"
+  ],
+  "scripts": {
+    "test": "node --test --test-isolation=none --test-concurrency=1 test/*.test.js",
+    "check": "node scripts/check.mjs",
+    "check:ui": "node scripts/verify-ui.mjs && node scripts/verify-ui-interaction.mjs"
+  },
+  "dsh": {
+    "name": "dsh CS 科研工作台",
+    "category": "research",
+    "bundle": {
+      "patch": "./patches/bundle.yaml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-settings",
+        "@deepseek-ai/dsh-client-ui-layout",
+        "@deepseek-ai/dsh-client-ui-session"
+      ]
+    }
+  },
+  "dependencies": {
+    "@deepseek-ai/dsh-tools": "0.2.2-rc.1"
+  }
 }

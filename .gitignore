@@ -21,3 +21,8 @@ scripts/finalize.mjs
 scripts/check-dav-excludes.mjs
 scripts/release-docs.mjs
 test/probe-links.js
+
+scripts/add-ui.mjs
+scripts/refine-ui.mjs
+scripts/document-ui.mjs
+scripts/diagnose-ui.mjs
