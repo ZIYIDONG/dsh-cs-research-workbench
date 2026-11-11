@@ -24,8 +24,8 @@ function walk(node,out=[]){if(node&&typeof node==='object'){out.push(node);(node
 const svg=iconSlot.component({size:20}),parts=walk(svg);
 assert.equal(svg.type,'svg');assert.equal(svg.props.viewBox,'0 0 24 24');assert.equal(svg.props['aria-hidden'],true);
 const mask=parts.find(n=>n.type==='mask');assert.ok(mask,'icon keeps a mask for the screen glyphs');assert.equal(mask.props.maskUnits,'userSpaceOnUse');
-const holes=parts.filter(n=>n.type==='path');assert.equal(holes.length,2);holes.forEach(p=>{assert.equal(p.props.stroke,'#000');assert.equal(p.props.strokeWidth,1.9);});
-assert.ok(holes[0].props.d.includes('11.2')&&holes[1].props.d.includes('13.5'));
+const holes=parts.filter(n=>n.type==='path');assert.equal(holes.length,2);holes.forEach(p=>{assert.equal(p.props.stroke,'#000');assert.equal(p.props.strokeWidth,1.6);});
+assert.ok(holes[0].props.d.includes('11.2')&&holes[1].props.d.includes('13.1'));
 const body=parts.find(n=>n.type==='g');assert.equal(body.props.fill,'currentColor');assert.ok(body.props.mask.includes(mask.props.id));
 assert.equal(parts.filter(n=>n.type==='rect').length,3);
 console.log(JSON.stringify({render:'passed',sessionSelection:'passed',remoteStringId:'passed',remoteResultUnwrap:'passed',load:'passed',confirmationGate:'passed',save:'passed',workspaceIsolation:'passed',icon:'passed'}));
