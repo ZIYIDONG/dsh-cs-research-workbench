@@ -1,4 +1,5 @@
 node_modules/
+.pnpm-store/
 .csrw/
 .test-artifacts/
 .npm-cache/
@@ -13,16 +14,3 @@ secrets.json
 *.key
 *.p12
 *.pfx
-
-scripts/refine-dav.mjs
-scripts/harden-snapshot.mjs
-scripts/finish-git.mjs
-scripts/finalize.mjs
-scripts/check-dav-excludes.mjs
-scripts/release-docs.mjs
-test/probe-links.js
-
-scripts/add-ui.mjs
-scripts/refine-ui.mjs
-scripts/document-ui.mjs
-scripts/diagnose-ui.mjs

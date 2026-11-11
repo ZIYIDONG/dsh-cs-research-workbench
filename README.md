@@ -1,15 +1,18 @@
-# dsh CS科研工作台
+# dsh-cs-research-workbench
 
-**dsh 计算机科学科研工作台**（`dsh-cs-research-workbench`，简称 `csrw`）是面向 dsh 的代码中心科研插件。这里的 **CS 仅指 Computer Science（计算机科学）**。插件围绕计算机科学研究中的问题定义、文献与笔记整理、代码和实验版本管理、结果复现及资料备份组织工作流，适用于不同计算机科学方向，不预设单一子领域。
+## CS科研工作台
 
-> A code-centric research workbench for Computer Science.
+**dsh 计算机科学与网络安全科研工作台**（`dsh-cs-research-workbench`，简称 `csrw`）是面向 dsh 的代码中心科研插件。这里的 **CS 同时指 Computer Science（计算机科学）与 Cybersecurity（网络安全）**：本插件抽象二者共通的代码化科研流程——问题定义、文献与笔记整理、代码和实验版本管理、结果复现及资料备份——不绑定单一细分方向。
+
+> A code-centric research workbench for Computer Science and Cybersecurity.
 
 v0.1 提供本地 Obsidian 文件操作、Git、Zotero 本机只读 API、坚果云 WebDAV 与可校验的本地备份。插件 ID 和 CLI 为 `csrw`，工具统一使用 `csrw_` 前缀，工作区配置目录为 `.csrw`。
 
 ## 环境与安装
 
-- Node.js ≥22.16；DSH `>=0.2.2-rc.1 <0.3.0`。已开发测试环境：Node 26.13.0、DSH 0.2.2-rc.1、Windows、Git 2.46.0。
-- Git 模块需要系统 `git`；Obsidian 操作直接读写 vault，无需 Obsidian REST 插件。
+- Node.js ≥22.16；DSH `>=0.2.2-rc.1 <0.3.0`。本次复验环境：Node 24.21.0（DSH 内置运行时）、DSH 0.2.2-rc.1、Windows、Git 2.56.1。DSH 桌面版当前内置 Node 24，完整功能（含 Zotero SQLite 在线备份）按该运行时验证。
+- Git 模块需要系统 `git`；`git` 不在 PATH 时，测试和工具都会明确失败，请先把 Git 加入 PATH。
+- Obsidian 操作直接读写 vault，无需 Obsidian REST 插件。
 - Zotero 需要运行中的本机 API，默认 `http://127.0.0.1:23119/api`。API 不可用时明确报错，不转向云端。
 
 在源码目录安装依赖并检查：
@@ -21,20 +24,34 @@ npm test
 node bin/csrw.js health
 ```
 
+`devDependencies` 中的 `@deepseek-ai/*` 包只是本地跑测试所需的 peer 依赖；插件运行在 DSH 中时由 DSH 提供这些包，安装插件本身不会安装它们。没有 npm 时可用 DSH 内置的 pnpm：`node <dsh-runtime>/pnpm/bin/pnpm.mjs install --ignore-scripts`。
+
 在 DSH 中通过插件管理安装本目录或发布包。让代理调用 `plugin_manager` 的 `install_bundle`，`target` 为包目录的绝对路径；不要手工改写 profile。包的 `patches/bundle.yaml` 仅插入自己的插件行。安装结果中的 `application` 与 `warnings` 决定是否已生效；若版本替换需要重启，重启后用 `csrw_health` 验证。插件的中文/英文显示资源和原始 SVG 图标包含在包中。
 
 本地直接运行 `node bin/csrw.js`。安装为命令行包后也可运行 `csrw`。命令与工具一一对应，如 `csrw obsidian read` 对应 `csrw_obsidian_read`；`--help` 列出完整命令。
 
 ## 图形界面
 
-安装并重启 DSH、刷新原有 GUI 后，设置中新增 **CS科研工作台** 分区，侧边栏新增同名入口；插件管理页也提供配置卡。三个入口复用同一原生 React 面板，不创建其他网页服务。
+安装插件并刷新 DSH 页面后，侧边栏新增 **CS科研工作台** 入口，主面板是仿 dsh-media-desk 的科研首页；设置里保留同一名字的 **CS科研工作台** 分区，插件管理页也提供配置卡。主面板与设置页复用同一个原生 React 客户端半片（`client.js`，手写 IIFE，无构建步骤），不创建其他网页服务。
+
+主面板（`/csrw-desk/*` 路由，数据在 `$DSH_HOME/csrw-desk/state.json`）：
+
+1. 首屏三行数字：还有 N 件事等你推进、M 篇文献排在本周、你已经连续记录 X 天；下面是一句话记录框。
+2. 一句话按内容分流：DOI/arXiv → 文献，`问题:`/`假设:`/`方法:`/`局限:` 或链接 → 想法，带日期/`@项目`/`#P0`/`~30min` → 任务，其余 → 任务。
+3. 散落画布可拖动卡片（位置持久化、不进撤销栈）、滚轮平移、`Ctrl/⌘ + 滚轮` 缩放；底部可在散落/列表/日历三种视图和全部/任务/项目/文献/想法/笔记之间切换；`＋` 打开快速记录。
+4. 任务页已可用；项目、文献、想法、知识库四页先给占位与条数，后续版本补齐。右侧助手 Dock 用本地规则建任务/查今天，不调用模型。
+5. 原生撤销 30 步、中英双语、窄屏适配。
+
+设置页里的工具面板：
 
 1. 选择工作区目录，并从列表选择一个已有会话作为命令的权限和审计上下文；不会启动模型对话。
 2. 点击“加载配置”读取工作区默认值/配置。按字段保存，字符串与布尔类型按白名单校验。密码不在界面中录入或保存。
 3. 工作台可检查 Git、Zotero 与 WebDAV，列远端目录、手动上传/下载、创建三类备份并校验快照。同步和备份先展示工作区与参数，确认后才执行。恢复保留在显式确认的工具中，不提供一键恢复。
 4. 切换工作区会清除旧配置和结果；运行时支持取消，成功与失败独立展示。
 
-界面通过 Host 人工命令 `/csrw-ui` 调用现有工具定义，使用 DSH 现有远程授权，不绕开权限策略；命令不记录原始输入。它不是模型工具，也不增加 `csrw_` 工具数量。GUI 入口不隐式执行同步、备份、初始化或推送。
+界面通过 Host 人工命令 `/csrw-ui` 调用现有工具定义，使用 DSH 现有远程授权，不绕开权限策略；命令不记录原始输入。它不是模型工具，也不增加 `csrw_` 工具数量。GUI 入口不隐式执行同步、备份、初始化或推送。工作台数据是本地状态，与 29 个无状态工具互不影响；需要同步到 Git 或坚果云时，仍显式调用 `csrw_git_*` / `csrw_nutstore_*`。
+
+开发期 `client.js` 保存后由 DSH 客户端 HMR 自动重载；改 `lib/` 宿主代码需要重载插件或重启 DSH。三份设计文档在 `docs/`：`dsh-research-desk-design.md`（总体）、`dsh-research-desk-pages.md`（五页）、`dsh-research-desk-home.md`（首页）。
 
 ## 配置
 
@@ -108,7 +125,7 @@ Zotero 本机 API 不需要 API Key。WebDAV 强制 HTTPS（本机测试允许 H
 
 ### 备份、校验与恢复
 
-备份默认保存在本地，manifest 记录版本、时间、大小与每文件 SHA-256。Zotero SQLite 通过只读源连接和 SQLite 在线备份产生一致副本，避免直接复制运行中的数据库。DSH 备份覆盖实际发现/显式配置的 prompts、plugins、skills 与配置，默认不含 sessions/storages；排除已知敏感路径及检测到敏感内容的文件（整文件跳过，不是字段脱敏）。包含 profile 的 `cordis.patch.yml`、package manifests 与 pnpm 锁文件；排除 `node_modules` 和 `.git`，依赖需要按清单重建。敏感识别为保守启发式，不能保证未知格式密钥 100% 召回，应检查排除报告后再上传。
+备份默认保存在本地，manifest 记录版本、时间、大小与每文件 SHA-256。Zotero SQLite 通过只读源连接和 SQLite 在线备份产生一致副本，避免直接复制运行中的数据库。该在线备份使用 Node 内置 `node:sqlite` 的 `backup()`；当前 Node 不提供该 API 时会明确报错，不会退化为直接复制运行中的数据库（本次验证运行时 Node 24.21.0 可用）。DSH 备份覆盖实际发现/显式配置的 prompts、plugins、skills 与配置，默认不含 sessions/storages；排除已知敏感路径及检测到敏感内容的文件（整文件跳过，不是字段脱敏）。包含 profile 的 `cordis.patch.yml`、package manifests 与 pnpm 锁文件；排除 `node_modules` 和 `.git`，依赖需要按清单重建。敏感识别为保守启发式，不能保证未知格式密钥 100% 召回，应检查排除报告后再上传。
 
 恢复必须显式 `confirm:true`，先完成 manifest 与全部文件校验，再自动生成恢复前快照。只恢复清单内的文件，不删除目标中额外内容；不会对用户资料执行未获授权的真实恢复。多文件恢复不是文件系统事务，运行期 I/O、取消或并发变更可能造成部分完成，恢复前快照是回滚依据。SHA-256 用于完整性而非来源认证；不提供敌对并发下的完全 TOCTOU 防护。恢复 SQLite 前关闭 Zotero；活动 WAL/SHM 存在时拒绝恢复。大文件会读入内存。请先在独立目录验证备份内容和凭据排除报告。
 
@@ -120,11 +137,14 @@ Zotero 本机 API 不需要 API Key。WebDAV 强制 HTTPS（本机测试允许 H
 
 ## 源码
 
-`lib/index.js` 注册工具；`lib/tools/` 实现各模块；`lib/services/config.js` 管理配置，`lib/services/snapshot.js` 管理备份；`lib/utils/` 提供路径边界及哈希工具。`bin/csrw.js` 是 CLI；`patches/bundle.yaml` 是 DSH bundle 补丁。GPL-3.0-only License（保留远端 GNU GPL v3 授权）。
+`lib/index.js` 注册工具和工作台路由；`lib/tools/` 实现各模块；`lib/desk/` 是工作台宿主半片（`host.js` 路由、`store.js` 持久化与撤销、`ops.js` 操作白名单、`seed.js` 示例数据）；`lib/services/config.js` 管理配置，`lib/services/snapshot.js` 管理备份；`lib/utils/` 提供路径边界及哈希工具。`bin/csrw.js` 是 CLI；`client.js` 是浏览器半片；`patches/bundle.yaml` 是 DSH bundle 补丁；`docs/` 是工作台设计文档。GPL-3.0-only License（保留远端 GNU GPL v3 授权）。
 
 ### 本次验收记录（2026-11-11）
 
-- 32 项本地测试通过（含真实 Git 临时仓库集成），无失败、无跳过，语法/元数据/29 个工具契约检查通过。
+- `node scripts/check.mjs` 复验通过：语法检查、包元数据、29 个 `csrw_` 工具与六个模块全部 `ready`。
+- `node --test --test-isolation=none --test-concurrency=1 test/*.test.js` 复验：37 个用例全部通过（0 skip），其中 5 个是并入工作台后的 `lib/desk/` 用例（示例数据、操作白名单、状态/位置更新、持久化与三方撤销、无 Web 服务时 `registerDesk` 不生效）。其中“真实 Git 临时仓库集成”用例需要进程能用管道捕获子进程输出：在限制该能力的沙箱中会按设计跳过（不绕过沙箱），在普通终端（Git 2.56.1 已加入 PATH）中通过。
+- 已通过 `plugin_manager install_bundle` 安装进 `desktop` profile（`application: applied`，无 warnings），会话内 29 个 `csrw_` 工具已注册；`csrw_health` 返回六模块 `ready`。`scripts/verify-ui.mjs` 与 `scripts/verify-ui-interaction.mjs` 全部通过；工作台主面板与侧栏入口已注册为 `csrw-workbench`，`GET /csrw-desk/state` 未登录返回 401。
+- 原独立验证包 `dsh-research-desk` 的工作台代码已并入本仓库（`lib/desk/` + `client.js`），验证通过后从 profile 停用；其设计文档已移入 `docs/`。
+- 实机端子验收（临时 vault，非用户真实数据）：write/append/move/trash 正常；`../` 越界与默认覆盖均被拒绝；`snapshot_create` 生成 manifest，`snapshot_verify` 检出被篡改文件，`snapshot_restore` 未传 `confirm: true` 时拒绝。
 - Obsidian 生命周期、WebDAV mock 往返/冲突、Zotero mock GET、SQLite WAL 一致副本与快照恢复均有测试证据；不等于真实外部服务验收。
-- 当前机器真实 Zotero API 连接失败；真实搜索/条目读取未验收。未提供坚果云应用凭据，真实远端往返未验收。
-- 基础工具已在重启后的真实 DSH 中确认注册 29 项，`csrw_health` 全模块 ready。新增 GUI 和界面命令需重新加载插件代际后单独验收；基础工具验收不代表新界面已生效。
+- 当前机器未运行 Zotero，真实本机 API 搜索/条目读取未验收（Zotero 关闭时工具返回明确连接错误）；未提供坚果云应用凭据，真实远端往返未验收（工具返回明确凭据错误）。
