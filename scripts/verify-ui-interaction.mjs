@@ -19,4 +19,13 @@ const field=nodes().find(n=>n.type==='select'&&n.props.value==='obsidian.vaultPa
 const value=nodes().find(n=>n.type==='input'&&n.props.value==='/vault');assert.ok(value);value.props.onChange({target:{value:'/new-vault'}});render();button('save').props.onClick();render();assert.equal(calls.length,1,'save must not write before confirmation');
 await button('confirm').props.onClick();await Promise.resolve();render();render();assert.equal(calls.length,2);assert.equal(calls[1].confirmed,true);assert.equal(calls[1].args.value,'/new-vault');assert.ok(nodes().some(n=>n.type==='pre'&&n.children.some(s=>typeof s==='string'&&s.includes('/new-vault'))));
 nodes().find(n=>n.type==='input'&&n.props.value==='C:/fixture').props.onChange({target:{value:'C:/other'}});render();assert.equal(button('save').props.disabled,true,'workspace switch must discard old config');
-console.log(JSON.stringify({render:'passed',sessionSelection:'passed',remoteStringId:'passed',remoteResultUnwrap:'passed',load:'passed',confirmationGate:'passed',save:'passed',workspaceIsolation:'passed'}));
+const iconSlot=slots.find(s=>s.opts.name==='sidebar.panellist');assert.ok(iconSlot,'sidebar icon registered');
+function walk(node,out=[]){if(node&&typeof node==='object'){out.push(node);(node.children||[]).forEach(child=>walk(child,out));}return out;}
+const svg=iconSlot.component({size:20}),parts=walk(svg);
+assert.equal(svg.type,'svg');assert.equal(svg.props.viewBox,'0 0 24 24');assert.equal(svg.props['aria-hidden'],true);
+const mask=parts.find(n=>n.type==='mask');assert.ok(mask,'icon keeps a mask for the screen glyphs');assert.equal(mask.props.maskUnits,'userSpaceOnUse');
+const holes=parts.filter(n=>n.type==='path');assert.equal(holes.length,2);holes.forEach(p=>{assert.equal(p.props.stroke,'#000');assert.equal(p.props.strokeWidth,1.9);});
+assert.ok(holes[0].props.d.includes('11.2')&&holes[1].props.d.includes('13.5'));
+const body=parts.find(n=>n.type==='g');assert.equal(body.props.fill,'currentColor');assert.ok(body.props.mask.includes(mask.props.id));
+assert.equal(parts.filter(n=>n.type==='rect').length,3);
+console.log(JSON.stringify({render:'passed',sessionSelection:'passed',remoteStringId:'passed',remoteResultUnwrap:'passed',load:'passed',confirmationGate:'passed',save:'passed',workspaceIsolation:'passed',icon:'passed'}));
