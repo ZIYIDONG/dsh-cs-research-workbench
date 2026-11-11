@@ -4,7 +4,7 @@
   "description": "A code-centric research workbench for Computer Science and Cybersecurity",
   "main": "./lib/index.js",
   "type": "module",
-  "license": "MIT",
+  "license": "GPL-3.0-only",
   "engines": {"node": ">=22.16", "dsh": ">=0.2.2-rc.1 <0.3.0"},
   "keywords": ["dsh","csrw","research","cybersecurity","obsidian","zotero","webdav"],
   "exports": {".": "./lib/index.js", "./locale/*.json": "./locale/*.json", "./icon": "./icon.svg"},

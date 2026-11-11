@@ -109,7 +109,7 @@ v0.1 不包含 UI 仪表盘、MCP 服务、向量检索、聚类、Zotero 写入
 
 ## 源码
 
-`lib/index.js` 注册工具；`lib/tools/` 实现各模块；`lib/services/config.js` 管理配置，`lib/services/snapshot.js` 管理备份；`lib/utils/` 提供路径边界及哈希工具。`bin/csrw.js` 是 CLI；`patches/bundle.yaml` 是 DSH bundle 补丁。MIT License。
+`lib/index.js` 注册工具；`lib/tools/` 实现各模块；`lib/services/config.js` 管理配置，`lib/services/snapshot.js` 管理备份；`lib/utils/` 提供路径边界及哈希工具。`bin/csrw.js` 是 CLI；`patches/bundle.yaml` 是 DSH bundle 补丁。GPL-3.0-only License（保留远端 GNU GPL v3 授权）。
 
 ### 本次验收记录（2026-11-11）
 
