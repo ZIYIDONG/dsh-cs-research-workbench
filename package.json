@@ -1,7 +1,7 @@
 {
   "name": "dsh-cs-research-workbench",
   "version": "0.1.0",
-  "description": "A code-centric research workbench for Computer Science and Cybersecurity",
+  "description": "A DSH plugin for end-to-end Computer Science research: literature, code, and backups",
   "main": "./lib/index.js",
   "type": "module",
   "license": "GPL-3.0-only",
@@ -14,7 +14,7 @@
     "csrw",
     "research",
     "computer-science",
-    "cybersecurity",
+    "research-workflow",
     "obsidian",
     "zotero",
     "webdav"
