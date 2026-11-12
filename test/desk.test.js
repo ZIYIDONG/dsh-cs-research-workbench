@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {mkdtemp,rm} from 'node:fs/promises';
+import {mkdtemp,rm,mkdir,readFile,stat,writeFile} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import path from 'node:path';
 import {buildSeed} from '../lib/desk/seed.js';
@@ -59,4 +59,40 @@ test('store persists with mtime refresh and three-way undo',async()=>{
 
 test('registerDesk stays inert without a web server',()=>{
   assert.equal(registerDesk({get:()=>undefined}),false);
+});
+
+test('store copies the legacy csrw-desk state without deleting it',async()=>{
+  const dir=await mkdtemp(path.join(tmpdir(),'csrw-migrate-'));
+  const legacy=path.join(dir,'csrw-desk');
+  const target=path.join(dir,'dsh-csrw');
+  await mkdir(legacy,{recursive:true});
+  const seeded=buildSeed(new Date());
+  seeded.todos[0].title='旧目录里的任务';
+  await writeFile(path.join(legacy,'state.json'),JSON.stringify(seeded));
+  try{
+    const store=new Store(target,legacy);
+    assert.equal((await store.read()).todos[0].title,'旧目录里的任务');
+    assert.ok((await stat(path.join(legacy,'state.json'))).isFile(),'旧文件必须保留');
+    assert.ok((await readFile(path.join(target,'.migrated-from-csrw-desk'),'utf8')).includes('csrw-desk'));
+    await store.mutate('改标题',draft=>{draft.todos[0].title='迁移后改的标题';});
+    const reopened=new Store(target,legacy);
+    assert.equal((await reopened.read()).todos[0].title,'迁移后改的标题','已迁移的目录不能被旧文件覆盖');
+  }finally{
+    await rm(dir,{recursive:true,force:true});
+  }
+});
+
+test('store refuses to migrate an unparsable legacy state',async()=>{
+  const dir=await mkdtemp(path.join(tmpdir(),'csrw-broken-'));
+  const legacy=path.join(dir,'csrw-desk');
+  await mkdir(legacy,{recursive:true});
+  await writeFile(path.join(legacy,'state.json'),'{"todos":[');
+  try{
+    const store=new Store(path.join(dir,'dsh-csrw'),legacy);
+    await assert.rejects(()=>store.read(),/无法解析/);
+    assert.ok((await stat(path.join(legacy,'state.json'))).isFile(),'坏文件不能被删除');
+    assert.equal(await stat(path.join(dir,'dsh-csrw','state.json')).then(()=>true,()=>false),false,'坏文件不能被复制成新状态');
+  }finally{
+    await rm(dir,{recursive:true,force:true});
+  }
 });
