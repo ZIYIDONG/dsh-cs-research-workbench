@@ -73,7 +73,7 @@ window.__ModuleLoader__.load({
       sampleTitle: '现在看到的内容都是示例，可以一键清空',
       scatter: '散落', list: '列表', calendar: '日历',
       all: '全部', task: '任务', project: '项目', paper: '文献', idea: '想法', note: '笔记',
-      undo: '撤销上一步', gear: '设置', assistant: '助手',
+      undo: '撤销上一步', gear: '设置', assistant: '助手', dashboard: '监控台', dueToday: '今日到期', backups: '备份', noBackups: '暂无备份',
       zoomIn: '放大', zoomOut: '缩小', zoomFit: '回到中心',
       model: '模型', modelPick: '选择助手模型', modelLocal: '本地规则', modelEmpty: '没有可用的模型',
       modelHint: '选中后助手用该模型回答；不选则用本地规则。',
@@ -113,7 +113,7 @@ window.__ModuleLoader__.load({
       sampleTitle: 'Everything you see is sample data; clear it in one click',
       scatter: 'Scatter', list: 'List', calendar: 'Calendar',
       all: 'All', task: 'Task', project: 'Project', paper: 'Paper', idea: 'Idea', note: 'Note',
-      undo: 'Undo', gear: 'Settings', assistant: 'Assistant',
+      undo: 'Undo', gear: 'Settings', assistant: 'Assistant', dashboard: 'Dashboard', dueToday: 'Due today', backups: 'Backups', noBackups: 'No backups yet',
       zoomIn: 'Zoom in', zoomOut: 'Zoom out', zoomFit: 'Reset view',
       model: 'Model', modelPick: 'Pick an assistant model', modelLocal: 'Local rules', modelEmpty: 'No model available',
       modelHint: 'The assistant answers with this model; unset falls back to local rules.',
@@ -154,7 +154,7 @@ window.__ModuleLoader__.load({
     let snapshot = {
       state: null, canUndo: false, error: null, view: 'todo', mode: 'scatter', kindFilter: 'all',
       query: '', related: null, capture: null, dockOpen: true, chatInput: '', thinking: false,
-      toast: null, focusId: null, cam: { x: 0, y: 0, z: 1 }, camAnim: false,
+      toast: null, focusId: null, dashboardOpen: true, cam: { x: 0, y: 0, z: 1 }, camAnim: false,
       modelsOpen: false, models: [], modelsLoading: false,
       month: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
     }
@@ -423,6 +423,7 @@ window.__ModuleLoader__.load({
         ['circle', { cx: 12, cy: 12, r: 3.1 }],
       ],
       target: [['circle', { cx: 12, cy: 12, r: 3.6 }], ['path', { d: 'M12 2.5v3.2M12 18.3v3.2M2.5 12h3.2M18.3 12h3.2' }]],
+      gauge: [['path', { d: 'M4 15a8 8 0 1 1 16 0' }], ['path', { d: 'M12 15l3.5-4.5' }]],
       chevron: [['path', { d: 'M6 9.5 12 15.5 18 9.5' }]],
       chat: [['path', { d: 'M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H9l-5 4z' }]],
       spark: [['path', { d: 'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z' }]],
@@ -480,6 +481,20 @@ window.__ModuleLoader__.load({
 .rd-model-empty{margin:0 0 14px;color:var(--dsw-alias-label-tertiary,#8a8a8a);font-size:12px}
 .rd-sample{height:30px;padding:0 12px;border-radius:999px;border:.5px solid var(--dsw-alias-border-l1);background:var(--glass);color:var(--dsw-alias-label-secondary);font:inherit;font-size:12px;cursor:pointer}
 .rd-open-dock{height:32px;display:flex;align-items:center;gap:6px;padding:0 12px;border-radius:999px;border:.5px solid var(--dsw-alias-border-l1);background:var(--glass);color:var(--dsw-alias-label-secondary);font:inherit;font-size:12px;cursor:pointer}
+.rd-dash{position:absolute;top:64px;left:18px;z-index:20;width:280px;max-height:calc(100% - 150px);overflow:auto;display:flex;flex-direction:column;gap:10px;padding:14px 16px;border-radius:16px;background:var(--glass);border:.5px solid var(--dsw-alias-border-l1);backdrop-filter:blur(24px);box-shadow:0 14px 40px rgb(0 0 0 / 10%)}
+.rd-dash-head{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:600;color:var(--dsw-alias-label-primary)}
+.rd-dash-head button{border:0;background:none;color:var(--dsw-alias-label-secondary);cursor:pointer;font:inherit;font-size:16px;line-height:1}
+.rd-dash-stats{display:flex;gap:6px}
+.rd-dash-stat{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;border-radius:10px;background:var(--dsw-alias-bg-layer-1)}
+.rd-dash-stat b{font-size:18px;font-weight:600;color:var(--dsw-alias-label-primary)}
+.rd-dash-stat span{font-size:11px;color:var(--dsw-alias-label-secondary)}
+.rd-dash-sec{display:flex;flex-direction:column;gap:4px}
+.rd-dash-sec h4{margin:0;font-size:11px;font-weight:600;color:var(--dsw-alias-label-tertiary,#9a9a9a);letter-spacing:.03em}
+.rd-dash-row{display:flex;align-items:baseline;justify-content:space-between;gap:8px;font-size:12px}
+.rd-dash-title{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--dsw-alias-label-primary)}
+.rd-dash-row em{flex:none;font-style:normal;font-size:11px;color:var(--dsw-alias-label-tertiary,#9a9a9a);max-width:46%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rd-dash-empty{font-size:12px;color:var(--dsw-alias-label-tertiary,#9a9a9a);margin:0}
+.rd-root.is-compact .rd-dash{width:min(280px,86%);left:10px}
 .rd-content{position:absolute;inset:0;overflow:hidden;transition:right .22s ease}
 /* 右侧助手展开时，内容区整体让出 --dock-w；所有全宽布局都必须放进 .rd-content，
    不要用 position:fixed 或 100vw 自行定位，否则会被助手栏遮住。 */
@@ -1070,10 +1085,45 @@ window.__ModuleLoader__.load({
         h('p', { style: { color: 'var(--dsw-alias-label-secondary)' } }, `${counts[view] ?? 0} 条记录 · ${t('pageSoon')}`))
     }
 
+    function Dashboard() {
+      const state = useSel((s) => s.state)
+      const open = useSel((s) => s.dashboardOpen)
+      const [backups, setBackups] = useState(null)
+      useEffect(() => {
+        if (!open) return
+        fetch(API_BASE + 'backups').then((r) => r.json()).then((d) => setBackups(d.snapshots ?? [])).catch(() => setBackups([]))
+      }, [open])
+      if (!open) return null
+      const todos = state?.todos ?? []
+      const papers = state?.papers ?? []
+      const projects = state?.projects ?? []
+      const today = new Date().toISOString().slice(0, 10)
+      const doing = todos.filter((x) => x.status === 'doing')
+      const waiting = todos.filter((x) => x.status === 'waiting')
+      const dueToday = todos.filter((x) => x.status !== 'done' && x.due === today)
+      const count = (s) => papers.filter((x) => x.status === s).length
+      const stat = (n, label) => h('div', { className: 'rd-dash-stat' }, h('b', null, n), h('span', null, label))
+      const row = (id, title, meta) => h('div', { key: id, className: 'rd-dash-row' }, h('span', { className: 'rd-dash-title' }, title), meta ? h('em', null, meta) : null)
+      return h('aside', { className: 'rd-dash', 'aria-label': t('dashboard') },
+        h('div', { className: 'rd-dash-head' },
+          h('span', null, t('dashboard')),
+          h('button', { type: 'button', title: t('cancel'), 'aria-label': t('cancel'), onClick: () => setDesk({ dashboardOpen: false }) }, '×')),
+        h('div', { className: 'rd-dash-stats' },
+          stat(doing.length, statusText('task', 'doing')),
+          stat(waiting.length, statusText('task', 'waiting')),
+          stat(dueToday.length, t('dueToday'))),
+        doing.length ? h('div', { className: 'rd-dash-sec' }, h('h4', null, statusText('task', 'doing')), ...doing.map((x) => row(x.id, x.title, x.estimateMinutes ? `~${x.estimateMinutes}m` : null))) : null,
+        waiting.length ? h('div', { className: 'rd-dash-sec' }, h('h4', null, statusText('task', 'waiting')), ...waiting.map((x) => row(x.id, x.title, x.blockedReason))) : null,
+        h('div', { className: 'rd-dash-sec' }, h('h4', null, t('navPaper')), h('div', { className: 'rd-dash-stats' }, ...['inbox', 'reading', 'read', 'cited'].map((s) => stat(count(s), statusText('paper', s))))),
+        projects.length ? h('div', { className: 'rd-dash-sec' }, h('h4', null, t('navProject')), ...projects.map((pr) => { const ms = pr.milestones ?? []; const done = ms.filter((m) => m.done).length; return row(pr.id, pr.name, `${done}/${ms.length}`) })) : null,
+        h('div', { className: 'rd-dash-sec' }, h('h4', null, t('backups')), backups === null ? h('p', { className: 'rd-dash-empty' }, '…') : backups.length ? row(backups[0].id, relTime(backups[0].createdAt), (backups[0].sources ?? []).join('/')) : h('p', { className: 'rd-dash-empty' }, t('noBackups'))))
+    }
+
     function Topbar() {
       const view = useSel((s) => s.view)
       const ready = useSel((s) => Boolean(s.state))
       const dockOpen = useSel((s) => s.dockOpen)
+      const dashOpen = useSel((s) => s.dashboardOpen)
       const nav = [['todo', 'Todo'], ['project', 'Projects'], ['paper', 'Papers'], ['idea', 'Ideas'], ['kb', 'KnowledgeBase']]
       return h('header', { className: 'rd-topbar' },
         h('nav', { className: 'rd-nav', 'aria-label': t('workbench') }, ...nav.map(([id, label]) => h('button', {
@@ -1081,6 +1131,7 @@ window.__ModuleLoader__.load({
           onClick: () => setDesk({ view: id, focusId: null }),
         }, label))),
         h('span', { style: { flex: 1 } }),
+        ready ? h(IconButton, { name: 'gauge', label: t('dashboard'), onClick: () => setDesk({ dashboardOpen: !dashOpen }) }) : null,
         ready ? h(ModelButton) : null,
         h(IconButton, { name: 'chat', label: t('assistant'), onClick: () => { const next = !dockOpen; setDesk({ dockOpen: next }); saveSettings({ dockOpen: next }) } }))
     }
@@ -1131,6 +1182,7 @@ window.__ModuleLoader__.load({
         h('div', { className: 'rd-ambient', 'aria-hidden': 'true' }, h('i'), h('i'), h('i')),
         h('div', { className: 'rd-main' },
           h(Topbar),
+          ready ? h(Dashboard) : null,
           h('main', { className: 'rd-content', key: view },
             error ? h('div', { className: 'rd-page' }, h('p', { style: { color: 'var(--dsw-alias-label-secondary)' } }, t('error', { error })), h('button', { type: 'button', className: 'rd-btn', onClick: () => loadDesk() }, t('retry')))
               : !ready ? h('div', { className: 'rd-loading' }, h('span', { className: 'rd-shimmer' }, t('loading')))

@@ -1,6 +1,6 @@
 {
   "name": "dsh-cs-research-workbench",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "An end-to-end research workbench for Computer Science: todos, papers, projects, ideas, knowledge base, sync and backup",
   "main": "./lib/index.js",
   "type": "module",
