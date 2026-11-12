@@ -7,9 +7,11 @@ window.__ModuleLoader__.load({
     const h = React.createElement
     const { useState, useEffect, useRef, useSyncExternalStore, useCallback } = React
 
-    const BASE = 'csrw-desk/'
+    // 全局标识：与 lib/desk/ids.js 保持一致（浏览器半片不能 import Node 模块，由 check-identifiers 校验）。
+    const UI_ID = 'dsh-csrw-ui'
+    // 相对路径：沿用改造前的解析方式，避免子路径部署时变成绝对地址。
+    const API_BASE = 'dsh-csrw/api/'
     const HERO = { w: 540, h: 372 }
-    const PANEL_ID = 'csrw-workbench'
 
     // ---------- 原有工具面板：配置、连接检测、备份（并入设置页，不再单独占一个侧栏入口） ----------
     const TOOLS_EN = {title:'CS research workbench',intro:'Workspace configuration, connection checks, sync and versioned backups.',workspace:'Workspace directory',session:'Session ID',load:'Load configuration',save:'Save field',open:'Open workbench',config:'Configuration',actions:'Operations',result:'Last result',pending:'Running…',cancel:'Cancel',confirm:'Confirm this write operation',approval:'Review the target workspace and arguments before confirming. This operation may change local or remote files.',secret:'Passwords are not stored here. Configure credentials in the DSH credential store or NUTSTORE_USERNAME / NUTSTORE_PASSWORD environment variables.',context:'Select an existing session to provide a permission and audit context. No model turn is started.',error:'Request failed',health:'Check plugin',git:'Git status',zotero:'Check Zotero',dav:'Check WebDAV',list:'List remote directory',push:'Upload directory',pull:'Download directory',obsidian:'Back up Obsidian',backupZotero:'Back up Zotero',dsh:'Back up DSH',verify:'Verify snapshot',local:'Local sync directory',remote:'Remote subdirectory',snapshot:'Snapshot directory',sources:'Backup paths come from the current workspace configuration. Restore remains available through the explicit-confirmation tool.',choose:'Choose directory',noSession:'Choose a session first',notLoaded:'Load the workspace configuration first',boolean:'Boolean',field:'Configuration field',value:'Value',operationsHint:'Network checks contact only the configured endpoints; backups create local files.',empty:'No result yet',yes:'Enabled',no:'Disabled'};
@@ -150,7 +152,7 @@ window.__ModuleLoader__.load({
     const useSel = (selector) => useSyncExternalStore(subscribe, () => selector(snapshot))
 
     async function request(path, body) {
-      const res = await fetch(BASE + path, body === undefined ? {} : {
+      const res = await fetch(API_BASE + path, body === undefined ? {} : {
         method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body),
       })
       const data = await res.json().catch(() => ({}))
@@ -1128,10 +1130,10 @@ window.__ModuleLoader__.load({
         const tt = ctx.locale.bind('csrw')
         const register = (name, options, component) => ctx.slots.inject(name, () => ctx.slots.register({ name, ...options }, component))
         const toolsPanel = (props) => h(ToolsPanel, { ...props, ctx, t: tt })
-        register('main', { key: PANEL_ID }, Desk)
-        register('sidebar.panellist', { id: PANEL_ID, order: 45, label: () => tt('title') }, PanelIcon)
-        register('settings.section', { id: PANEL_ID, order: 17, label: () => tt('title') }, toolsPanel)
-        register('settings.section.icon', { id: PANEL_ID }, ToolsIcon)
+        register('main', { key: UI_ID }, Desk)
+        register('sidebar.panellist', { id: UI_ID, order: 45, label: () => tt('title') }, PanelIcon)
+        register('settings.section', { id: UI_ID, order: 17, label: () => tt('title') }, toolsPanel)
+        register('settings.section.icon', { id: UI_ID }, ToolsIcon)
         register('plugins.bundle.config', { key: 'dsh-cs-research-workbench' }, toolsPanel)
       },
     }

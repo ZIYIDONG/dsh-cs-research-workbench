@@ -13,13 +13,13 @@ entry.factory(()=>React).apply({effect:fn=>fn(),get:()=>undefined,locale:{regist
 
 assert.equal(slots.length,5,'five slots are registered');
 const main=slots.find(s=>s.opts.name==='main');
-assert.equal(main.opts.key,'csrw-workbench');
+assert.equal(main.opts.key,'dsh-csrw-ui');
 const shell=main.component();
 assert.equal(shell.props.className,'rd-shell','main slot renders the workbench shell');
 assert.ok(shell.children.some(n=>n.props?.className?.startsWith('rd-root')),'workbench root is contained in the shell');
 
 const settings=slots.find(s=>s.opts.name==='settings.section');
-assert.equal(settings.opts.id,'csrw-workbench');
+assert.equal(settings.opts.id,'dsh-csrw-ui');
 const element=settings.component({useSessions:selector=>selector({ids:['session-fixture'],byId:{'session-fixture':{displayTitle:'Fixture'}}})});
 const Panel=element.type,panelProps=element.props;
 states.length=0;effects.length=0;cursor=0;
@@ -37,7 +37,7 @@ await button('confirm').props.onClick();await Promise.resolve();render();render(
 nodes().find(n=>n.type==='input'&&n.props.value==='C:/fixture').props.onChange({target:{value:'C:/other'}});render();assert.equal(button('save').props.disabled,true,'workspace switch must discard old config');
 
 const sidebar=slots.find(s=>s.opts.name==='sidebar.panellist');
-assert.equal(sidebar.opts.id,'csrw-workbench');assert.equal(sidebar.opts.order,45);assert.equal(typeof sidebar.opts.label,'function');
+assert.equal(sidebar.opts.id,'dsh-csrw-ui');assert.equal(sidebar.opts.order,45);assert.equal(typeof sidebar.opts.label,'function');
 const iconElement=sidebar.component({size:20});assert.ok(iconElement,'sidebar icon renders an element');
 assert.equal(iconElement.type,'span','sidebar icon is wrapped for flex centering');
 assert.equal(iconElement.props.className,'csrw-icon-slot');
@@ -58,7 +58,7 @@ assert.ok(screen,'screen path is the 3:2 geometry');
 const sw=20.9-3.1, sh=17.9167-6.05;
 assert.ok(Math.abs(sw/sh-1.5)<0.01,`screen aspect ratio is 3:2: ${sw.toFixed(3)}x${sh.toFixed(3)}`);
 assert.ok(Math.abs(base.props.y-(17.9167+0.2))<0.01,'screen and base keep a 0.2 gap');
-const settingsIcon=slots.find(s=>s.opts.name==='settings.section.icon');assert.equal(settingsIcon.opts.id,'csrw-workbench');
+const settingsIcon=slots.find(s=>s.opts.name==='settings.section.icon');assert.equal(settingsIcon.opts.id,'dsh-csrw-ui');
 const pluginConfig=slots.find(s=>s.opts.name==='plugins.bundle.config');assert.equal(pluginConfig.opts.key,'dsh-cs-research-workbench');
 assert.equal(translations.zh.title,'CS\u79d1\u7814\u5de5\u4f5c\u53f0');
 const head=nodes().find(n=>n.props&&n.props.className==='csrw-head');assert.ok(head,'panel header renders');

@@ -38,6 +38,7 @@
     "LICENSE",
     ".csrw.example.json",
     "scripts/check.mjs",
+    "scripts/check-identifiers.mjs",
     "test/*.test.js",
     "client.js",
     "scripts/verify-ui.mjs",
@@ -45,7 +46,7 @@
   ],
   "scripts": {
     "test": "node --test --test-isolation=none --test-concurrency=1 test/*.test.js",
-    "check": "node scripts/check.mjs",
+    "check": "node scripts/check.mjs && node scripts/check-identifiers.mjs",
     "check:ui": "node scripts/verify-ui.mjs && node scripts/verify-ui-interaction.mjs"
   },
   "dsh": {

@@ -31,7 +31,7 @@ const api=client.factory(name=>{assert.equal(name,'react');return {createElement
 api.apply({effect:fn=>disposers.push(fn()),locale:{register:()=>()=>{},bind:()=>key=>key},slots:{inject:(name,fn)=>disposers.push(fn()),register:(options,component)=>{registered.push({options,component});return()=>registered.pop();}}});
 assert.deepEqual(registered.map(e=>e.options.name),['main','sidebar.panellist','settings.section','settings.section.icon','plugins.bundle.config']);
 assert.equal(registered[0].options.key,registered[1].options.id);
-assert.equal(registered[2].options.id,'csrw-workbench');
+assert.equal(registered[2].options.id,'dsh-csrw-ui');
 assert.ok(registered.every(e=>typeof e.component==='function'));
 for(const dispose of disposers.reverse())dispose();assert.equal(registered.length,0);
 console.log(JSON.stringify({uiCommand:'passed',sharedConfiguration:'passed',writeConfirmation:'passed',sensitiveConfigRejection:'passed',cancel:'passed',slots:5,disposal:'passed'}));
