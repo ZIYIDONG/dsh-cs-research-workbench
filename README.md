@@ -1,16 +1,41 @@
 # CS科研工作台 (dsh-cs-research-workbench)
 
-**dsh 计算机科学科研工作台**（`dsh-cs-research-workbench`，简称 `csrw`）是**面向计算机科学的全流程科研工作台**。这里的 **CS 指 Computer Science（计算机科学）**，不绑定单一细分方向。工作台有六个入口：**待办、文献、项目、想法、知识库、同步与备份**，对应选题构思、文献与笔记整理、代码与实验版本管理、结果归档、资料备份这五段科研工作流。
+**dsh 计算机科学科研工作台**（`dsh-cs-research-workbench`，简称 `csrw`）是**面向计算机科学的全流程科研工作台**：把选题构思、文献与笔记、代码与实验版本、结果归档、资料备份串成一条能在本机跑起来的链路。这里的 **CS 指 Computer Science（计算机科学）**，不绑定单一细分方向。
 
-这里的"全流程"指上述五段科研工作流，不包含实验设备控制、投稿系统对接等外部环节；插件负责的是本机文件、版本与备份，不代替领域专用的实验工具。
+工作台有六个入口：**待办、文献、项目、想法、知识库、同步与备份**。前五个是工作台页面，最后一个落在设置页与工具里——同步与备份处理的是文件和远端，不产生科研条目，所以不给它单独一页。
+
+"全流程"指上述五段科研工作流，不含实验设备控制、投稿系统对接等外部环节；插件负责本机文件、版本与备份，不代替领域专用的实验工具。
 
 > An end-to-end research workbench for Computer Science: todos, papers, projects, ideas, knowledge base, sync and backup.
 
-v0.1 提供本地 Obsidian 文件操作、Git、Zotero 本机只读 API、坚果云 WebDAV 与可校验的本地备份。插件 ID 和 CLI 为 `csrw`，工具统一使用 `csrw_` 前缀，工作区配置目录为 `.csrw`。
+v0.1 分两层交付：**工作台界面**（本地状态、快速记录、助手、撤销）与其下的**执行层**（Obsidian 文件操作、Git、Zotero 本机只读 API、坚果云 WebDAV、可校验备份）。插件 ID 与 CLI 为 `csrw`，工具统一使用 `csrw_` 前缀（29 个），工作区配置目录为 `.csrw`，工作台状态存在 `$DSH_HOME/dsh-csrw/state.json`。
+
+## 六个入口
+
+| 入口 | 存什么 | 当前状态 |
+| --- | --- | --- |
+| 待办 `todo` | 任务标题、状态、优先级、截止时间、所属项目 | 已可用：散落画布、列表、日历三种视图，可拖动、可撤销 |
+| 项目 `project` | 项目本身的推进节奏 | 页面占位，只显示记录条数 |
+| 文献 `paper` | 题录、DOI/arXiv、阅读状态 | 页面占位，只显示记录条数 |
+| 想法 `idea` | 想法、假设、问题、方法 | 页面占位，只显示记录条数 |
+| 知识库 `kb` | 概念、坑、公式、工具、片段、模板 | 页面占位，只显示记录条数 |
+| 同步与备份 | 快照、远端副本 | 无页面，在设置页与 `csrw_nutstore_*` / `csrw_backup_*` 中 |
+
+占位页不是空壳数据：快速记录和助手对话都能写进这五类条目，只是这四个页面目前只统计条数，还没有列表与编辑界面。增加或修改条目走快速记录，查条目走助手。
+
+工作台数据与 29 个工具是两套独立状态：工具不读写 `$DSH_HOME/dsh-csrw/state.json`。要让条目落成文件、版本或远端副本时，显式调用对应工具：
+
+| 想要的结果 | 用哪个 |
+| --- | --- |
+| 文献题录与引用 | `csrw_zotero_search` / `item` / `cite` |
+| 笔记与知识库落到 vault | `csrw_obsidian_write` / `append` |
+| 代码与实验版本 | `csrw_git_status` / `commit` / `push` / `pull` |
+| 目录同步到坚果云 | `csrw_nutstore_push` / `pull` |
+| 可校验的本地快照 | `csrw_snapshot_create` / `verify` / `restore` |
 
 ## 环境与安装
 
-- Node.js ≥22.16；DSH `>=0.2.2-rc.1 <0.3.0`。本次复验环境：Node 24.21.0（DSH 内置运行时）、DSH 0.2.2-rc.1、Windows、Git 2.56.1。DSH 桌面版当前内置 Node 24，完整功能（含 Zotero SQLite 在线备份）按该运行时验证。
+- Node.js ≥22.16；DSH `>=0.2.2-rc.1 <0.3.0`。本次复验环境：Node 26.13.0、DSH 0.2.2-rc.1、Windows、Git 2.46.0.windows.1。Zotero SQLite 在线备份依赖 Node 内置 `node:sqlite` 的 `backup()`，不提供该 API 的运行时会让备份明确报错，不会退化为直接复制运行中的数据库。
 - Git 模块需要系统 `git`；`git` 不在 PATH 时，测试和工具都会明确失败，请先把 Git 加入 PATH。
 - Obsidian 操作直接读写 vault，无需 Obsidian REST 插件。
 - Zotero 需要运行中的本机 API，默认 `http://127.0.0.1:23119/api`。API 不可用时明确报错，不转向云端。
@@ -20,6 +45,7 @@ v0.1 提供本地 Obsidian 文件操作、Git、Zotero 本机只读 API、坚果
 ```powershell
 npm install --ignore-scripts
 npm run check
+npm run check:ui
 npm test
 node bin/csrw.js health
 ```
@@ -47,22 +73,25 @@ node bin/csrw.js health
 
 ## 图形界面
 
-安装插件并刷新 DSH 页面后，侧边栏新增 **CS科研工作台** 入口，主面板是仿 dsh-media-desk 的科研首页；设置里保留同一名字的 **CS科研工作台** 分区，插件管理页也提供配置卡。主面板与设置页复用同一个原生 React 客户端半片（`client.js`，手写 IIFE，无构建步骤），不创建其他网页服务。
+安装插件并刷新 DSH 页面后，侧边栏新增 **CS科研工作台** 入口，主面板是科研首页；设置里保留同一名字的 **CS科研工作台** 分区，插件管理页也提供配置卡。主面板与设置页复用同一个原生 React 客户端半片（`client.js`，手写 IIFE，无构建步骤），不创建其他网页服务。
 
 主面板（`/dsh-csrw/api/*` 路由，数据在 `$DSH_HOME/dsh-csrw/state.json`；旧目录 `csrw-desk/` 会在首次读取时自动复制，且旧文件保留）：
 
-1. 首屏两行数字：还有 N 件事等你推进、M 篇文献排在本周；下面是一句话记录框。
-2. 一句话按内容分流：DOI/arXiv → 文献，`问题:`/`假设:`/`方法:`/`局限:` 或链接 → 想法，带日期/`@项目`/`#P0`/`~30min` → 任务，其余 → 任务。
-3. 散落画布可拖动卡片（位置持久化、不进撤销栈）、滚轮平移、`Ctrl/⌘ + 滚轮` 缩放；底部在散落/列表/日历三种视图间切换，分类筛选只在散落视图出现；`＋` 打开快速记录。
-4. 列表视图是三列五卡：Todo: All｜Todo: Projects、Todo: Paper｜Todo: Idea 整理、Todo: 知识库整理。
-5. 任务页已可用；项目、文献、想法、知识库四页先给占位与条数，后续版本补齐。右侧助手 Dock 用本地规则建任务/查今天，不调用模型。
-6. 原生撤销 30 步、中英文案、窄屏适配（`<1020px` 两列、`<780px` 单列，窄屏默认收起助手）。
-7. 布局约定：所有全宽内容必须放进 `.rd-content`。助手 Dock 展开时内容区自动让出 `--dock-w`（336px），顶栏、底部 Dockbar、Toast 同步避让；不要用 `position: fixed` 或 `100vw` 自行铺满，否则会被右侧助手遮住。
+1. 顶栏是五个入口——待办、项目、文献、想法、知识库，右侧是助手模型按钮和设置齿轮。
+2. 首屏两行数字：还有 N 件事等你推进、M 篇文献排在本周；下面是一句话记录框。
+3. 一句话按内容分流：DOI/arXiv → 文献，`问题:`/`假设:`/`方法:`/`局限:` 或链接 → 想法，带日期/`@项目`/`#P0`/`~30min` → 任务，其余 → 任务。
+4. 散落画布可拖动卡片（位置持久化、不进撤销栈）、滚轮平移、`Ctrl/⌘ + 滚轮` 缩放；底部在散落/列表/日历三种视图间切换，分类筛选只在散落视图出现；`＋` 打开快速记录。
+5. 列表视图是三列五卡：Todo: All｜Todo: Projects、Todo: Paper｜Todo: Idea 整理、Todo: 知识库整理；日历视图按截止日期排布。
+6. 快速记录按类型分栏：任务（优先级、截止、项目、状态）、文献（DOI、URL、阅读状态）、想法（类型：想法/假设/问题/方法）、知识库（概念/坑/公式/工具/片段/模板），填完直接写进本地状态。
+7. 右侧助手 Dock：不选模型时用本地规则（建任务、查今天、统计待办），不联网；在顶栏选定模型后，助手只依据当前工作台数据作答，要求 120 字内、不编造条目，模型调用失败会回退本地规则并在返回里标明 `engine`。
+8. 设置对话框：界面语言（中文/English）、助手栏默认展开、清除示例数据、撤销提示。
+9. 原生撤销 30 步（`Ctrl/⌘+Z`）、中英文案、窄屏适配（`<1020px` 两列、`<780px` 单列，窄屏默认收起助手）。
+10. 布局约定：所有全宽内容必须放进 `.rd-content`。助手 Dock 展开时内容区自动让出 `--dock-w`（336px），顶栏、底部 Dockbar、Toast 同步避让；不要用 `position: fixed` 或 `100vw` 自行铺满，否则会被右侧助手遮住。
 
 设置页里的工具面板：
 
 1. 选择工作区目录，并从列表选择一个已有会话作为命令的权限和审计上下文；不会启动模型对话。
-2. 点击“加载配置”读取工作区默认值/配置。按字段保存，字符串与布尔类型按白名单校验。密码不在界面中录入或保存。
+2. 点击"加载配置"读取工作区默认值/配置。按字段保存，字符串与布尔类型按白名单校验。密码不在界面中录入或保存。
 3. 工作台可检查 Git、Zotero 与 WebDAV，列远端目录、手动上传/下载、创建三类备份并校验快照。同步和备份先展示工作区与参数，确认后才执行。恢复保留在显式确认的工具中，不提供一键恢复。
 4. 切换工作区会清除旧配置和结果；运行时支持取消，成功与失败独立展示。
 
@@ -142,26 +171,31 @@ Zotero 本机 API 不需要 API Key。WebDAV 强制 HTTPS（本机测试允许 H
 
 ### 备份、校验与恢复
 
-备份默认保存在本地，manifest 记录版本、时间、大小与每文件 SHA-256。Zotero SQLite 通过只读源连接和 SQLite 在线备份产生一致副本，避免直接复制运行中的数据库。该在线备份使用 Node 内置 `node:sqlite` 的 `backup()`；当前 Node 不提供该 API 时会明确报错，不会退化为直接复制运行中的数据库（本次验证运行时 Node 24.21.0 可用）。DSH 备份覆盖实际发现/显式配置的 prompts、plugins、skills 与配置，默认不含 sessions/storages；排除已知敏感路径及检测到敏感内容的文件（整文件跳过，不是字段脱敏）。包含 profile 的 `cordis.patch.yml`、package manifests 与 pnpm 锁文件；排除 `node_modules` 和 `.git`，依赖需要按清单重建。敏感识别为保守启发式，不能保证未知格式密钥 100% 召回，应检查排除报告后再上传。
+备份默认保存在本地，manifest 记录版本、时间、大小与每文件 SHA-256。Zotero SQLite 通过只读源连接和 SQLite 在线备份产生一致副本，避免直接复制运行中的数据库。该在线备份使用 Node 内置 `node:sqlite` 的 `backup()`；当前运行时没有该 API 时会明确报错，不会退化为直接复制运行中的数据库。DSH 备份覆盖实际发现/显式配置的 prompts、plugins、skills 与配置，默认不含 sessions/storages；排除已知敏感路径及检测到敏感内容的文件（整文件跳过，不是字段脱敏）。包含 profile 的 `cordis.patch.yml`、package manifests 与 pnpm 锁文件；排除 `node_modules` 和 `.git`，依赖需要按清单重建。敏感识别为保守启发式，不能保证未知格式密钥 100% 召回，应检查排除报告后再上传。
 
 恢复必须显式 `confirm:true`，先完成 manifest 与全部文件校验，再自动生成恢复前快照。只恢复清单内的文件，不删除目标中额外内容；不会对用户资料执行未获授权的真实恢复。多文件恢复不是文件系统事务，运行期 I/O、取消或并发变更可能造成部分完成，恢复前快照是回滚依据。SHA-256 用于完整性而非来源认证；不提供敌对并发下的完全 TOCTOU 防护。恢复 SQLite 前关闭 Zotero；活动 WAL/SHM 存在时拒绝恢复。大文件会读入内存。请先在独立目录验证备份内容和凭据排除报告。
+
+### 工作台状态迁移
+
+工作台状态从旧目录 `$DSH_HOME/csrw-desk/state.json` 迁到 `$DSH_HOME/dsh-csrw/state.json`。迁移在首次读取时自动发生：目标已存在则跳过；旧文件解析失败会明确报错并保留原文件；写入用独占方式，成功后留下 `.migrated-from-csrw-desk` 标记。**旧目录不会被删除**，确认新目录工作正常后可由用户自行清理。
 
 ## 验证与范围
 
 自动测试使用工作区 `.test-artifacts/` 或系统临时目录下的隔离 fixture 和本机模拟服务；不推送真实外部仓库，不恢复用户真实 vault、Zotero 或 DSH profile。执行 `npm test` 查看当前结果。真实 Zotero 搜索/读取验收要求本机服务可用；真实坚果云往返要求用户自己的应用密码及测试目录。这些不能由 mock 通过替代。
 
-本版本提供设置页和侧边栏工作台，不包含 MCP 服务、向量检索、聚类、Zotero 写入、自动定时同步、永久删除或 vault 双链重写。
+本版本提供的界面是待办页的三种视图加四个占位页；不含 MCP 服务、向量检索、聚类、Zotero 写入、自动定时同步、永久删除或 vault 双链重写。
 
 ## 源码
 
-`lib/index.js` 注册工具和工作台路由；`lib/tools/` 实现各模块；`lib/desk/` 是工作台宿主半片（`host.js` 路由、`store.js` 持久化与撤销、`ops.js` 操作白名单、`seed.js` 示例数据）；`lib/services/config.js` 管理配置，`lib/services/snapshot.js` 管理备份；`lib/utils/` 提供路径边界及哈希工具。`bin/csrw.js` 是 CLI；`client.js` 是浏览器半片；`patches/bundle.yaml` 是 DSH bundle 补丁；`docs/` 是工作台设计文档。GPL-3.0-only License（保留远端 GNU GPL v3 授权）。
+`lib/index.js` 注册工具和工作台路由；`lib/tools/` 实现各模块；`lib/desk/` 是工作台宿主半片（`host.js` 路由、`store.js` 持久化/撤销/迁移、`ops.js` 操作白名单、`seed.js` 示例数据、`ids.js` 全局标识）；`lib/services/config.js` 管理配置，`lib/services/snapshot.js` 管理备份；`lib/utils/` 提供路径边界及哈希工具。`bin/csrw.js` 是 CLI；`client.js` 是浏览器半片；`patches/bundle.yaml` 是 DSH bundle 补丁；`docs/` 是工作台设计文档；`scripts/check.mjs` 与 `scripts/check-identifiers.mjs` 做结构与标识一致性检查，`scripts/verify-ui*.mjs` 校验界面注册与交互。GPL-3.0-only License（保留远端 GNU GPL v3 授权）。
 
-### 本次验收记录（2026-11-11）
+### 本次验收记录（2026-11-12）
 
-- `node scripts/check.mjs` 复验通过：语法检查、包元数据、29 个 `csrw_` 工具与六个模块全部 `ready`。
-- `node --test --test-isolation=none --test-concurrency=1 test/*.test.js` 复验：37 个用例全部通过（0 skip），其中 5 个是并入工作台后的 `lib/desk/` 用例（示例数据、操作白名单、状态/位置更新、持久化与三方撤销、无 Web 服务时 `registerDesk` 不生效）。其中“真实 Git 临时仓库集成”用例需要进程能用管道捕获子进程输出：在限制该能力的沙箱中会按设计跳过（不绕过沙箱），在普通终端（Git 2.56.1 已加入 PATH）中通过。
-- 已通过 `plugin_manager install_bundle` 安装进 `desktop` profile（`application: applied`，无 warnings），会话内 29 个 `csrw_` 工具已注册；`csrw_health` 返回六模块 `ready`。`scripts/verify-ui.mjs` 与 `scripts/verify-ui-interaction.mjs` 全部通过；工作台主面板与侧栏入口已注册为 `dsh-csrw-ui`，`GET /dsh-csrw/api/state` 未登录返回 401。
-- 原独立验证包 `dsh-research-desk` 的工作台代码已并入本仓库（`lib/desk/` + `client.js`），验证通过后从 profile 停用；其设计文档已移入 `docs/`。
-- 实机端子验收（临时 vault，非用户真实数据）：write/append/move/trash 正常；`../` 越界与默认覆盖均被拒绝；`snapshot_create` 生成 manifest，`snapshot_verify` 检出被篡改文件，`snapshot_restore` 未传 `confirm: true` 时拒绝。
-- Obsidian 生命周期、WebDAV mock 往返/冲突、Zotero mock GET、SQLite WAL 一致副本与快照恢复均有测试证据；不等于真实外部服务验收。
-- 当前机器未运行 Zotero，真实本机 API 搜索/条目读取未验收（Zotero 关闭时工具返回明确连接错误）；未提供坚果云应用凭据，真实远端往返未验收（工具返回明确凭据错误）。
+- `npm run check` 通过：语法、包元数据、29 个 `csrw_` 工具、六个模块全部 `ready`；`identifiers` 通过（`dsh-csrw-ui`、`/dsh-csrw/api`、`dsh-csrw`）。
+- `npm run check:ui` 通过：五处界面注册、图标几何、标题、设置分区 id 与中英文案全部匹配。
+- `npm test`：39 个用例全部通过（0 skip、0 fail）。其中 5 个是 `lib/desk/` 用例（示例数据、操作白名单、状态/位置更新、持久化与三方撤销、无 Web 服务时 `registerDesk` 不生效），2 个是迁移用例（旧状态复制且不删旧文件、旧文件损坏时报错且不写新文件）。"真实 Git 临时仓库集成"用例需要进程能用管道捕获子进程输出，在限制该能力的沙箱中按设计跳过，在普通终端通过。
+- 运行期实测：`GET /dsh-csrw/api/state` 返回 401（路由已注册，需鉴权），旧路由 `GET /csrw-desk/state` 返回 404；客户端插槽列表里 `sidebar.panellist`（order 45）、`settings.section`（order 17）、`settings.section.icon` 均为 `dsh-csrw-ui`；`csrw_health` 返回 29 工具、六模块 `ready`。
+- 状态迁移实机验证：从 `~/.dsh/csrw-desk/` 复制到 `~/.dsh/dsh-csrw/`，读到 6 个待办、3 篇文献、3 个想法；旧文件 SHA-256 前后一致（未被改写），新目录含 `state.json` 与 `.migrated-from-csrw-desk` 标记。
+- 界面人工验收：设置分区、侧栏入口、标题与图标名称、工作台加载配置均按预期显示；插件卡片描述 41 字未截断。
+- 外部服务边界：本机未运行 Zotero，真实 API 搜索/条目读取未验收；未提供坚果云应用密码，真实远端往返未验收；两者在不可用时都返回明确错误而不是假成功。Obsidian 端子验收使用临时 vault（非用户真实数据）：write/append/move/trash 正常，`../` 越界与默认覆盖被拒绝，`snapshot_verify` 能检出被篡改文件，`snapshot_restore` 未传 `confirm: true` 时拒绝。
+- 尚未实现：项目、文献、想法、知识库四页只有条数占位，没有列表与编辑界面。
