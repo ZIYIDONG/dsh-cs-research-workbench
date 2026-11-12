@@ -61,6 +61,34 @@ test('registerDesk stays inert without a web server',()=>{
   assert.equal(registerDesk({get:()=>undefined}),false);
 });
 
+test('registerDesk waits for webServer through conditional injection',()=>{
+  const routes=[];
+  const disposers=[];
+  const scoped={
+    webServer:{register:route=>{routes.push(route);const dispose=()=>{disposers.push('disposed');};return dispose;}},
+    effect:fn=>{const dispose=fn();disposers.push(dispose);return dispose;},
+  };
+  let requested=null;
+  const mounted=registerDesk({inject:(deps,callback)=>{requested=deps;callback(scoped);}});
+  assert.equal(mounted,true);
+  assert.deepEqual(requested,['webServer']);
+  assert.equal(routes.length,1);
+  assert.equal(routes[0].kind,'prefix');
+  assert.equal(routes[0].path,'/dsh-csrw/api');
+  assert.equal(typeof routes[0].handler,'function');
+  assert.equal(disposers.length,1);
+});
+
+test('registerDesk falls back to a present service when inject is unavailable',()=>{
+  const routes=[];
+  const mounted=registerDesk({
+    get:name=>name==='webServer'?{register:route=>{routes.push(route);return()=>{};}}:undefined,
+    effect:fn=>{const dispose=fn();return dispose;},
+  });
+  assert.equal(mounted,true);
+  assert.equal(routes[0].path,'/dsh-csrw/api');
+});
+
 test('store copies the legacy csrw-desk state without deleting it',async()=>{
   const dir=await mkdtemp(path.join(tmpdir(),'dsh-csrw-migrate-'));
   const legacy=path.join(dir,'csrw-desk');
