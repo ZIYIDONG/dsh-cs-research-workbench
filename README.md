@@ -1,10 +1,10 @@
 # CS科研工作台 (dsh-cs-research-workbench)
 
-**dsh 计算机科学科研工作台**（`dsh-cs-research-workbench`，简称 `csrw`）是**面向计算机科学全流程科研的 DSH 插件**。这里的 **CS 指 Computer Science（计算机科学）**，不绑定单一细分方向：插件把选题构思、文献与笔记整理、代码与实验版本管理、结果归档、资料备份这五段串在同一条工作流里。
+**dsh 计算机科学科研工作台**（`dsh-cs-research-workbench`，简称 `csrw`）是**面向计算机科学的全流程科研工作台**。这里的 **CS 指 Computer Science（计算机科学）**，不绑定单一细分方向。工作台有六个入口：**待办、文献、项目、想法、知识库、同步与备份**，对应选题构思、文献与笔记整理、代码与实验版本管理、结果归档、资料备份这五段科研工作流。
 
 这里的"全流程"指上述五段科研工作流，不包含实验设备控制、投稿系统对接等外部环节；插件负责的是本机文件、版本与备份，不代替领域专用的实验工具。
 
-> A DSH plugin for end-to-end Computer Science research: literature, code, and backups.
+> An end-to-end research workbench for Computer Science: todos, papers, projects, ideas, knowledge base, sync and backup.
 
 v0.1 提供本地 Obsidian 文件操作、Git、Zotero 本机只读 API、坚果云 WebDAV 与可校验的本地备份。插件 ID 和 CLI 为 `csrw`，工具统一使用 `csrw_` 前缀，工作区配置目录为 `.csrw`。
 
