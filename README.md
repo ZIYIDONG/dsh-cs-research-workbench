@@ -67,7 +67,7 @@ node bin/dsh-csrw.js health
 | 工作台状态目录 | `$DSH_HOME/dsh-csrw/` | 本机持久化 | 自动从 `csrw-desk/` 复制，旧目录保留 |
 | 工作区配置 | `<workspace>/.dsh-csrw/` | 项目内配置、同步状态、备份 | 首次读取旧 `.csrw/` 配置时自动复制 |
 | 工具前缀 | `dsh_csrw_`（29 个） | 模型工具 | 工具名不允许连字符，用下划线分隔 |
-| 人工命令 | `/dsh-csrw-ui` | DSH 命令面板 | 不是模型工具 |
+| 人工命令 | `/dsh-csrw` | DSH 命令面板 | 与 CLI 同名，不是模型工具 |
 
 所有对外标识统一使用 `dsh-csrw`：插件名、CLI、命令、配置目录、远端根目录、凭据键与工具前缀都是同一根命名，工具前缀因命名规则限制把 `-` 写成 `_`。这样做是为了明确"这是一个 DSH 插件"，而不是独立于 DSH 的 `csrw` 软件。全局标识由 `scripts/check-identifiers.mjs` 校验一致性，`npm run check` 会执行它。
 
@@ -95,7 +95,19 @@ node bin/dsh-csrw.js health
 3. 工作台可检查 Git、Zotero 与 WebDAV，列远端目录、手动上传/下载、创建三类备份并校验快照。同步和备份先展示工作区与参数，确认后才执行。恢复保留在显式确认的工具中，不提供一键恢复。
 4. 切换工作区会清除旧配置和结果；运行时支持取消，成功与失败独立展示。
 
-界面通过 Host 人工命令 `/dsh-csrw-ui` 调用现有工具定义，使用 DSH 现有远程授权，不绕开权限策略；命令不记录原始输入。它不是模型工具，也不增加 `dsh_csrw_` 工具数量。GUI 入口不隐式执行同步、备份、初始化或推送。工作台数据是本地状态，与 29 个无状态工具互不影响；需要同步到 Git 或坚果云时，仍显式调用 `dsh_csrw_git_*` / `dsh_csrw_nutstore_*`。
+界面通过 Host 人工命令 `/dsh-csrw` 调用现有工具定义，使用 DSH 现有远程授权，不绕开权限策略；命令不记录原始输入。它不是模型工具，也不增加 `dsh_csrw_` 工具数量。
+
+命令接受两种写法，边界完全相同（同样 13 个操作白名单、同样要 `--confirm`、同样不暴露恢复）：
+
+```text
+/dsh-csrw help
+/dsh-csrw config show --workspace C:\repo
+/dsh-csrw nutstore list --workspace C:\repo --remote-path notes
+/dsh-csrw config set --workspace C:\repo --key obsidian.vaultPath --value vault --confirm
+/dsh-csrw backup obsidian --workspace C:\repo --confirm
+```
+
+界面走整行 JSON（`{"operation":"…","args":{…},"confirmed":true}`），手敲可用上面的 `<模块> <操作> --参数` 形式；两种输入落到同一个执行函数。GUI 入口不隐式执行同步、备份、初始化或推送。工作台数据是本地状态，与 29 个无状态工具互不影响；需要同步到 Git 或坚果云时，仍显式调用 `dsh_csrw_git_*` / `dsh_csrw_nutstore_*`。
 
 开发期 `client.js` 保存后由 DSH 客户端 HMR 自动重载；改 `lib/` 宿主代码需要重载插件或重启 DSH。三份设计文档在 `docs/`：`dsh-research-desk-design.md`（总体）、`dsh-research-desk-pages.md`（五页）、`dsh-research-desk-home.md`（首页）。
 
@@ -185,7 +197,7 @@ Zotero 本机 API 不需要 API Key。WebDAV 强制 HTTPS（本机测试允许 H
 2. 凭据：`dsh-csrw/nutstore` 读不到记录时回退旧键 `csrw/nutstore`。
 3. 远端目录：默认 `remoteRoot` 已从 `csrw` 改为 `dsh-csrw`，旧远端内容不会自动搬迁；需要保留历史同步时，请自行在 WebDAV 端重命名目录，或用 `dsh_csrw_nutstore_pull` 先拉到本地再推送。
 
-CLI 可执行文件名从 `csrw` 改为 `dsh-csrw`，模型工具名从 `csrw_*` 改为 `dsh_csrw_*`，命令从 `/csrw-ui` 改为 `/dsh-csrw-ui`。这些都是 0.1.0 内的破坏性更名：旧的调用脚本、快捷指令和提示词需要同步更新。
+CLI 可执行文件名从 `csrw` 改为 `dsh-csrw`，模型工具名从 `csrw_*` 改为 `dsh_csrw_*`，命令从 `/csrw-ui` 改为 `/dsh-csrw`，并同时接受 JSON 与 `dsh-csrw <模块> <操作>` 两种写法。这些都是 0.1.0 内的破坏性更名：旧的调用脚本、快捷指令和提示词需要同步更新。
 
 ## 验证与范围
 
