@@ -8,7 +8,7 @@
 
 > An end-to-end research workbench for Computer Science: todos, papers, projects, ideas, knowledge base, sync and backup.
 
-v0.1 分两层交付：**工作台界面**（本地状态、快速记录、助手、撤销）与其下的**执行层**（Obsidian 文件操作、Git、Zotero 本机只读 API、坚果云 WebDAV、可校验备份）。插件 ID 与 CLI 为 `csrw`，工具统一使用 `csrw_` 前缀（29 个），工作区配置目录为 `.csrw`，工作台状态存在 `$DSH_HOME/dsh-csrw/state.json`。
+v0.1 分两层交付：**工作台界面**（本地状态、快速记录、助手、撤销）与其下的**执行层**（Obsidian 文件操作、Git、Zotero 本机只读 API、坚果云 WebDAV、可校验备份）。插件 ID 与 CLI 为 `dsh-csrw`，工具统一使用 `dsh_csrw_` 前缀（29 个），工作区配置目录为 `.dsh-csrw`，工作台状态存在 `$DSH_HOME/dsh-csrw/state.json`。
 
 ## 六个入口
 
@@ -19,7 +19,7 @@ v0.1 分两层交付：**工作台界面**（本地状态、快速记录、助�
 | 文献 `paper` | 题录、DOI/arXiv、阅读状态 | 页面占位，只显示记录条数 |
 | 想法 `idea` | 想法、假设、问题、方法 | 页面占位，只显示记录条数 |
 | 知识库 `kb` | 概念、坑、公式、工具、片段、模板 | 页面占位，只显示记录条数 |
-| 同步与备份 | 快照、远端副本 | 无页面，在设置页与 `csrw_nutstore_*` / `csrw_backup_*` 中 |
+| 同步与备份 | 快照、远端副本 | 无页面，在设置页与 `dsh_csrw_nutstore_*` / `dsh_csrw_backup_*` 中 |
 
 占位页不是空壳数据：快速记录和助手对话都能写进这五类条目，只是这四个页面目前只统计条数，还没有列表与编辑界面。增加或修改条目走快速记录，查条目走助手。
 
@@ -27,11 +27,11 @@ v0.1 分两层交付：**工作台界面**（本地状态、快速记录、助�
 
 | 想要的结果 | 用哪个 |
 | --- | --- |
-| 文献题录与引用 | `csrw_zotero_search` / `item` / `cite` |
-| 笔记与知识库落到 vault | `csrw_obsidian_write` / `append` |
-| 代码与实验版本 | `csrw_git_status` / `commit` / `push` / `pull` |
-| 目录同步到坚果云 | `csrw_nutstore_push` / `pull` |
-| 可校验的本地快照 | `csrw_snapshot_create` / `verify` / `restore` |
+| 文献题录与引用 | `dsh_csrw_zotero_search` / `item` / `cite` |
+| 笔记与知识库落到 vault | `dsh_csrw_obsidian_write` / `append` |
+| 代码与实验版本 | `dsh_csrw_git_status` / `commit` / `push` / `pull` |
+| 目录同步到坚果云 | `dsh_csrw_nutstore_push` / `pull` |
+| 可校验的本地快照 | `dsh_csrw_snapshot_create` / `verify` / `restore` |
 
 ## 环境与安装
 
@@ -47,29 +47,29 @@ npm install --ignore-scripts
 npm run check
 npm run check:ui
 npm test
-node bin/csrw.js health
+node bin/dsh-csrw.js health
 ```
 
 `devDependencies` 中的 `@deepseek-ai/*` 包只是本地跑测试所需的 peer 依赖；插件运行在 DSH 中时由 DSH 提供这些包，安装插件本身不会安装它们。没有 npm 时可用 DSH 内置的 pnpm：`node <dsh-runtime>/pnpm/bin/pnpm.mjs install --ignore-scripts`。
 
-在 DSH 中通过插件管理安装本目录或发布包。让代理调用 `plugin_manager` 的 `install_bundle`，`target` 为包目录的绝对路径；不要手工改写 profile。包的 `patches/bundle.yaml` 仅插入自己的插件行。安装结果中的 `application` 与 `warnings` 决定是否已生效；若版本替换需要重启，重启后用 `csrw_health` 验证。插件的中文/英文显示资源和原始 SVG 图标包含在包中。
+在 DSH 中通过插件管理安装本目录或发布包。让代理调用 `plugin_manager` 的 `install_bundle`，`target` 为包目录的绝对路径；不要手工改写 profile。包的 `patches/bundle.yaml` 仅插入自己的插件行。安装结果中的 `application` 与 `warnings` 决定是否已生效；若版本替换需要重启，重启后用 `dsh_csrw_health` 验证。插件的中文/英文显示资源和原始 SVG 图标包含在包中。
 
-本地直接运行 `node bin/csrw.js`。安装为命令行包后也可运行 `csrw`。命令与工具一一对应，如 `csrw obsidian read` 对应 `csrw_obsidian_read`；`--help` 列出完整命令。
+本地直接运行 `node bin/dsh-csrw.js`。安装为命令行包后也可运行 `dsh-csrw`。命令与工具一一对应，如 `dsh-csrw obsidian read` 对应 `dsh_csrw_obsidian_read`；`--help` 列出完整命令。
 
 ## 命名规范
 
 | 标识 | 取值 | 作用域 | 说明 |
 | --- | --- | --- | --- |
 | npm 包名 | `dsh-cs-research-workbench` | npm / DSH 模块 | 改名必须重新安装 |
-| 插件短名 | `csrw` | Host 插件 `name`、Locale 命名空间、CLI | 稳定，工具前缀与之对齐 |
+| 插件名 | `dsh-csrw` | Host 插件 `name`、Locale 命名空间、CLI | 稳定，工具前缀与之对齐 |
 | UI 面板 ID | `dsh-csrw-ui` | 主面板、侧栏入口、设置分区、设置图标 | 四处必须同值 |
 | HTTP 路由 | `/dsh-csrw/api` | Host Web 服务 | 前端用相对基址 `dsh-csrw/api/` |
 | 工作台状态目录 | `$DSH_HOME/dsh-csrw/` | 本机持久化 | 自动从 `csrw-desk/` 复制，旧目录保留 |
-| 工作区配置 | `<workspace>/.csrw/` | 项目内配置、同步状态、备份 | 刻意保留短名 |
-| 工具前缀 | `csrw_`（29 个） | 模型工具 | 刻意保留短名 |
-| 人工命令 | `/csrw-ui` | DSH 命令面板 | 不是模型工具 |
+| 工作区配置 | `<workspace>/.dsh-csrw/` | 项目内配置、同步状态、备份 | 首次读取旧 `.csrw/` 配置时自动复制 |
+| 工具前缀 | `dsh_csrw_`（29 个） | 模型工具 | 工具名不允许连字符，用下划线分隔 |
+| 人工命令 | `/dsh-csrw-ui` | DSH 命令面板 | 不是模型工具 |
 
-全局资源统一挂在 `dsh-csrw` 命名空间下；项目内配置目录与工具前缀保留短名 `csrw`，避免改动用户已有仓库和模型调用习惯。两处全局标识由 `scripts/check-identifiers.mjs` 校验一致性，`npm run check` 会执行它。
+所有对外标识统一使用 `dsh-csrw`：插件名、CLI、命令、配置目录、远端根目录、凭据键与工具前缀都是同一根命名，工具前缀因命名规则限制把 `-` 写成 `_`。这样做是为了明确"这是一个 DSH 插件"，而不是独立于 DSH 的 `csrw` 软件。全局标识由 `scripts/check-identifiers.mjs` 校验一致性，`npm run check` 会执行它。
 
 ## 图形界面
 
@@ -95,17 +95,17 @@ node bin/csrw.js health
 3. 工作台可检查 Git、Zotero 与 WebDAV，列远端目录、手动上传/下载、创建三类备份并校验快照。同步和备份先展示工作区与参数，确认后才执行。恢复保留在显式确认的工具中，不提供一键恢复。
 4. 切换工作区会清除旧配置和结果；运行时支持取消，成功与失败独立展示。
 
-界面通过 Host 人工命令 `/csrw-ui` 调用现有工具定义，使用 DSH 现有远程授权，不绕开权限策略；命令不记录原始输入。它不是模型工具，也不增加 `csrw_` 工具数量。GUI 入口不隐式执行同步、备份、初始化或推送。工作台数据是本地状态，与 29 个无状态工具互不影响；需要同步到 Git 或坚果云时，仍显式调用 `csrw_git_*` / `csrw_nutstore_*`。
+界面通过 Host 人工命令 `/dsh-csrw-ui` 调用现有工具定义，使用 DSH 现有远程授权，不绕开权限策略；命令不记录原始输入。它不是模型工具，也不增加 `dsh_csrw_` 工具数量。GUI 入口不隐式执行同步、备份、初始化或推送。工作台数据是本地状态，与 29 个无状态工具互不影响；需要同步到 Git 或坚果云时，仍显式调用 `dsh_csrw_git_*` / `dsh_csrw_nutstore_*`。
 
 开发期 `client.js` 保存后由 DSH 客户端 HMR 自动重载；改 `lib/` 宿主代码需要重载插件或重启 DSH。三份设计文档在 `docs/`：`dsh-research-desk-design.md`（总体）、`dsh-research-desk-pages.md`（五页）、`dsh-research-desk-home.md`（首页）。
 
 ## 配置
 
-首次读取返回默认值，不自动写配置。配置位于工作区 `.csrw/config.json`；`.csrw.example.json` 是可复制的完整示例。`csrw_config_set` 每次设置一个白名单字段，拒绝未知字段、类型不匹配和密码/令牌字段；`csrw_config_show` 返回脱敏结果。
+首次读取返回默认值，不自动写配置。配置位于工作区 `.dsh-csrw/config.json`；`.dsh-csrw.example.json` 是可复制的完整示例。`dsh_csrw_config_set` 每次设置一个白名单字段，拒绝未知字段、类型不匹配和密码/令牌字段；`dsh_csrw_config_show` 返回脱敏结果。
 
 ```powershell
-node bin/csrw.js config set --args '{"key":"obsidian.vaultPath","value":"vault"}'
-node bin/csrw.js config show
+node bin/dsh-csrw.js config set --args '{"key":"obsidian.vaultPath","value":"vault"}'
+node bin/dsh-csrw.js config show
 ```
 
 Windows PowerShell 对内联 JSON 的引号处理因版本而异。也可把参数保存为 JSON 文件并使用 `--args-file params.json`。`--workspace` 指定工作区，省略时使用当前会话目录；CLI 则使用当前工作目录。
@@ -117,9 +117,9 @@ Windows PowerShell 对内联 JSON 的引号处理因版本而异。也可把参�
 | `obsidian.vaultPath`, `obsidian.autoDetect` | 空路径、`true`；自动查找工作区及直接子目录的 `.obsidian`，多个候选时报错 |
 | `obsidian.trashDir` | `.trash`，相对 vault 的回收目录 |
 | `zotero.localApi`, `zotero.dataDir` | 本机 API 默认地址、空路径；数据库备份需明确定位数据目录 |
-| `nutstore.baseUrl`, `nutstore.remoteRoot` | `https://dav.jianguoyun.com/dav/`, `csrw` |
-| `nutstore.username`, `nutstore.credentialKey` | 空用户名、`csrw/nutstore`；此 key 是引用名，不是密码 |
-| `backup.target`, `backup.localDir` | `local`, `.csrw/backups`；远端归档请显式上传快照目录 |
+| `nutstore.baseUrl`, `nutstore.remoteRoot` | `https://dav.jianguoyun.com/dav/`, `dsh-csrw` |
+| `nutstore.username`, `nutstore.credentialKey` | 空用户名、`dsh-csrw/nutstore`；此 key 是引用名，不是密码 |
+| `backup.target`, `backup.localDir` | `local`, `.dsh-csrw/backups`；远端归档请显式上传快照目录 |
 | `backup.includeDshSessions` | `false`；默认排除 sessions/storages |
 | `backup.dshHome`, `backup.dshProfile` | 空路径，自动发现无法唯一确定时要求显式配置 |
 
@@ -136,12 +136,12 @@ Zotero 本机 API 不需要 API Key。WebDAV 强制 HTTPS（本机测试允许 H
 
 | 组 | 工具 |
 | --- | --- |
-| 检查与配置 | `csrw_health`, `csrw_config_show`, `csrw_config_set` |
-| Obsidian | `csrw_obsidian_search`, `read`, `write`, `append`, `move`, `trash`（每个短名均使用 `csrw_obsidian_` 前缀） |
-| Git | `csrw_git_status`, `init`, `commit`, `push`, `pull`（每个短名均使用 `csrw_git_` 前缀） |
-| Zotero | `csrw_zotero_search`, `item`, `notes`, `attachments`, `cite`（每个短名均使用 `csrw_zotero_` 前缀） |
-| 坚果云 | `csrw_nutstore_test`, `list`, `push`, `pull`（每个短名均使用 `csrw_nutstore_` 前缀） |
-| 备份与快照 | `csrw_backup_obsidian`, `csrw_backup_zotero`, `csrw_backup_dsh`, `csrw_snapshot_create`, `csrw_snapshot_verify`, `csrw_snapshot_restore` |
+| 检查与配置 | `dsh_csrw_health`, `dsh_csrw_config_show`, `dsh_csrw_config_set` |
+| Obsidian | `dsh_csrw_obsidian_search`, `read`, `write`, `append`, `move`, `trash`（每个短名均使用 `dsh_csrw_obsidian_` 前缀） |
+| Git | `dsh_csrw_git_status`, `init`, `commit`, `push`, `pull`（每个短名均使用 `dsh_csrw_git_` 前缀） |
+| Zotero | `dsh_csrw_zotero_search`, `item`, `notes`, `attachments`, `cite`（每个短名均使用 `dsh_csrw_zotero_` 前缀） |
+| 坚果云 | `dsh_csrw_nutstore_test`, `list`, `push`, `pull`（每个短名均使用 `dsh_csrw_nutstore_` 前缀） |
+| 备份与快照 | `dsh_csrw_backup_obsidian`, `dsh_csrw_backup_zotero`, `dsh_csrw_backup_dsh`, `dsh_csrw_snapshot_create`, `dsh_csrw_snapshot_verify`, `dsh_csrw_snapshot_restore` |
 
 工具的模型可见参数说明和 CLI `--help` 是具体调用接口。所有操作返回单一 JSON；基础设施错误抛出，不把失败包装为成功。工具尊重取消信号。
 
@@ -153,7 +153,7 @@ Zotero 本机 API 不需要 API Key。WebDAV 强制 HTTPS（本机测试允许 H
 {"path":"notes/example.md","text":"# Example\nResearch notes\n"}
 ```
 
-将上述内容保存为参数文件后运行 `csrw obsidian write --args-file params.json`。读取使用 `{"path":"notes/example.md"}`。
+将上述内容保存为参数文件后运行 `dsh-csrw obsidian write --args-file params.json`。读取使用 `{"path":"notes/example.md"}`。
 
 ### Git
 
@@ -167,7 +167,7 @@ Zotero 本机 API 不需要 API Key。WebDAV 强制 HTTPS（本机测试允许 H
 
 `push` / `pull` 采用 `localPath`（本地目录）和可选 `remotePath`（相对配置 `remoteRoot` 的目录）。按 SHA-256 记录基线；相同文件跳过。覆盖远端需要 ETag 条件请求，首次写入使用 `If-None-Match: *`，上传后读取校验。
 
-发现不一致且无法安全判断时，保留本地 `.local` 与远端 `.remote` 副本，并在 JSON 的 `conflicts` 中报告，不静默替换原文件。已有冲突副本会加唯一后缀。**不传播删除，不做后台或定时同步。** 本地状态保存在 `.csrw/sync/`。单文件/响应上限 32 MiB，目录列表上限 10000 项；大附件不适用此版本。目录同步忽略 `.git`、`.csrw`、`node_modules` 和常见凭据文件。
+发现不一致且无法安全判断时，保留本地 `.local` 与远端 `.remote` 副本，并在 JSON 的 `conflicts` 中报告，不静默替换原文件。已有冲突副本会加唯一后缀。**不传播删除，不做后台或定时同步。** 本地状态保存在 `.dsh-csrw/sync/`。单文件/响应上限 32 MiB，目录列表上限 10000 项；大附件不适用此版本。目录同步忽略 `.git`、`.dsh-csrw`、`node_modules` 和常见凭据文件。
 
 ### 备份、校验与恢复
 
@@ -175,9 +175,17 @@ Zotero 本机 API 不需要 API Key。WebDAV 强制 HTTPS（本机测试允许 H
 
 恢复必须显式 `confirm:true`，先完成 manifest 与全部文件校验，再自动生成恢复前快照。只恢复清单内的文件，不删除目标中额外内容；不会对用户资料执行未获授权的真实恢复。多文件恢复不是文件系统事务，运行期 I/O、取消或并发变更可能造成部分完成，恢复前快照是回滚依据。SHA-256 用于完整性而非来源认证；不提供敌对并发下的完全 TOCTOU 防护。恢复 SQLite 前关闭 Zotero；活动 WAL/SHM 存在时拒绝恢复。大文件会读入内存。请先在独立目录验证备份内容和凭据排除报告。
 
-### 工作台状态迁移
+### 旧版本迁移
 
 工作台状态从旧目录 `$DSH_HOME/csrw-desk/state.json` 迁到 `$DSH_HOME/dsh-csrw/state.json`。迁移在首次读取时自动发生：目标已存在则跳过；旧文件解析失败会明确报错并保留原文件；写入用独占方式，成功后留下 `.migrated-from-csrw-desk` 标记。**旧目录不会被删除**，确认新目录工作正常后可由用户自行清理。
+
+同时兼容三处旧命名，均为只读回退、不删除旧数据：
+
+1. 工作区配置：新路径 `.dsh-csrw/config.json` 不存在时读取旧 `.csrw/config.json`，并尽力复制到新路径。
+2. 凭据：`dsh-csrw/nutstore` 读不到记录时回退旧键 `csrw/nutstore`。
+3. 远端目录：默认 `remoteRoot` 已从 `csrw` 改为 `dsh-csrw`，旧远端内容不会自动搬迁；需要保留历史同步时，请自行在 WebDAV 端重命名目录，或用 `dsh_csrw_nutstore_pull` 先拉到本地再推送。
+
+CLI 可执行文件名从 `csrw` 改为 `dsh-csrw`，模型工具名从 `csrw_*` 改为 `dsh_csrw_*`，命令从 `/csrw-ui` 改为 `/dsh-csrw-ui`。这些都是 0.1.0 内的破坏性更名：旧的调用脚本、快捷指令和提示词需要同步更新。
 
 ## 验证与范围
 
@@ -187,14 +195,14 @@ Zotero 本机 API 不需要 API Key。WebDAV 强制 HTTPS（本机测试允许 H
 
 ## 源码
 
-`lib/index.js` 注册工具和工作台路由；`lib/tools/` 实现各模块；`lib/desk/` 是工作台宿主半片（`host.js` 路由、`store.js` 持久化/撤销/迁移、`ops.js` 操作白名单、`seed.js` 示例数据、`ids.js` 全局标识）；`lib/services/config.js` 管理配置，`lib/services/snapshot.js` 管理备份；`lib/utils/` 提供路径边界及哈希工具。`bin/csrw.js` 是 CLI；`client.js` 是浏览器半片；`patches/bundle.yaml` 是 DSH bundle 补丁；`docs/` 是工作台设计文档；`scripts/check.mjs` 与 `scripts/check-identifiers.mjs` 做结构与标识一致性检查，`scripts/verify-ui*.mjs` 校验界面注册与交互。GPL-3.0-only License（保留远端 GNU GPL v3 授权）。
+`lib/index.js` 注册工具和工作台路由；`lib/tools/` 实现各模块；`lib/desk/` 是工作台宿主半片（`host.js` 路由、`store.js` 持久化/撤销/迁移、`ops.js` 操作白名单、`seed.js` 示例数据、`ids.js` 全局标识）；`lib/services/config.js` 管理配置，`lib/services/snapshot.js` 管理备份；`lib/utils/` 提供路径边界及哈希工具。`bin/dsh-csrw.js` 是 CLI；`client.js` 是浏览器半片；`patches/bundle.yaml` 是 DSH bundle 补丁；`docs/` 是工作台设计文档；`scripts/check.mjs` 与 `scripts/check-identifiers.mjs` 做结构与标识一致性检查，`scripts/verify-ui*.mjs` 校验界面注册与交互。GPL-3.0-only License（保留远端 GNU GPL v3 授权）。
 
 ### 本次验收记录（2026-11-12）
 
-- `npm run check` 通过：语法、包元数据、29 个 `csrw_` 工具、六个模块全部 `ready`；`identifiers` 通过（`dsh-csrw-ui`、`/dsh-csrw/api`、`dsh-csrw`）。
+- `npm run check` 通过：语法、包元数据、29 个 `dsh_csrw_` 工具、六个模块全部 `ready`；`identifiers` 通过（`dsh-csrw-ui`、`/dsh-csrw/api`、`dsh-csrw`）。
 - `npm run check:ui` 通过：五处界面注册、图标几何、标题、设置分区 id 与中英文案全部匹配。
-- `npm test`：39 个用例全部通过（0 skip、0 fail）。其中 5 个是 `lib/desk/` 用例（示例数据、操作白名单、状态/位置更新、持久化与三方撤销、无 Web 服务时 `registerDesk` 不生效），2 个是迁移用例（旧状态复制且不删旧文件、旧文件损坏时报错且不写新文件）。"真实 Git 临时仓库集成"用例需要进程能用管道捕获子进程输出，在限制该能力的沙箱中按设计跳过，在普通终端通过。
-- 运行期实测：`GET /dsh-csrw/api/state` 返回 401（路由已注册，需鉴权），旧路由 `GET /csrw-desk/state` 返回 404；客户端插槽列表里 `sidebar.panellist`（order 45）、`settings.section`（order 17）、`settings.section.icon` 均为 `dsh-csrw-ui`；`csrw_health` 返回 29 工具、六模块 `ready`。
+- `npm test`：41 个用例全部通过（0 skip、0 fail）。其中 5 个是 `lib/desk/` 用例（示例数据、操作白名单、状态/位置更新、持久化与三方撤销、无 Web 服务时 `registerDesk` 不生效），2 个是工作台状态迁移用例（旧状态复制且不删旧文件、旧文件损坏时报错且不写新文件），2 个是配置兼容用例（旧 `.csrw/` 配置读取并复制到新路径且不改写旧文件、两处都没有配置时回落到默认值）。"真实 Git 临时仓库集成"用例需要进程能用管道捕获子进程输出，在限制该能力的沙箱中按设计跳过，在普通终端通过。
+- 运行期实测：`GET /dsh-csrw/api/state` 返回 401（路由已注册，需鉴权），旧路由 `GET /csrw-desk/state` 返回 404；客户端插槽列表里 `sidebar.panellist`（order 45）、`settings.section`（order 17）、`settings.section.icon` 均为 `dsh-csrw-ui`；`dsh_csrw_health` 返回 29 工具、六模块 `ready`。
 - 状态迁移实机验证：从 `~/.dsh/csrw-desk/` 复制到 `~/.dsh/dsh-csrw/`，读到 6 个待办、3 篇文献、3 个想法；旧文件 SHA-256 前后一致（未被改写），新目录含 `state.json` 与 `.migrated-from-csrw-desk` 标记。
 - 界面人工验收：设置分区、侧栏入口、标题与图标名称、工作台加载配置均按预期显示；插件卡片描述 41 字未截断。
 - 外部服务边界：本机未运行 Zotero，真实 API 搜索/条目读取未验收；未提供坚果云应用密码，真实远端往返未验收；两者在不可用时都返回明确错误而不是假成功。Obsidian 端子验收使用临时 vault（非用户真实数据）：write/append/move/trash 正常，`../` 越界与默认覆盖被拒绝，`snapshot_verify` 能检出被篡改文件，`snapshot_restore` 未传 `confirm: true` 时拒绝。

@@ -81,7 +81,7 @@
 - 笔记树 + Markdown 编辑器；双向链接 `[[笔记名]]`；全文搜索。
 - 分类（用 tag 表达）：`方法论 / 术语 / 领域知识 / 会议期刊 / 写作风格 / 审稿意见`。
 - 概念卡：`概念 + 定义 + 来源 + 关联文献/笔记`，用于术语表与综述素材。
-- 与 Obsidian：可选绑定 vault 的一个子目录（如 `<vault>/Research/Knowledge/`）做双向同步；冲突以 `.local/.remote` 双份保留，不静默覆盖（沿用 csrw 的冲突策略）。
+- 与 Obsidian：可选绑定 vault 的一个子目录（如 `<vault>/Research/Knowledge/`）做双向同步；冲突以 `.local/.remote` 双份保留，不静默覆盖（沿用 dsh-csrw 的冲突策略）。
 - 一键动作：从一组笔记**提炼写作/研究规则** → 生成 Skill（`<DSH_HOME>/skills/research-writing/SKILL.md`）；生成**术语表**；把笔记整理成综述素材。
 - 规则页：`proposed → active → exported`，带证据与置信度，示例规则永不导出。
 
@@ -106,7 +106,7 @@
 │  Producer（后台生成流水线）                 五页 UI + 右侧助手 + 设置          │
 │  bridge: zotero.js / vault.js / bibtex.js                                     │
 └──────────┬───────────────────────────────────────────────┬────────────────────┘
-           │ 读写 vault 约定目录                            │ 调用 csrw 做同步/备份
+           │ 读写 vault 约定目录                            │ 调用 dsh-csrw 做同步/备份
 ┌──────────▼──────────────────────┐          ┌──────────────▼───────────────────┐
 │ Obsidian vault                  │          │ dsh-cs-research-workbench（已装） │
 │  Research/{Papers,Ideas,        │          │  git / nutstore / snapshot /     │
@@ -114,9 +114,9 @@
 └─────────────────────────────────┘          └──────────────────────────────────┘
 ```
 
-**决策：独立新包，不塞进 csrw。** csrw 是已验收的无状态工具层（`scripts/check.mjs` 硬断言 29 个工具与 catalog 一致），desk 是有状态创作空间；两者通过 vault 文件协作，desk 页面上的「提交/同步」按钮调用 `csrw` CLI（`node bin/csrw.js`），不引入跨插件服务依赖。
+**决策：独立新包，不塞进 dsh-csrw。** dsh-csrw 是已验收的无状态工具层（`scripts/check.mjs` 硬断言 29 个工具与 catalog 一致），desk 是有状态创作空间；两者通过 vault 文件协作，desk 页面上的「提交/同步」按钮调用 `dsh-csrw` CLI（`node bin/dsh-csrw.js`），不引入跨插件服务依赖。
 
-**客户端不用 esbuild。** csrw 的 `client.js` 是手写 IIFE（`window.__ModuleLoader__.load({id, factory(require)})` + `React.createElement`），已在当前 DSH 0.2.2-rc.1 验证可注册 `main / sidebar.panellist / settings.section / settings.section.icon / plugins.bundle.config`。desk 沿用，v0.1 单文件；页面变多后加 `scripts/build-client.mjs`（零依赖拼接 + 语法检查）。
+**客户端不用 esbuild。** dsh-csrw 的 `client.js` 是手写 IIFE（`window.__ModuleLoader__.load({id, factory(require)})` + `React.createElement`），已在当前 DSH 0.2.2-rc.1 验证可注册 `main / sidebar.panellist / settings.section / settings.section.icon / plugins.bundle.config`。desk 沿用，v0.1 单文件；页面变多后加 `scripts/build-client.mjs`（零依赖拼接 + 语法检查）。
 
 ### 3.2 目录结构
 
@@ -268,7 +268,7 @@ Metric  { id, date, todosDone, papersRead, wordsWritten, focusMinutes, sample? }
 
 ---
 
-## 7. 安全与合规（沿用 csrw 红线）
+## 7. 安全与合规（沿用 dsh-csrw 红线）
 
 - 凭据：desk 不存任何密钥；Zotero 本机 API 无凭据；坚果云等外部凭据仍由 DSH credential store / 环境变量提供。
 - 路径：vault 内写入一律 `safePath`（拒 `..`、盘符、绝对路径、符号链接/目录联接），原子写，覆盖需显式 `overwrite`，删除只进 `.trash`。
