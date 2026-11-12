@@ -11,12 +11,14 @@ window.__ModuleLoader__.load({
     const UI_ID = 'dsh-csrw-ui'
     // 相对路径：沿用改造前的解析方式，避免子路径部署时变成绝对地址。
     const API_BASE = 'dsh-csrw/api/'
+    // 双半片 API 契约：路由 path 与 lib/desk/ids.js 的 ROUTES 保持一致（check-identifiers 校验）。
+    const ROUTES = { state: 'state', ops: 'ops', undo: 'undo', settings: 'settings', models: 'models', chat: 'chat', backups: 'backups', vaultSync: 'vault-sync' }
     const HERO = { w: 540, h: 372 }
 
     // ---------- 原有工具面板：配置、连接检测、备份（并入设置页，不再单独占一个侧栏入口） ----------
     const TOOLS_EN = {title:'CS research workbench',intro:'Workspace configuration, connection checks, sync and versioned backups.',workspace:'Workspace directory',session:'Session ID',load:'Load configuration',save:'Save field',open:'Open workbench',config:'Configuration',actions:'Operations',result:'Last result',pending:'Running…',cancel:'Cancel',confirm:'Confirm this write operation',approval:'Review the target workspace and arguments before confirming. This operation may change local or remote files.',secret:'Passwords are not stored here. Configure credentials in the DSH credential store or NUTSTORE_USERNAME / NUTSTORE_PASSWORD environment variables.',context:'Select an existing session to provide a permission and audit context. No model turn is started.',error:'Request failed',health:'Check plugin',git:'Git status',zotero:'Check Zotero',dav:'Check WebDAV',list:'List remote directory',push:'Upload directory',pull:'Download directory',obsidian:'Back up Obsidian',backupZotero:'Back up Zotero',dsh:'Back up DSH',verify:'Verify snapshot',local:'Local sync directory',remote:'Remote subdirectory',snapshot:'Snapshot directory',sources:'Backup paths come from the current workspace configuration. Restore remains available through the explicit-confirmation tool.',choose:'Choose directory',noSession:'Choose a session first',notLoaded:'Load the workspace configuration first',boolean:'Boolean',field:'Configuration field',value:'Value',operationsHint:'Network checks contact only the configured endpoints; backups create local files.',empty:'No result yet',yes:'Enabled',no:'Disabled',cloudBackup:'Cloud backup',backupWorkspace:'Backup config',backupUpload:'Upload Nutstore',backupGithub:'Backup GitHub',backupAll:'Backup all',obsidianTools:'Obsidian tools',links:'Links',backlinks:'Backlinks',brokenLinks:'Broken links',listDir:'List',template:'Template',daily:'Daily',attach:'Attach',rename:'Rename',graph:'Graph',canvas:'Canvas',bookmarks:'Bookmarks',paperNote:'Paper note',path:'Path',destination:'Destination',source:'Source',date:'Date',scope:'Scope',templatePath:'Template',zkey:'Zotero key'};
     const TOOLS_ZH = {title:'CS科研工作台',intro:'工作区配置、连接检测、增量同步与版本化备份。',workspace:'工作区目录',session:'会话 ID',load:'加载配置',save:'保存此项',open:'打开工作台',config:'配置',actions:'操作',result:'最近结果',pending:'执行中…',cancel:'取消',confirm:'确认执行此写入操作',approval:'请核对目标工作区和参数后确认；此操作可能修改本地或远端文件。',secret:'这里不保存密码。请使用 DSH 凭据存储，或 NUTSTORE_USERNAME / NUTSTORE_PASSWORD 环境变量。',context:'选择已有会话作为权限与审计上下文，不会启动模型对话。',error:'请求失败',health:'检查插件',git:'Git 状态',zotero:'检测 Zotero',dav:'检测 WebDAV',list:'列出远端目录',push:'上传目录',pull:'下载目录',obsidian:'备份 Obsidian',backupZotero:'备份 Zotero',dsh:'备份 DSH',verify:'校验快照',local:'本地同步目录',remote:'远端子目录',snapshot:'快照目录',sources:'备份路径读取当前工作区配置。恢复仍通过带显式确认的工具执行。',choose:'选择目录',noSession:'请先选择会话',notLoaded:'请先加载工作区配置',boolean:'布尔值',field:'配置字段',value:'值',operationsHint:'连接检测只访问配置中的端点；备份会创建本地文件。',empty:'暂无结果',yes:'启用',no:'停用',cloudBackup:'云端备份',backupWorkspace:'备份参数',backupUpload:'上传坚果云',backupGithub:'备份 GitHub',backupAll:'一键备份',obsidianTools:'Obsidian 工具',links:'双链',backlinks:'反链',brokenLinks:'死链',listDir:'列目录',template:'模板生成',daily:'日记',attach:'附件',rename:'重命名',graph:'图谱',canvas:'Canvas',bookmarks:'书签',paperNote:'文献笔记',path:'路径',destination:'目标',source:'源文件',date:'日期',scope:'目录',templatePath:'模板',zkey:'Zotero key'};
-    const TOOLS_FIELDS = ['obsidian.vaultPath','obsidian.autoDetect','obsidian.trashDir','git.remote','git.branch','git.autoInit','git.pullRebase','zotero.localApi','zotero.dataDir','nutstore.baseUrl','nutstore.remoteRoot','nutstore.username','nutstore.credentialKey','backup.localDir','backup.dshHome','backup.dshProfile','backup.includeDshSessions'];
+    const TOOLS_FIELDS = ['obsidian.vaultPath','obsidian.autoDetect','obsidian.trashDir','obsidian.ideasDir','obsidian.notesDir','git.remote','git.branch','git.autoInit','git.pullRebase','git.backupRemote','git.backupBranch','git.backupRepoDir','zotero.localApi','zotero.dataDir','nutstore.baseUrl','nutstore.remoteRoot','nutstore.username','nutstore.credentialKey','backup.target','backup.localDir','backup.dshHome','backup.dshProfile','backup.includeDshSessions'];
     const TOOLS_CSS = '.dsh-csrw-panel{box-sizing:border-box;max-width:1040px;width:100%;margin:0 auto;padding:28px;color:var(--dsw-alias-label-primary);font-size:14px;overflow:auto;height:100%}.dsh-csrw-panel *{box-sizing:border-box}.dsh-csrw-panel h1{font-size:24px;margin:0}.dsh-csrw-head{margin:0 0 10px}.dsh-csrw-panel h2{font-size:17px;margin:0 0 16px}.dsh-csrw-panel p{color:var(--dsw-alias-label-secondary);line-height:1.6}.dsh-csrw-card{background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l1);border-radius:12px;padding:20px;margin:18px 0}.dsh-csrw-row{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin:12px 0}.dsh-csrw-panel label{display:flex;flex-direction:column;gap:7px;flex:1 1 240px}.dsh-csrw-panel input,.dsh-csrw-panel select{width:100%;min-height:36px;border:1px solid var(--dsw-alias-border-l2);border-radius:7px;padding:7px 10px;background:var(--dsw-alias-bg-base);color:inherit;font:inherit}.dsh-csrw-panel button{min-height:36px;border:1px solid var(--dsw-alias-border-l2);border-radius:7px;padding:7px 14px;background:var(--dsw-alias-bg-layer-2);color:inherit;font:inherit;cursor:pointer}.dsh-csrw-panel button:disabled{opacity:.5;cursor:not-allowed}.dsh-csrw-panel button:focus-visible,.dsh-csrw-panel input:focus-visible,.dsh-csrw-panel select:focus-visible{outline:2px solid var(--dsw-alias-brand-primary);outline-offset:2px}.dsh-csrw-panel pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:420px;overflow:auto;background:var(--dsw-alias-bg-base);padding:14px;border-radius:8px;font-size:12px}.dsh-csrw-alert{border-left:3px solid var(--dsw-alias-state-warn-primary);padding:12px}.dsh-csrw-error{color:var(--dsw-alias-state-error-primary)}.dsh-csrw-icon-slot{display:inline-flex;align-items:center;justify-content:center;line-height:1;vertical-align:middle;align-self:center;flex:none}.dsh-csrw-icon-slot svg{display:block}';
     const toolsGlyph = { fill: 'none', stroke: '#000', strokeWidth: 0.5333333333333333, strokeLinecap: 'round', strokeLinejoin: 'round' };
     function ToolsIcon({ size = 20 }) {
@@ -63,7 +65,7 @@ window.__ModuleLoader__.load({
     // ---------- 文案 ----------
     const zh = {
       workbench: '科研工作台',
-      navTodo: '待办', navProject: '项目', navPaper: '文献库', navIdea: '想法', navKb: '知识库',
+      navTodo: '待办', navProject: '项目', navPaper: '文献库', navIdea: '想法', navKb: '知识库', navBrain: '想法 · 知识库', backupSync: '备份 / 同步', backupSyncHint: '选择会话作为权限上下文；一键备份先建本地快照，再按配置上传坚果云与 GitHub。', mdEdit: '编辑', mdPreview: '预览', mdSplit: '分栏', brEmpty: '选择左侧条目开始编辑，或点击「＋」新建', deleteEntry: '删除', syncVault: '同步', syncPickIdeas: '选择想法目录', syncPickNotes: '选择知识库目录', syncNoDir: '请先选择同步目录', syncing: '同步中…', syncDone: '同步完成', syncConflict: '发现冲突',
       pendingLine: '还有{n}件事等你推进',
       heroPlaceholder: '记下一件事、一个想法，或贴一个 DOI / 链接',
       send: '记下',
@@ -103,7 +105,7 @@ window.__ModuleLoader__.load({
     }
     const en = {
       workbench: 'Research desk',
-      navTodo: 'Todo', navProject: 'Projects', navPaper: 'Papers', navIdea: 'Ideas', navKb: 'KnowledgeBase',
+      navTodo: 'Todo', navProject: 'Projects', navPaper: 'Papers', navIdea: 'Ideas', navKb: 'KnowledgeBase', navBrain: 'Ideas & KB', backupSync: 'Backup / Sync', backupSyncHint: 'Choose a session as permission context. Backup all creates a local snapshot, then uploads to Nutstore and GitHub per config.', mdEdit: 'Edit', mdPreview: 'Preview', mdSplit: 'Split', brEmpty: 'Select an entry to edit, or click "+" to create', deleteEntry: 'Delete', syncVault: 'Sync', syncPickIdeas: 'Pick ideas dir', syncPickNotes: 'Pick notes dir', syncNoDir: 'Pick sync directories first', syncing: 'Syncing…', syncDone: 'Synced', syncConflict: 'Conflicts',
       pendingLine: '{n} things waiting for you',
       heroPlaceholder: 'Log a task, an idea, or paste a DOI / link',
       send: 'Log',
@@ -142,6 +144,7 @@ window.__ModuleLoader__.load({
       pageSoon: 'This page is coming in the next round; the home page comes first.',
     }
     let language = 'zh'
+    let ctxRef = null
     const dict = () => (language === 'en' ? en : zh)
     function t(key, vars) {
       const value = dict()[key] ?? zh[key] ?? key
@@ -155,7 +158,7 @@ window.__ModuleLoader__.load({
       state: null, canUndo: false, error: null, view: 'todo', mode: 'scatter', kindFilter: 'all',
       query: '', related: null, capture: null, dockOpen: true, chatInput: '', thinking: false,
       toast: null, focusId: null, dashboardOpen: true, cam: { x: 0, y: 0, z: 1 }, camAnim: false,
-      modelsOpen: false, models: [], modelsLoading: false,
+      modelsOpen: false, models: [], modelsLoading: false, backupOpen: false,
       month: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
     }
     const listeners = new Set()
@@ -184,9 +187,9 @@ window.__ModuleLoader__.load({
 
     async function loadDesk() {
       try {
-        const data = await request('state')
+        const data = await request(ROUTES.state)
         if (data.state?.settings?.language) language = data.state.settings.language
-        setDesk({ state: data.state, canUndo: data.canUndo, error: null, dockOpen: data.state?.settings?.dockOpen !== false })
+        setDesk({ state: data.state, canUndo: data.canUndo, error: null, dockOpen: data.state?.settings?.dockOpen !== false, dashboardOpen: true })
       } catch (err) {
         setDesk({ error: err.message })
       }
@@ -194,7 +197,7 @@ window.__ModuleLoader__.load({
 
     async function dispatchOps(ops, { label = '操作', undoable = true, silent = false } = {}) {
       try {
-        const data = await request('ops', { ops, label, undoable })
+        const data = await request(ROUTES.ops, { ops, label, undoable })
         setDesk({ state: data.state, canUndo: undoable || snapshot.canUndo })
         if (data.errors?.length) toast(data.errors[0], { error: true })
         else if (!silent && data.receipts?.[0]) toast(data.receipts[0].text, { undo: undoable })
@@ -207,7 +210,7 @@ window.__ModuleLoader__.load({
 
     async function undoDesk() {
       try {
-        const data = await request('undo', {})
+        const data = await request(ROUTES.undo, {})
         setDesk({ state: data.state, canUndo: data.canUndo, toast: null })
         if (data.label) toast(t('cleared', { label: data.label }))
       } catch (err) {
@@ -217,7 +220,7 @@ window.__ModuleLoader__.load({
 
     async function saveSettings(patch) {
       try {
-        const data = await request('settings', patch)
+        const data = await request(ROUTES.settings, patch)
         if (patch.language) language = patch.language
         setDesk({ state: data.state, dockOpen: data.settings.dockOpen !== false })
         return true
@@ -230,7 +233,7 @@ window.__ModuleLoader__.load({
     async function openModels() {
       setDesk({ modelsOpen: true, modelsLoading: true })
       try {
-        const data = await request('models')
+        const data = await request(ROUTES.models)
         setDesk({ models: data.models ?? [], modelsLoading: false })
       } catch (err) {
         setDesk({ models: [], modelsLoading: false })
@@ -251,7 +254,7 @@ window.__ModuleLoader__.load({
         state: { ...s.state, chat: [...(s.state?.chat ?? []), { id: `tmp_${Date.now()}`, role: 'user', text, at: new Date().toISOString() }] },
       }))
       try {
-        const data = await request('chat', { message: text })
+        const data = await request(ROUTES.chat, { message: text })
         setDesk({ state: data.state, canUndo: true })
       } catch (err) {
         toast(err.message, { error: true })
@@ -424,6 +427,7 @@ window.__ModuleLoader__.load({
       ],
       target: [['circle', { cx: 12, cy: 12, r: 3.6 }], ['path', { d: 'M12 2.5v3.2M12 18.3v3.2M2.5 12h3.2M18.3 12h3.2' }]],
       gauge: [['path', { d: 'M4 15a8 8 0 1 1 16 0' }], ['path', { d: 'M12 15l3.5-4.5' }]],
+      backup: [['rect', { x: 4, y: 5, width: 16, height: 15, rx: 2 }], ['path', { d: 'M4 10h16' }], ['path', { d: 'M8 14h8' }]],
       chevron: [['path', { d: 'M6 9.5 12 15.5 18 9.5' }]],
       chat: [['path', { d: 'M4 6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H9l-5 4z' }]],
       spark: [['path', { d: 'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z' }]],
@@ -452,6 +456,8 @@ window.__ModuleLoader__.load({
 .rd-nav button{appearance:none;border:0;background:transparent;color:var(--dsw-alias-label-secondary);font:inherit;font-size:13px;padding:6px 14px;border-radius:999px;cursor:pointer;transition:background .18s,color .18s}
 .rd-nav button:hover{color:var(--dsw-alias-label-primary)}
 .rd-nav button.is-on{background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);box-shadow:0 1px 4px rgb(0 0 0 / 8%)}
+.rd-nav-dash{display:inline-flex;align-items:center;gap:6px;font-weight:600;color:var(--dsw-alias-label-primary)}
+.rd-nav-sep{width:1px;height:18px;background:var(--dsw-alias-border-l1);margin:0 3px;align-self:center}
 .rd-tool{display:flex;align-items:center;gap:6px;margin-left:auto}
 .rd-iconbtn{width:32px;height:32px;display:grid;place-items:center;border-radius:999px;border:.5px solid var(--dsw-alias-border-l1);background:var(--glass);backdrop-filter:blur(24px);color:var(--dsw-alias-label-secondary);cursor:pointer}
 .rd-iconbtn:hover{color:var(--dsw-alias-label-primary)}
@@ -481,20 +487,21 @@ window.__ModuleLoader__.load({
 .rd-model-empty{margin:0 0 14px;color:var(--dsw-alias-label-tertiary,#8a8a8a);font-size:12px}
 .rd-sample{height:30px;padding:0 12px;border-radius:999px;border:.5px solid var(--dsw-alias-border-l1);background:var(--glass);color:var(--dsw-alias-label-secondary);font:inherit;font-size:12px;cursor:pointer}
 .rd-open-dock{height:32px;display:flex;align-items:center;gap:6px;padding:0 12px;border-radius:999px;border:.5px solid var(--dsw-alias-border-l1);background:var(--glass);color:var(--dsw-alias-label-secondary);font:inherit;font-size:12px;cursor:pointer}
-.rd-dash{position:absolute;top:64px;left:18px;z-index:20;width:280px;max-height:calc(100% - 150px);overflow:auto;display:flex;flex-direction:column;gap:10px;padding:14px 16px;border-radius:16px;background:var(--glass);border:.5px solid var(--dsw-alias-border-l1);backdrop-filter:blur(24px);box-shadow:0 14px 40px rgb(0 0 0 / 10%)}
-.rd-dash-head{display:flex;align-items:center;justify-content:space-between;font-size:13px;font-weight:600;color:var(--dsw-alias-label-primary)}
-.rd-dash-head button{border:0;background:none;color:var(--dsw-alias-label-secondary);cursor:pointer;font:inherit;font-size:16px;line-height:1}
-.rd-dash-stats{display:flex;gap:6px}
-.rd-dash-stat{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;border-radius:10px;background:var(--dsw-alias-bg-layer-1)}
-.rd-dash-stat b{font-size:18px;font-weight:600;color:var(--dsw-alias-label-primary)}
-.rd-dash-stat span{font-size:11px;color:var(--dsw-alias-label-secondary)}
-.rd-dash-sec{display:flex;flex-direction:column;gap:4px}
-.rd-dash-sec h4{margin:0;font-size:11px;font-weight:600;color:var(--dsw-alias-label-tertiary,#9a9a9a);letter-spacing:.03em}
-.rd-dash-row{display:flex;align-items:baseline;justify-content:space-between;gap:8px;font-size:12px}
+.rd-dash{position:absolute;inset:0;overflow:auto;padding:88px 28px 120px}
+.rd-dash-inner{max-width:860px;width:100%;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.rd-dash-head{display:flex;align-items:center;justify-content:space-between;font-size:20px;font-weight:700;color:var(--dsw-alias-label-primary)}
+.rd-dash-head button{border:0;background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-secondary);cursor:pointer;font:inherit;font-size:15px;line-height:1;width:30px;height:30px;border-radius:50%;display:grid;place-items:center}
+.rd-dash-stats{display:flex;gap:10px;flex-wrap:wrap}
+.rd-dash-stat{flex:1;min-width:110px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:18px 12px;border-radius:14px;background:var(--glass);border:.5px solid var(--dsw-alias-border-l1)}
+.rd-dash-stat b{font-size:28px;font-weight:700;color:var(--dsw-alias-label-primary)}
+.rd-dash-stat span{font-size:12px;color:var(--dsw-alias-label-secondary)}
+.rd-dash-sec{display:flex;flex-direction:column;gap:8px;padding:16px 18px;border-radius:14px;background:var(--glass);border:.5px solid var(--dsw-alias-border-l1)}
+.rd-dash-sec h4{margin:0 0 4px;font-size:12px;font-weight:600;color:var(--dsw-alias-label-tertiary,#9a9a9a);letter-spacing:.03em}
+.rd-dash-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px;font-size:13px;line-height:1.5}
 .rd-dash-title{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--dsw-alias-label-primary)}
 .rd-dash-row em{flex:none;font-style:normal;font-size:11px;color:var(--dsw-alias-label-tertiary,#9a9a9a);max-width:46%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rd-dash-empty{font-size:12px;color:var(--dsw-alias-label-tertiary,#9a9a9a);margin:0}
-.rd-root.is-compact .rd-dash{width:min(280px,86%);left:10px}
+.rd-root.is-compact .rd-dash{padding:80px 14px 110px}
 .rd-content{position:absolute;inset:0;overflow:hidden;transition:right .22s ease}
 /* 右侧助手展开时，内容区整体让出 --dock-w；所有全宽布局都必须放进 .rd-content，
    不要用 position:fixed 或 100vw 自行定位，否则会被助手栏遮住。 */
@@ -557,6 +564,57 @@ window.__ModuleLoader__.load({
 .rd-round-plus{width:34px;height:34px;border-radius:50%;border:0;background:var(--dsw-alias-label-primary);color:var(--dsw-alias-bg-base);display:grid;place-items:center;cursor:pointer}
 .rd-list{padding:104px 28px 120px;max-width:1080px;margin:0 auto;overflow:auto;height:100%}
 .rd-board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:start}
+.rd-todo-split{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--dsw-alias-bg-base)}
+.rd-todo-stage{position:relative;flex:1 1 55%;min-height:0;overflow:hidden}
+.rd-todo-stage .rd-hero-anchor{top:44%;transform:translate(-50%,-50%) scale(.88)}
+.rd-todo-list{flex:0 0 45%;min-height:0;display:flex;flex-direction:column;border-top:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);box-shadow:0 -10px 32px rgb(0 0 0 / 7%)}
+.rd-todo-list-head{display:flex;align-items:center;gap:12px;padding:16px 24px 12px;border-bottom:1px solid var(--dsw-alias-border-l1)}
+.rd-todo-list-head h2{margin:0;font-size:15px;font-weight:600;color:var(--dsw-alias-label-primary)}
+.rd-todo-list-count{font-size:12px;color:var(--dsw-alias-label-tertiary,#9a9a9a)}
+.rd-todo-list-body{flex:1;overflow:auto;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;padding:16px 24px 24px}
+.rd-todo-bucket{min-width:0;display:flex;flex-direction:column;gap:6px;padding:12px 14px;border-radius:12px;background:var(--dsw-alias-bg-base);border:1px solid var(--dsw-alias-border-l1);box-shadow:0 2px 8px rgb(0 0 0 / 4%)}
+.rd-todo-bucket h3{margin:0 0 2px;font-size:12px;font-weight:600;color:var(--dsw-alias-label-secondary)}
+.rd-todo-bucket-rows{display:flex;flex-direction:column;gap:5px}
+.rd-todo-row{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;line-height:1.4}
+.rd-todo-row-title{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--dsw-alias-label-primary)}
+.rd-root.is-compact .rd-todo-list-body{grid-template-columns:repeat(2,minmax(0,1fr))}
+.rd-brain{position:absolute;inset:0;padding:64px 18px 18px}
+.rd-br-sync{display:flex;align-items:center;gap:10px;padding:0 4px 12px}
+.rd-br-sync-dir{font-size:12px;color:var(--dsw-alias-label-secondary);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rd-br-sync-warn{font-size:12px;color:var(--dsw-alias-state-warn-primary)}
+.rd-br{display:flex;height:100%;border-radius:16px;overflow:hidden;background:var(--glass);border:.5px solid var(--dsw-alias-border-l1);backdrop-filter:blur(24px)}
+.rd-br-list{width:280px;flex:none;overflow:auto;padding:16px 12px;display:flex;flex-direction:column;gap:4px;border-right:1px solid var(--dsw-alias-border-l1)}
+.rd-br-list-head{display:flex;align-items:center;justify-content:space-between;padding:10px 4px 6px;margin-top:6px}
+.rd-br-list-head h2{margin:0;font-size:13px;font-weight:600;color:var(--dsw-alias-label-secondary)}
+.rd-br-add{width:26px;height:26px;border-radius:50%;border:0;background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);cursor:pointer;font-size:16px;line-height:1}
+.rd-br-item{display:flex;flex-direction:column;gap:2px;text-align:left;padding:8px 10px;border-radius:10px;border:0;background:transparent;cursor:pointer;font:inherit}
+.rd-br-item:hover{background:var(--dsw-alias-bg-layer-1)}
+.rd-br-item.is-on{background:var(--dsw-alias-bg-layer-1)}
+.rd-br-item-title{font-size:13px;color:var(--dsw-alias-label-primary);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rd-br-item-meta{font-size:11px;color:var(--dsw-alias-label-tertiary,#9a9a9a)}
+.rd-br-main{flex:1;min-width:0;display:flex;flex-direction:column;overflow:auto}
+.rd-br-empty{flex:1;display:grid;place-items:center;color:var(--dsw-alias-label-tertiary,#9a9a9a);font-size:13px;padding:40px}
+.rd-br-editor{display:flex;flex-direction:column;gap:12px;padding:20px 24px;height:100%}
+.rd-br-editor-head{display:flex;gap:10px;align-items:center}
+.rd-br-title{flex:1;min-width:0;height:40px;font-size:18px;font-weight:600;border:1px solid var(--dsw-alias-border-l2);border-radius:10px;background:var(--dsw-alias-bg-layer-1);color:inherit;padding:0 12px;font:inherit}
+.rd-br-editor-head select{height:40px;border:1px solid var(--dsw-alias-border-l2);border-radius:10px;background:var(--dsw-alias-bg-layer-1);color:inherit;font:inherit;padding:0 8px}
+.rd-br-toolbar{display:flex;align-items:center;gap:10px}
+.rd-br-split{flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.rd-br-body{flex:1;min-height:0;width:100%;resize:none;border:1px solid var(--dsw-alias-border-l2);border-radius:12px;background:var(--dsw-alias-bg-base);color:inherit;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:13px;line-height:1.6;padding:14px}
+.rd-br-preview{flex:1;min-height:0;overflow:auto;padding:14px 18px;border:1px solid var(--dsw-alias-border-l2);border-radius:12px;background:var(--dsw-alias-bg-base)}
+.rd-md{font-size:14px;line-height:1.7;color:var(--dsw-alias-label-primary)}
+.rd-md-h{margin:0 0 8px;font-weight:600}
+.rd-md-p{margin:0 0 10px}
+.rd-md-ul,.rd-md-ol{margin:0 0 10px;padding-left:22px}
+.rd-md-pre{margin:0 0 12px;padding:12px;border-radius:8px;background:var(--dsw-alias-bg-layer-1);overflow:auto}
+.rd-md-pre code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px}
+.rd-md-code{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;background:var(--dsw-alias-bg-layer-1);padding:1px 5px;border-radius:4px}
+.rd-md-wiki{color:var(--dsw-alias-brand-primary);text-decoration:underline;text-decoration-style:dotted;cursor:pointer}
+.rd-md-link{color:var(--dsw-alias-brand-primary)}
+.rd-md-quote{margin:0 0 10px;padding:4px 12px;border-left:3px solid var(--dsw-alias-border-l1);color:var(--dsw-alias-label-secondary)}
+.rd-root.is-compact .rd-br-list{width:220px}
+.rd-backup-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.rd-backup-result{white-space:pre-wrap;overflow-wrap:anywhere;max-height:260px;overflow:auto;background:var(--dsw-alias-bg-base);padding:12px;border-radius:8px;font-size:12px}
 .rd-board-col{display:flex;flex-direction:column;gap:14px;min-width:0}
 .rd-board-card{padding:16px 16px 12px;border-radius:16px;background:var(--dsw-alias-bg-layer-1);border:.5px solid var(--dsw-alias-border-l1);box-shadow:0 8px 24px rgb(0 0 0 / 5%)}
 .rd-board-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:10px}
@@ -879,6 +937,216 @@ window.__ModuleLoader__.load({
         h('div', { className: 'rd-board' }, ...columns.map((column, index) => h('div', { key: `col${index}`, className: 'rd-board-col' }, ...column.map(card)))))
     }
 
+    function TodoList() {
+      const state = useSel((s) => s.state)
+      const todos = state?.todos ?? []
+      const papers = state?.papers ?? []
+      const ideas = state?.ideas ?? []
+      const notes = state?.notes ?? []
+      const projectName = (id) => (state?.projects ?? []).find((row) => row.id === id)?.name
+      const open = todos.filter((row) => row.status !== 'done')
+      const buckets = [
+        ['all', 'Todo: All', open.map((row) => ({ id: row.id, title: row.title, meta: statusText('task', row.status) }))],
+        ['projects', 'Todo: Projects', open.filter((row) => row.projectId).map((row) => ({ id: row.id, title: row.title, meta: projectName(row.projectId) ?? '' }))],
+        ['paper', 'Todo: Paper', papers.filter((row) => row.status === 'inbox' || row.status === 'reading').map((row) => ({ id: row.id, title: row.title, meta: statusText('paper', row.status) }))],
+        ['ideas', 'Todo: Idea', ideas.filter((row) => row.status === 'seed').map((row) => ({ id: row.id, title: row.title, meta: statusText('idea', row.status) }))],
+        ['notes', 'Todo: 知识库', notes.filter((row) => row.status === 'draft').map((row) => ({ id: row.id, title: row.title, meta: row.kb ?? '' }))],
+      ]
+      return h('div', { className: 'rd-todo-list' },
+        h('div', { className: 'rd-todo-list-head' },
+          h('h2', null, t('navTodo')),
+          h('span', { className: 'rd-todo-list-count' }, String(open.length)),
+          h('span', { style: { flex: 1 } }),
+          h('button', { type: 'button', className: 'rd-btn', onClick: () => setDesk({ capture: 'task' }) }, t('capture'))),
+        h('div', { className: 'rd-todo-list-body' },
+          ...buckets.map(([key, title, rows]) => h('section', { key, className: 'rd-todo-bucket' },
+            h('h3', null, title),
+            rows.length
+              ? h('div', { className: 'rd-todo-bucket-rows' }, ...rows.slice(0, 6).map((row) => h('div', { key: row.id, className: 'rd-todo-row' },
+                h('span', { className: 'rd-todo-row-title' }, row.title),
+                row.meta ? h('span', { className: 'rd-tag' }, row.meta) : null)))
+              : h('p', { className: 'rd-board-empty' }, t('empty'))))))
+    }
+
+    function TodoSplit() {
+      return h('div', { className: 'rd-todo-split' },
+        h('div', { className: 'rd-todo-stage' }, h(Hero), h(ScatterView)),
+        h(TodoList))
+    }
+
+    function inlineMd(text) {
+      const tokens = text.split(/(\*\*[^*]+\*\*|__[^_]+__|\*[^*]+\*|_([^_]+)_|`[^`]+`|\[\[[^\]]+\]\]|\[[^\]]+\]\([^)]+\))/g)
+      return tokens.filter(Boolean).map((token, i) => {
+        if (token.startsWith('**') && token.endsWith('**')) return h('strong', { key: i }, token.slice(2, -2))
+        if (token.startsWith('__') && token.endsWith('__')) return h('strong', { key: i }, token.slice(2, -2))
+        if (token.startsWith('*') && token.endsWith('*')) return h('em', { key: i }, token.slice(1, -1))
+        if (token.startsWith('`') && token.endsWith('`')) return h('code', { key: i, className: 'rd-md-code' }, token.slice(1, -1))
+        if (token.startsWith('[[') && token.endsWith(']]')) {
+          const inner = token.slice(2, -2)
+          const [target, alias] = inner.split('|')
+          return h('span', { key: i, className: 'rd-md-wiki' }, alias || target)
+        }
+        const link = token.match(/^\[([^\]]+)\]\(([^)]+)\)$/)
+        if (link) return h('a', { key: i, className: 'rd-md-link', href: link[2], target: '_blank', rel: 'noreferrer' }, link[1])
+        return token
+      })
+    }
+
+    function markdownToVdom(md) {
+      const lines = (md ?? '').replace(/\r\n/g, '\n').split('\n')
+      const out = []
+      let i = 0
+      while (i < lines.length) {
+        const line = lines[i]
+        if (line.trim().startsWith('```')) {
+          const buf = []; i += 1
+          while (i < lines.length && !lines[i].trim().startsWith('```')) { buf.push(lines[i]); i += 1 }
+          i += 1
+          out.push(h('pre', { key: out.length, className: 'rd-md-pre' }, h('code', null, buf.join('\n'))))
+          continue
+        }
+        const hd = line.match(/^(#{1,6})\s+(.*)$/)
+        if (hd) {
+          const level = hd[1].length
+          out.push(h(`h${level}`, { key: out.length, className: 'rd-md-h' }, ...inlineMd(hd[2])))
+          i += 1; continue
+        }
+        const ul = line.match(/^\s*[-*+]\s+(.*)$/)
+        if (ul) {
+          const items = []
+          while (i < lines.length && lines[i].match(/^\s*[-*+]\s+(.*)$/)) { items.push(h('li', { key: items.length }, ...inlineMd(lines[i].match(/^\s*[-*+]\s+(.*)$/)[1]))); i += 1 }
+          out.push(h('ul', { key: out.length, className: 'rd-md-ul' }, ...items)); continue
+        }
+        const ol = line.match(/^\s*\d+\.\s+(.*)$/)
+        if (ol) {
+          const items = []
+          while (i < lines.length && lines[i].match(/^\s*\d+\.\s+(.*)$/)) { items.push(h('li', { key: items.length }, ...inlineMd(lines[i].match(/^\s*\d+\.\s+(.*)$/)[1]))); i += 1 }
+          out.push(h('ol', { key: out.length, className: 'rd-md-ol' }, ...items)); continue
+        }
+        const quote = line.match(/^\s*>\s?(.*)$/)
+        if (quote) {
+          const items = []
+          while (i < lines.length && lines[i].match(/^\s*>\s?(.*)$/)) { items.push(lines[i].match(/^\s*>\s?(.*)$/)[1]); i += 1 }
+          out.push(h('blockquote', { key: out.length, className: 'rd-md-quote' }, ...inlineMd(items.join(' ')))); continue
+        }
+        if (!line.trim()) { i += 1; continue }
+        out.push(h('p', { key: out.length, className: 'rd-md-p' }, ...inlineMd(line)))
+        i += 1
+      }
+      return out
+    }
+
+    function BrainView() {
+      const state = useSel((s) => s.state)
+      const [selected, setSelected] = useState(null)
+      const [mode, setMode] = useState('edit')
+      const [draft, setDraft] = useState({ title: '', kind: 'idea', kb: 'concept', status: 'seed', body: '' })
+      const [syncInfo, setSyncInfo] = useState(null)
+      const ideas = state?.ideas ?? []
+      const notes = state?.notes ?? []
+      const vaultSync = state?.settings?.vaultSync
+      const ideasDir = vaultSync?.ideasDir ?? ''
+      const notesDir = vaultSync?.notesDir ?? ''
+      const saveVaultSync = async (patch) => {
+        await fetch(API_BASE + ROUTES.settings, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ vaultSync: { ...(vaultSync ?? {}), ...patch } }) })
+        loadDesk()
+      }
+      const pickDir = async (key) => {
+        try {
+          const p = await ctxRef?.get('uiWorkspace')?.pickDirectory()
+          if (p) await saveVaultSync({ [key]: p })
+        } catch (err) { toast(err.message, { error: true }) }
+      }
+      const doSync = async () => {
+        if (!ideasDir && !notesDir) { toast(t('syncNoDir'), { error: true }); return }
+        setSyncInfo('busy')
+        try {
+          const res = await fetch(API_BASE + ROUTES.vaultSync, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ ideasDir, notesDir }) })
+          const data = await res.json()
+          if (!res.ok) throw new Error(data.error || t('error'))
+          setSyncInfo(data)
+          loadDesk()
+          toast(t('syncDone'))
+        } catch (err) {
+          setSyncInfo(null)
+          toast(err.message, { error: true })
+        }
+      }
+      const ideaKind = (k) => ({ idea: dict() === en ? 'Idea' : '想法', hypothesis: dict() === en ? 'Hypothesis' : '假设', question: dict() === en ? 'Question' : '问题', method: dict() === en ? 'Method' : '方法' })[k] ?? k
+      const kbLabel = (k) => (dict().kb ?? zh.kb)[k] ?? k ?? 'note'
+      const open = (kind, row) => { setSelected({ kind, id: row.id, isNew: false }); setMode('edit'); setDraft({ title: row.title ?? '', kind: row.kind ?? 'idea', kb: row.kb ?? 'concept', status: row.status ?? 'seed', body: row.body ?? '' }) }
+      const create = (kind) => { setSelected({ kind, id: null, isNew: true }); setMode('edit'); setDraft({ title: '', kind: 'idea', kb: 'concept', status: 'seed', body: '' }) }
+      const set = (key, value) => setDraft((p) => ({ ...p, [key]: value }))
+      const save = async () => {
+        if (!selected) return
+        const title = String(draft.title ?? '').trim()
+        if (!title) return
+        if (selected.isNew) {
+          const op = { op: 'add_item', kind: selected.kind, title }
+          if (selected.kind === 'idea') { op.kind = draft.kind; op.body = draft.body }
+          else { op.kb = draft.kb; op.body = draft.body }
+          await dispatchOps([op], { label: dict() === en ? 'Create entry' : '新建条目' })
+        } else {
+          const patch = { title }
+          if (selected.kind === 'idea') { patch.kind = draft.kind; patch.status = draft.status; patch.body = draft.body }
+          else { patch.kb = draft.kb; patch.body = draft.body }
+          await dispatchOps([{ op: 'update_item', kind: selected.kind, id: selected.id, patch }], { label: dict() === en ? 'Edit entry' : '编辑条目' })
+        }
+        setSelected(null)
+      }
+      const remove = async () => {
+        if (!selected) return
+        if (selected.isNew) { setSelected(null); return }
+        await dispatchOps([{ op: 'delete_item', kind: selected.kind, id: selected.id }], { label: dict() === en ? 'Delete entry' : '删除条目' })
+        setSelected(null)
+      }
+      const item = (kind, row, label) => h('button', {
+        key: row.id, type: 'button',
+        className: `rd-br-item ${selected && selected.kind === kind && selected.id === row.id ? 'is-on' : ''}`,
+        onClick: () => open(kind, row),
+      }, h('span', { className: 'rd-br-item-title' }, row.title), h('span', { className: 'rd-br-item-meta' }, label))
+      const editor = selected ? h('div', { className: 'rd-br-editor' },
+        h('div', { className: 'rd-br-editor-head' },
+          h('input', { className: 'rd-br-title', value: draft.title, placeholder: t('title'), onChange: (e) => set('title', e.target.value) }),
+          selected.kind === 'idea'
+            ? h('select', { value: draft.kind, onChange: (e) => set('kind', e.target.value) }, ...['idea', 'hypothesis', 'question', 'method'].map((k) => h('option', { key: k, value: k }, ideaKind(k))))
+            : h('select', { value: draft.kb, onChange: (e) => set('kb', e.target.value) }, ...Object.keys(zh.kb).map((k) => h('option', { key: k, value: k }, kbLabel(k)))),
+          selected.kind === 'idea' ? h('select', { value: draft.status, onChange: (e) => set('status', e.target.value) }, ...['seed', 'exploring', 'parked'].map((s) => h('option', { key: s, value: s }, statusText('idea', s)))) : null),
+        h('div', { className: 'rd-br-toolbar' },
+          h('div', { className: 'rd-seg' },
+            h('button', { type: 'button', className: mode === 'edit' ? 'is-on' : '', onClick: () => setMode('edit') }, t('mdEdit')),
+            h('button', { type: 'button', className: mode === 'preview' ? 'is-on' : '', onClick: () => setMode('preview') }, t('mdPreview')),
+            h('button', { type: 'button', className: mode === 'split' ? 'is-on' : '', onClick: () => setMode('split') }, t('mdSplit'))),
+          h('span', { style: { flex: 1 } }),
+          !selected.isNew ? h('button', { type: 'button', className: 'rd-btn', onClick: remove }, t('deleteEntry')) : null,
+          h('button', { type: 'button', className: 'rd-btn is-primary', onClick: save }, t('save'))),
+        mode === 'split'
+          ? h('div', { className: 'rd-br-split' },
+            h('textarea', { className: 'rd-br-body', value: draft.body, onChange: (e) => set('body', e.target.value) }),
+            h('div', { className: 'rd-br-preview rd-md' }, ...markdownToVdom(draft.body)))
+          : mode === 'preview'
+            ? h('div', { className: 'rd-br-preview rd-md' }, ...markdownToVdom(draft.body))
+            : h('textarea', { className: 'rd-br-body', value: draft.body, onChange: (e) => set('body', e.target.value) }))
+      : h('div', { className: 'rd-br-empty' }, t('brEmpty'))
+      const syncBar = h('div', { className: 'rd-br-sync' },
+        h('span', { className: 'rd-br-sync-dir', title: ideasDir }, ideasDir ? (ideasDir.split(/[\\/]/).filter(Boolean).pop() || ideasDir) : t('syncPickIdeas')),
+        h('span', { className: 'rd-br-sync-dir', title: notesDir }, notesDir ? (notesDir.split(/[\\/]/).filter(Boolean).pop() || notesDir) : t('syncPickNotes')),
+        h('button', { type: 'button', className: 'rd-btn', onClick: () => pickDir('ideasDir') }, t('syncPickIdeas')),
+        h('button', { type: 'button', className: 'rd-btn', onClick: () => pickDir('notesDir') }, t('syncPickNotes')),
+        h('span', { style: { flex: 1 } }),
+        syncInfo && syncInfo !== 'busy' && syncInfo.conflicts ? h('span', { className: 'rd-br-sync-warn' }, `${t('syncConflict')} ${syncInfo.conflicts}`) : null,
+        h('button', { type: 'button', className: 'rd-btn is-primary', disabled: syncInfo === 'busy', onClick: doSync }, syncInfo === 'busy' ? t('syncing') : t('syncVault')))
+      return h('div', { className: 'rd-brain' },
+        syncBar,
+        h('div', { className: 'rd-br' },
+          h('aside', { className: 'rd-br-list' },
+            h('div', { className: 'rd-br-list-head' }, h('h2', null, t('navIdea')), h('button', { type: 'button', className: 'rd-br-add', title: t('capture'), onClick: () => create('idea') }, '+')),
+            ...ideas.map((row) => item('idea', row, ideaKind(row.kind))),
+            h('div', { className: 'rd-br-list-head' }, h('h2', null, t('navKb')), h('button', { type: 'button', className: 'rd-br-add', title: t('capture'), onClick: () => create('note') }, '+')),
+            ...notes.map((row) => item('note', row, kbLabel(row.kb)))),
+          h('main', { className: 'rd-br-main' }, editor)))
+    }
+
     function CalendarView() {
       const state = useSel((s) => s.state)
       const month = useSel((s) => s.month)
@@ -920,7 +1188,7 @@ window.__ModuleLoader__.load({
       const dockOpen = useSel((s) => s.dockOpen)
       const modes = [['scatter', t('scatter')], ['list', t('list')], ['calendar', t('calendar')]]
       return h('div', { className: 'rd-dockbar' },
-        h('div', { className: 'rd-seg' }, ...modes.map(([id, label]) => h('button', { key: id, type: 'button', className: mode === id ? 'is-on' : '', onClick: () => setDesk({ mode: id }) }, label))),
+        h('div', { className: 'rd-seg' }, ...modes.map(([id, label]) => h('button', { key: id, type: 'button', className: mode === id ? 'is-on' : '', onClick: () => setDesk({ mode: id, dashboardOpen: false }) }, label))),
         h('button', { type: 'button', className: 'rd-round-plus', title: t('capture'), 'aria-label': t('capture'), onClick: () => setDesk({ capture: 'task' }) }, h(Icon, { name: 'plus', size: 17 })),
         dockOpen ? null : h('button', { type: 'button', className: 'rd-open-dock', onClick: () => setDesk({ dockOpen: true }) }, h(Icon, { name: 'chat', size: 14 }), t('assistant')))
     }
@@ -1069,6 +1337,39 @@ window.__ModuleLoader__.load({
             h('button', { type: 'button', className: 'rd-btn', onClick: () => setDesk({ modelsOpen: false }) }, dict() === en ? 'Close' : '关闭'))))
     }
 
+    function BackupDialog() {
+      const open = useSel((s) => s.backupOpen)
+      const [sessionId, setSessionId] = useState('')
+      const [busy, setBusy] = useState(false)
+      const [result, setResult] = useState(null)
+      const [error, setError] = useState('')
+      if (!open) return null
+      const run = async (operation) => {
+        if (!sessionId.trim()) { setError(t('noSession')); return }
+        const controller = new AbortController()
+        setBusy(true); setError(''); setResult(null)
+        try {
+          const remoteResult = await ctxRef?.remote?.commands?.execute(sessionId.trim(), '/dsh-csrw ' + JSON.stringify({ operation, args: {}, confirmed: true }), [], controller.signal)
+          if (!remoteResult?.ok) throw remoteResult?.error ?? new Error(t('error'))
+          const response = remoteResult.value
+          if (!response || response.result?.kind !== 'success') throw new Error(response?.result?.text || t('error'))
+          setResult(JSON.parse(response.result.text))
+        } catch (err) {
+          if (!controller.signal.aborted) setError(err?.message || String(err))
+        } finally { setBusy(false) }
+      }
+      const act = (operation, label) => h('button', { type: 'button', className: 'rd-btn', disabled: busy, onClick: () => run(operation) }, t(label))
+      return h('div', { className: 'rd-dialog-backdrop', onPointerDown: (event) => { if (event.target === event.currentTarget) setDesk({ backupOpen: false }) } },
+        h('div', { className: 'rd-dialog' },
+          h('h3', null, t('backupSync')),
+          h('p', { className: 'rd-hint' }, t('backupSyncHint')),
+          h('label', { className: 'rd-field' }, h('span', null, t('session')), h('input', { value: sessionId, placeholder: t('noSession'), onChange: (event) => setSessionId(event.target.value) })),
+          h('div', { className: 'rd-backup-actions' }, act('dsh_csrw_backup_all', 'backupAll'), act('dsh_csrw_backup_upload', 'backupUpload'), act('dsh_csrw_backup_github', 'backupGithub')),
+          error ? h('p', { className: 'rd-hint', style: { color: 'var(--dsw-alias-state-error-primary)' } }, error) : null,
+          result ? h('pre', { className: 'rd-backup-result' }, JSON.stringify(result, null, 2)) : null,
+          h('div', { className: 'rd-form-foot' }, h('button', { type: 'button', className: 'rd-btn', onClick: () => setDesk({ backupOpen: false }) }, t('cancel')))))
+    }
+
     function PlaceholderView() {
       const state = useSel((s) => s.state)
       const view = useSel((s) => s.view)
@@ -1091,7 +1392,7 @@ window.__ModuleLoader__.load({
       const [backups, setBackups] = useState(null)
       useEffect(() => {
         if (!open) return
-        fetch(API_BASE + 'backups').then((r) => r.json()).then((d) => setBackups(d.snapshots ?? [])).catch(() => setBackups([]))
+        fetch(API_BASE + ROUTES.backups).then((r) => r.json()).then((d) => setBackups(d.snapshots ?? [])).catch(() => setBackups([]))
       }, [open])
       if (!open) return null
       const todos = state?.todos ?? []
@@ -1104,19 +1405,20 @@ window.__ModuleLoader__.load({
       const count = (s) => papers.filter((x) => x.status === s).length
       const stat = (n, label) => h('div', { className: 'rd-dash-stat' }, h('b', null, n), h('span', null, label))
       const row = (id, title, meta) => h('div', { key: id, className: 'rd-dash-row' }, h('span', { className: 'rd-dash-title' }, title), meta ? h('em', null, meta) : null)
-      return h('aside', { className: 'rd-dash', 'aria-label': t('dashboard') },
-        h('div', { className: 'rd-dash-head' },
-          h('span', null, t('dashboard')),
-          h('button', { type: 'button', title: t('cancel'), 'aria-label': t('cancel'), onClick: () => setDesk({ dashboardOpen: false }) }, '×')),
-        h('div', { className: 'rd-dash-stats' },
-          stat(doing.length, statusText('task', 'doing')),
-          stat(waiting.length, statusText('task', 'waiting')),
-          stat(dueToday.length, t('dueToday'))),
-        doing.length ? h('div', { className: 'rd-dash-sec' }, h('h4', null, statusText('task', 'doing')), ...doing.map((x) => row(x.id, x.title, x.estimateMinutes ? `~${x.estimateMinutes}m` : null))) : null,
-        waiting.length ? h('div', { className: 'rd-dash-sec' }, h('h4', null, statusText('task', 'waiting')), ...waiting.map((x) => row(x.id, x.title, x.blockedReason))) : null,
-        h('div', { className: 'rd-dash-sec' }, h('h4', null, t('navPaper')), h('div', { className: 'rd-dash-stats' }, ...['inbox', 'reading', 'read', 'cited'].map((s) => stat(count(s), statusText('paper', s))))),
-        projects.length ? h('div', { className: 'rd-dash-sec' }, h('h4', null, t('navProject')), ...projects.map((pr) => { const ms = pr.milestones ?? []; const done = ms.filter((m) => m.done).length; return row(pr.id, pr.name, `${done}/${ms.length}`) })) : null,
-        h('div', { className: 'rd-dash-sec' }, h('h4', null, t('backups')), backups === null ? h('p', { className: 'rd-dash-empty' }, '…') : backups.length ? row(backups[0].id, relTime(backups[0].createdAt), (backups[0].sources ?? []).join('/')) : h('p', { className: 'rd-dash-empty' }, t('noBackups'))))
+      return h('main', { className: 'rd-dash', 'aria-label': t('dashboard') },
+        h('div', { className: 'rd-dash-inner' },
+          h('div', { className: 'rd-dash-head' },
+            h('span', null, t('dashboard')),
+            h('button', { type: 'button', title: t('cancel'), 'aria-label': t('cancel'), onClick: () => setDesk({ dashboardOpen: false }) }, '×')),
+          h('div', { className: 'rd-dash-stats' },
+            stat(doing.length, statusText('task', 'doing')),
+            stat(waiting.length, statusText('task', 'waiting')),
+            stat(dueToday.length, t('dueToday'))),
+          doing.length ? h('div', { className: 'rd-dash-sec' }, h('h4', null, statusText('task', 'doing')), ...doing.map((x) => row(x.id, x.title, x.estimateMinutes ? `~${x.estimateMinutes}m` : null))) : null,
+          waiting.length ? h('div', { className: 'rd-dash-sec' }, h('h4', null, statusText('task', 'waiting')), ...waiting.map((x) => row(x.id, x.title, x.blockedReason))) : null,
+          h('div', { className: 'rd-dash-sec' }, h('h4', null, t('navPaper')), h('div', { className: 'rd-dash-stats' }, ...['inbox', 'reading', 'read', 'cited'].map((s) => stat(count(s), statusText('paper', s))))),
+          projects.length ? h('div', { className: 'rd-dash-sec' }, h('h4', null, t('navProject')), ...projects.map((pr) => { const ms = pr.milestones ?? []; const done = ms.filter((m) => m.done).length; return row(pr.id, pr.name, `${done}/${ms.length}`) })) : null,
+          h('div', { className: 'rd-dash-sec' }, h('h4', null, t('backups')), backups === null ? h('p', { className: 'rd-dash-empty' }, '…') : backups.length ? row(backups[0].id, relTime(backups[0].createdAt), (backups[0].sources ?? []).join('/')) : h('p', { className: 'rd-dash-empty' }, t('noBackups')))))
     }
 
     function Topbar() {
@@ -1124,15 +1426,20 @@ window.__ModuleLoader__.load({
       const ready = useSel((s) => Boolean(s.state))
       const dockOpen = useSel((s) => s.dockOpen)
       const dashOpen = useSel((s) => s.dashboardOpen)
-      const nav = [['todo', 'Todo'], ['project', 'Projects'], ['paper', 'Papers'], ['idea', 'Ideas'], ['kb', 'KnowledgeBase']]
+      const nav = [['todo', t('navTodo')], ['project', t('navProject')], ['paper', t('navPaper')], ['idea', t('navBrain')]]
+      const dashActive = view === 'todo' && dashOpen
       return h('header', { className: 'rd-topbar' },
-        h('nav', { className: 'rd-nav', 'aria-label': t('workbench') }, ...nav.map(([id, label]) => h('button', {
-          key: id, type: 'button', className: view === id ? 'is-on' : '', 'aria-current': view === id ? 'page' : undefined,
-          onClick: () => setDesk({ view: id, focusId: null }),
-        }, label))),
+        h('nav', { className: 'rd-nav', 'aria-label': t('workbench') },
+          h('button', { type: 'button', className: `rd-nav-dash ${dashActive ? 'is-on' : ''}`, 'aria-current': dashActive ? 'page' : undefined, onClick: () => setDesk({ view: 'todo', dashboardOpen: true }) },
+            h(Icon, { name: 'gauge', size: 15 }), h('span', null, t('dashboard'))),
+          h('span', { className: 'rd-nav-sep', 'aria-hidden': 'true' }),
+          ...nav.map(([id, label]) => h('button', {
+            key: id, type: 'button', className: view === id && !dashOpen ? 'is-on' : '', 'aria-current': view === id && !dashOpen ? 'page' : undefined,
+            onClick: () => setDesk({ view: id, dashboardOpen: false, focusId: null }),
+          }, label))),
         h('span', { style: { flex: 1 } }),
-        ready ? h(IconButton, { name: 'gauge', label: t('dashboard'), onClick: () => setDesk({ dashboardOpen: !dashOpen }) }) : null,
         ready ? h(ModelButton) : null,
+        ready ? h(IconButton, { name: 'backup', label: t('backupSync'), onClick: () => setDesk({ backupOpen: true }) }) : null,
         h(IconButton, { name: 'chat', label: t('assistant'), onClick: () => { const next = !dockOpen; setDesk({ dockOpen: next }); saveSettings({ dockOpen: next }) } }))
     }
 
@@ -1142,6 +1449,7 @@ window.__ModuleLoader__.load({
       const view = useSel((s) => s.view)
       const mode = useSel((s) => s.mode)
       const dockOpen = useSel((s) => s.dockOpen)
+      const dashboardOpen = useSel((s) => s.dashboardOpen)
       const narrow = useSel((s) => s.width < 1020)
       const compact = useSel((s) => s.width < 780)
       const rootRef = useRef(null)
@@ -1175,24 +1483,20 @@ window.__ModuleLoader__.load({
         return () => window.removeEventListener('keydown', onKey)
       }, [])
       const showDock = dockOpen && !snapshot.focusId
-      const Active = error ? null : view === 'todo' ? null : PlaceholderView
+      const Active = error ? null : view === 'todo' ? null : (view === 'idea' || view === 'kb') ? BrainView : PlaceholderView
       return h('div', { ref: rootRef, className: 'rd-shell' },
         h('div', { className: `rd-root ${narrow ? 'is-narrow' : ''} ${compact ? 'is-compact' : ''} ${showDock ? 'has-dock' : ''}` },
         h('style', null, CSS),
         h('div', { className: 'rd-ambient', 'aria-hidden': 'true' }, h('i'), h('i'), h('i')),
         h('div', { className: 'rd-main' },
           h(Topbar),
-          ready ? h(Dashboard) : null,
           h('main', { className: 'rd-content', key: view },
             error ? h('div', { className: 'rd-page' }, h('p', { style: { color: 'var(--dsw-alias-label-secondary)' } }, t('error', { error })), h('button', { type: 'button', className: 'rd-btn', onClick: () => loadDesk() }, t('retry')))
               : !ready ? h('div', { className: 'rd-loading' }, h('span', { className: 'rd-shimmer' }, t('loading')))
                 : view === 'todo'
-                  ? h(React.Fragment, null,
-                    mode === 'scatter' ? h(ScatterView) : mode === 'list' ? h(ListView) : h(CalendarView),
-                    mode === 'scatter' ? h(Hero) : null,
-                    h(Dockbar))
+                  ? (dashboardOpen ? h(Dashboard) : h(TodoSplit))
                   : h(Active)),
-          ready && view === 'todo' && mode === 'scatter' ? h('div', { className: 'rd-corner is-right' },
+          ready && view === 'todo' && !dashboardOpen ? h('div', { className: 'rd-corner is-right' },
             h('div', { className: 'rd-zoom' },
               h('button', { type: 'button', title: t('zoomOut'), 'aria-label': t('zoomOut'), onClick: () => zoomCenter(1 / 1.25) }, '−'),
               h('button', { type: 'button', className: 'rd-zoom-fit', title: t('zoomFit'), 'aria-label': t('zoomFit'), onClick: resetCamera }, h(Icon, { name: 'target', size: 15 })),
@@ -1200,6 +1504,7 @@ window.__ModuleLoader__.load({
         ready ? h(AssistantDock) : null,
         ready ? h(CaptureDialog) : null,
         ready ? h(ModelPicker) : null,
+        ready ? h(BackupDialog) : null,
         h(Toast))))
     }
 
@@ -1213,6 +1518,7 @@ window.__ModuleLoader__.load({
     return {
       inject: ['slots', 'locale', 'remote.commands'],
       apply(ctx) {
+        ctxRef = ctx
         ctx.effect(() => ctx.locale.register('dsh-csrw', 'en', TOOLS_EN))
         ctx.effect(() => ctx.locale.register('dsh-csrw', 'zh', TOOLS_ZH))
         const tt = ctx.locale.bind('dsh-csrw')

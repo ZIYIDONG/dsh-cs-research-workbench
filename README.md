@@ -77,17 +77,18 @@ node bin/dsh-csrw.js health
 
 主面板（`/dsh-csrw/api/*` 路由，数据在 `$DSH_HOME/dsh-csrw/state.json`；旧目录 `csrw-desk/` 会在首次读取时自动复制，且旧文件保留）：
 
-1. 顶栏是五个入口——待办、项目、文献、想法、知识库，右侧是监控台按钮、助手模型按钮和助手开关（点击收起/唤起右侧助手 Dock，状态持久化到偏好）。
+1. 顶栏导航区重组：「监控台」排最左，用分隔线与其余分组明确区分；随后是四个标签——待办、项目、文献、想法·知识库（想法与知识库合并为一个入口）。右侧是助手模型按钮、备份/同步按钮和助手开关（点击收起/唤起右侧助手 Dock，状态持久化到偏好）。
 2. 首屏两行数字：还有 N 件事等你推进、M 篇文献排在本周；下面是一句话记录框。
 3. 一句话按内容分流：DOI/arXiv → 文献，`问题:`/`假设:`/`方法:`/`局限:` 或链接 → 想法，带日期/`@项目`/`#P0`/`~30min` → 任务，其余 → 任务。
-4. 散落画布可拖动卡片（位置持久化、不进撤销栈）、滚轮平移、`Ctrl/⌘ + 滚轮` 缩放；底部在散落/列表/日历三种视图间切换；`＋` 打开快速记录。
-5. 列表视图是三列五卡：Todo: All｜Todo: Projects、Todo: Paper｜Todo: Idea 整理、Todo: 知识库整理；日历视图按截止日期排布。
+4. Todo 页为上下分区：上部散落画布（可拖动卡片、滚轮平移、`Ctrl/⌘ + 滚轮` 缩放）+ 一句话记录框，下部五项待办分类列表（Todo: All / Projects / Paper / Idea / 知识库）。底部 dock 栏（视图切换与快速记录按钮）已移除，快速记录入口在待办列表头部。
+5. 想法·知识库合并页是一个「类似 Obsidian 的编辑阅读器」：左侧想法/知识库条目列表（可新建、选中），右侧 Markdown 编辑器，支持编辑/预览/分栏三种模式，渲染标题、列表、代码块、加粗、斜体、链接与双链 `[[...]]`，可直接新建、编辑、删除条目。页面顶部提供「同步」工具栏：选择想法/知识库目录后，可把工作台条目与本地 Obsidian 笔记双向同步（手动触发，走 `POST /api/vault-sync`）；冲突保留 `.conflict.md` 副本、不自动覆盖。
 6. 快速记录按类型分栏：任务（优先级、截止、项目、状态）、文献（DOI、URL、阅读状态）、想法（类型：想法/假设/问题/方法）、知识库（概念/坑/公式/工具/片段/模板），填完直接写进本地状态。
 7. 右侧助手 Dock：不选模型时用本地规则（建任务、查今天、统计待办），不联网；在顶栏选定模型后，助手只依据当前工作台数据作答，要求 120 字内、不编造条目，模型调用失败会回退本地规则并在返回里标明 `engine`。
 8. 工作台偏好（界面语言、助手栏默认展开、清除示例数据、撤销提示）不再占用顶栏入口，统一收进 DSH 设置页的「CS科研工作台」分区（见下）。
 9. 原生撤销 30 步（`Ctrl/⌘+Z`）、中英文案、窄屏适配（`<1020px` 两列、`<780px` 单列，窄屏默认收起助手）。
-10. 布局约定：所有全宽内容必须放进 `.rd-content`。助手 Dock 展开时内容区自动让出 `--dock-w`（336px），顶栏、底部 Dockbar、Toast 同步避让；不要用 `position: fixed` 或 `100vw` 自行铺满，否则会被右侧助手遮住。
-11. 监控台（左上角浮动面板，顶栏仪表盘按钮切换）：进行中/等待中/今日到期的任务计数与列表、论文阅读进展（待读/精读/已读/已引用）、项目里程碑进度、最近备份摘要（走 `GET /dsh-csrw/api/backups`）。
+10. 布局约定：所有全宽内容必须放进 `.rd-content`。助手 Dock 展开时内容区自动让出 `--dock-w`（336px），顶栏与 Toast 同步避让；不要用 `position: fixed` 或 `100vw` 自行铺满，否则会被右侧助手遮住。
+11. 监控台是首页（待办页）的默认落地视图：打开工作台默认展开，展示进行中/等待中/今日到期的任务、论文阅读进展（待读/精读/已读/已引用）、项目里程碑进度、最近备份摘要（走 `GET /dsh-csrw/api/backups`）。点顶栏的「待办」标签或监控台按钮可切换监控台与待办页；每次打开工作台都默认回到监控台。
+12. 备份/同步：顶栏「备份/同步」按钮打开对话框，选会话后一键备份、上传坚果云或备份 GitHub（走 `/dsh-csrw` 命令）；首次设置后不再变更的基础设置仍只保留在 DSH 设置区入口。
 
 设置页里的工具面板（含工作台偏好）：
 
@@ -132,6 +133,7 @@ Windows PowerShell 对内联 JSON 的引号处理因版本而异。也可把参�
 | `git.backupRemote`, `git.backupBranch`, `git.backupRepoDir` | 空、`backup`、`.dsh-csrw/backup-repo`；GitHub 元数据备份的远程 URL/分支/本地仓库目录 |
 | `obsidian.vaultPath`, `obsidian.autoDetect` | 空路径、`true`；自动查找工作区及直接子目录的 `.obsidian`，多个候选时报错 |
 | `obsidian.trashDir` | `.trash`，相对 vault 的回收目录 |
+| `obsidian.ideasDir`, `obsidian.notesDir` | `ideas`、`kb`，相对 vault 或绝对路径；工作台「想法/知识库」与 Obsidian 双向同步的目标目录 |
 | `zotero.localApi`, `zotero.dataDir` | 本机 API 默认地址、空路径；数据库备份需明确定位数据目录 |
 | `nutstore.baseUrl`, `nutstore.remoteRoot` | `https://dav.jianguoyun.com/dav/`, `dsh-csrw` |
 | `nutstore.username`, `nutstore.credentialKey` | 空用户名、`dsh-csrw/nutstore`；此 key 是引用名，不是密码 |
@@ -246,7 +248,7 @@ GET /dsh-csrw/api/state
 
 - `npm run check` 通过：语法、包元数据、46 个 `dsh_csrw_` 工具、六个模块全部 `ready`；`identifiers` 通过（`dsh-csrw-ui`、`/dsh-csrw/api`、`dsh-csrw`）。
 - `npm run check:ui` 通过：五处界面注册、图标几何、标题、设置分区 id 与中英文案全部匹配。
-- `npm test`：70 个用例全部通过（0 skip、0 fail）。其中 5 个是 `lib/desk/` 用例，2 个是工作台状态迁移用例，2 个是配置兼容用例；12 个是新增 Obsidian 双链/检索/模板/日记/附件/重命名/死链/图谱/Canvas/书签用例，2 个是 `paper_to_note` 文献笔记用例（用本机 mock HTTP 验证 Zotero 请求路径与生成内容），3 个是新增备份云端用例（`workspace` 源排除备份目录、`backup_github` 用 mock git 验证 init/commit/push 序列与 confirm 门）。"真实 Git 临时仓库集成"用例需要进程能用管道捕获子进程输出，在限制该能力的沙箱中按设计跳过，在普通终端通过。
+- `npm test`：74 个用例全部通过（0 skip、0 fail）。其中 5 个是 `lib/desk/` 用例，2 个是工作台状态迁移用例，2 个是配置兼容用例；12 个是新增 Obsidian 双链/检索/模板/日记/附件/重命名/死链/图谱/Canvas/书签用例，2 个是 `paper_to_note` 文献笔记用例（用本机 mock HTTP 验证 Zotero 请求路径与生成内容），3 个是新增备份云端用例，4 个是新增 vault 同步用例（pull 新建、push 写回、冲突保留副本、知识库 kb 字段）。"真实 Git 临时仓库集成"用例需要进程能用管道捕获子进程输出，在限制该能力的沙箱中按设计跳过，在普通终端通过。
 - 运行期实测：`GET /dsh-csrw/api/state` 返回 401（路由已注册，需鉴权），旧路由 `GET /csrw-desk/state` 返回 404；客户端插槽列表里 `sidebar.panellist`（order 45）、`settings.section`（order 17）、`settings.section.icon` 均为 `dsh-csrw-ui`；`dsh_csrw_health` 返回 46 工具、六模块 `ready`。
 - 状态迁移实机验证：从 `~/.dsh/csrw-desk/` 复制到 `~/.dsh/dsh-csrw/`，读到 6 个待办、3 篇文献、3 个想法；旧文件 SHA-256 前后一致（未被改写），新目录含 `state.json` 与 `.migrated-from-csrw-desk` 标记。
 - 界面人工验收：设置分区、侧栏入口、标题与图标名称、工作台加载配置均按预期显示；插件卡片描述 41 字未截断。
