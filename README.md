@@ -28,11 +28,26 @@ node bin/csrw.js health
 
 本地直接运行 `node bin/csrw.js`。安装为命令行包后也可运行 `csrw`。命令与工具一一对应，如 `csrw obsidian read` 对应 `csrw_obsidian_read`；`--help` 列出完整命令。
 
+## 命名规范
+
+| 标识 | 取值 | 作用域 | 说明 |
+| --- | --- | --- | --- |
+| npm 包名 | `dsh-cs-research-workbench` | npm / DSH 模块 | 改名必须重新安装 |
+| 插件短名 | `csrw` | Host 插件 `name`、Locale 命名空间、CLI | 稳定，工具前缀与之对齐 |
+| UI 面板 ID | `dsh-csrw-ui` | 主面板、侧栏入口、设置分区、设置图标 | 四处必须同值 |
+| HTTP 路由 | `/dsh-csrw/api` | Host Web 服务 | 前端用相对基址 `dsh-csrw/api/` |
+| 工作台状态目录 | `$DSH_HOME/dsh-csrw/` | 本机持久化 | 自动从 `csrw-desk/` 复制，旧目录保留 |
+| 工作区配置 | `<workspace>/.csrw/` | 项目内配置、同步状态、备份 | 刻意保留短名 |
+| 工具前缀 | `csrw_`（29 个） | 模型工具 | 刻意保留短名 |
+| 人工命令 | `/csrw-ui` | DSH 命令面板 | 不是模型工具 |
+
+全局资源统一挂在 `dsh-csrw` 命名空间下；项目内配置目录与工具前缀保留短名 `csrw`，避免改动用户已有仓库和模型调用习惯。两处全局标识由 `scripts/check-identifiers.mjs` 校验一致性，`npm run check` 会执行它。
+
 ## 图形界面
 
 安装插件并刷新 DSH 页面后，侧边栏新增 **CS科研工作台** 入口，主面板是仿 dsh-media-desk 的科研首页；设置里保留同一名字的 **CS科研工作台** 分区，插件管理页也提供配置卡。主面板与设置页复用同一个原生 React 客户端半片（`client.js`，手写 IIFE，无构建步骤），不创建其他网页服务。
 
-主面板（`/csrw-desk/*` 路由，数据在 `$DSH_HOME/csrw-desk/state.json`）：
+主面板（`/dsh-csrw/api/*` 路由，数据在 `$DSH_HOME/dsh-csrw/state.json`；旧目录 `csrw-desk/` 会在首次读取时自动复制，且旧文件保留）：
 
 1. 首屏两行数字：还有 N 件事等你推进、M 篇文献排在本周；下面是一句话记录框。
 2. 一句话按内容分流：DOI/arXiv → 文献，`问题:`/`假设:`/`方法:`/`局限:` 或链接 → 想法，带日期/`@项目`/`#P0`/`~30min` → 任务，其余 → 任务。
@@ -143,7 +158,7 @@ Zotero 本机 API 不需要 API Key。WebDAV 强制 HTTPS（本机测试允许 H
 
 - `node scripts/check.mjs` 复验通过：语法检查、包元数据、29 个 `csrw_` 工具与六个模块全部 `ready`。
 - `node --test --test-isolation=none --test-concurrency=1 test/*.test.js` 复验：37 个用例全部通过（0 skip），其中 5 个是并入工作台后的 `lib/desk/` 用例（示例数据、操作白名单、状态/位置更新、持久化与三方撤销、无 Web 服务时 `registerDesk` 不生效）。其中“真实 Git 临时仓库集成”用例需要进程能用管道捕获子进程输出：在限制该能力的沙箱中会按设计跳过（不绕过沙箱），在普通终端（Git 2.56.1 已加入 PATH）中通过。
-- 已通过 `plugin_manager install_bundle` 安装进 `desktop` profile（`application: applied`，无 warnings），会话内 29 个 `csrw_` 工具已注册；`csrw_health` 返回六模块 `ready`。`scripts/verify-ui.mjs` 与 `scripts/verify-ui-interaction.mjs` 全部通过；工作台主面板与侧栏入口已注册为 `csrw-workbench`，`GET /csrw-desk/state` 未登录返回 401。
+- 已通过 `plugin_manager install_bundle` 安装进 `desktop` profile（`application: applied`，无 warnings），会话内 29 个 `csrw_` 工具已注册；`csrw_health` 返回六模块 `ready`。`scripts/verify-ui.mjs` 与 `scripts/verify-ui-interaction.mjs` 全部通过；工作台主面板与侧栏入口已注册为 `dsh-csrw-ui`，`GET /dsh-csrw/api/state` 未登录返回 401。
 - 原独立验证包 `dsh-research-desk` 的工作台代码已并入本仓库（`lib/desk/` + `client.js`），验证通过后从 profile 停用；其设计文档已移入 `docs/`。
 - 实机端子验收（临时 vault，非用户真实数据）：write/append/move/trash 正常；`../` 越界与默认覆盖均被拒绝；`snapshot_create` 生成 manifest，`snapshot_verify` 检出被篡改文件，`snapshot_restore` 未传 `confirm: true` 时拒绝。
 - Obsidian 生命周期、WebDAV mock 往返/冲突、Zotero mock GET、SQLite WAL 一致副本与快照恢复均有测试证据；不等于真实外部服务验收。

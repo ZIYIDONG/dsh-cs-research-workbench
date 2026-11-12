@@ -473,7 +473,7 @@
 **vault 同步**
 - 设置里绑定 vault 子目录（默认 `Research/Knowledge/`）。
 - 导出：每篇笔记 → `<vault>/Research/Knowledge/<分组>/<标题>.md`，带 frontmatter（tags、updatedAt）；冲突时保留 `<名>.local.md` 与 `<名>.remote.md` 双份并提示。
-- 导入：扫描目录中带 `csrw-desk: true` frontmatter 的文件（只认识自己导出的），变更才覆盖，不删 vault 中其他文件。
+- 导入：扫描目录中带 `dsh-csrw: true` frontmatter 的文件（只认识自己导出的），变更才覆盖，不删 vault 中其他文件。
 
 ### 5.4 状态
 
