@@ -6,7 +6,7 @@ import path from 'node:path';
 import { DatabaseSync } from 'node:sqlite';
 import { createSnapshot, verifySnapshot, restoreSnapshot, discoverDsh } from '../lib/services/snapshot.js';
 import { backupTools } from '../lib/tools/backup.js';
-import { DEFAULTS } from '../lib/services/config.js';
+import { DEFAULTS, setConfig } from '../lib/services/config.js';
 import { hashBytes } from '../lib/utils/hash.js';
 const signal = () => new AbortController().signal;
 async function fixture(t) {
@@ -130,17 +130,17 @@ test('Zotero WAL database snapshot is consistent using node:sqlite backup', asyn
  await assert.rejects(restoreSnapshot(root, { sources: ['zotero'], dataDir, snapshotPath: snap.snapshotPath, confirm: true }, signal()), /Close Zotero/);
 });
 
-test('abort and unsupported target errors propagate', async t => {
+test('abort, unsupported target config and missing sources propagate', async t => {
  const { root, options } = await fixture(t); const controller = new AbortController(); controller.abort(new Error('stop-now'));
  await assert.rejects(createSnapshot(root, options, controller.signal), /stop-now/);
- await assert.rejects(createSnapshot(root, { ...options, target: 'nutstore' }, signal()), /not implemented/);
+ await assert.rejects(setConfig(root, 'backup.target', 'remote'), /local or nutstore/);
  await assert.rejects(createSnapshot(root, { ...options, vaultPath: path.join(root, 'missing') }, signal()), /ENOENT/);
 });
 
-test('six canonical defineTool contracts render one JSON block and preserve exceptions', async t => {
+test('canonical defineTool contracts render one JSON block and preserve exceptions', async t => {
  const { root, options } = await fixture(t); const definitions = backupTools({});
- assert.deepEqual(definitions.map(d => d.name), ['dsh_csrw_backup_obsidian', 'dsh_csrw_backup_zotero', 'dsh_csrw_backup_dsh', 'dsh_csrw_snapshot_create', 'dsh_csrw_snapshot_verify', 'dsh_csrw_snapshot_restore']);
- for (const d of definitions) { assert.equal(d.output.schema.type, 'object'); assert.equal(d.output.schema.additionalProperties, false); assert.ok(Array.isArray(d.output.schema.required)); }
+ assert.deepEqual(definitions.map(d => d.name), ['dsh_csrw_backup_obsidian', 'dsh_csrw_backup_zotero', 'dsh_csrw_backup_dsh', 'dsh_csrw_backup_workspace', 'dsh_csrw_snapshot_create', 'dsh_csrw_snapshot_verify', 'dsh_csrw_snapshot_restore', 'dsh_csrw_backup_upload', 'dsh_csrw_backup_github', 'dsh_csrw_backup_all']);
+ for (const d of definitions) { assert.equal(d.output.schema.type, 'object'); if (d.name === 'dsh_csrw_backup_all') assert.equal(d.output.schema.additionalProperties, true); else { assert.equal(d.output.schema.additionalProperties, false); assert.ok(Array.isArray(d.output.schema.required)); } }
  const d = definitions[0]; const result = await d.execute({ workspace: root, ...options }, { signal: signal() });
  const blocks = d.output.render({}, result); assert.equal(blocks.length, 1); assert.deepEqual(JSON.parse(blocks[0].text), result);
  const c = new AbortController(); c.abort(new Error('tool-abort')); await assert.rejects(d.execute({ workspace: root, ...options }, { signal: c.signal }), /tool-abort/);

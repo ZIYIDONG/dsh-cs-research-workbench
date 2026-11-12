@@ -14,8 +14,8 @@ window.__ModuleLoader__.load({
     const HERO = { w: 540, h: 372 }
 
     // ---------- 原有工具面板：配置、连接检测、备份（并入设置页，不再单独占一个侧栏入口） ----------
-    const TOOLS_EN = {title:'CS research workbench',intro:'Workspace configuration, connection checks, sync and versioned backups.',workspace:'Workspace directory',session:'Session ID',load:'Load configuration',save:'Save field',open:'Open workbench',config:'Configuration',actions:'Operations',result:'Last result',pending:'Running…',cancel:'Cancel',confirm:'Confirm this write operation',approval:'Review the target workspace and arguments before confirming. This operation may change local or remote files.',secret:'Passwords are not stored here. Configure credentials in the DSH credential store or NUTSTORE_USERNAME / NUTSTORE_PASSWORD environment variables.',context:'Select an existing session to provide a permission and audit context. No model turn is started.',error:'Request failed',health:'Check plugin',git:'Git status',zotero:'Check Zotero',dav:'Check WebDAV',list:'List remote directory',push:'Upload directory',pull:'Download directory',obsidian:'Back up Obsidian',backupZotero:'Back up Zotero',dsh:'Back up DSH',verify:'Verify snapshot',local:'Local sync directory',remote:'Remote subdirectory',snapshot:'Snapshot directory',sources:'Backup paths come from the current workspace configuration. Restore remains available through the explicit-confirmation tool.',choose:'Choose directory',noSession:'Choose a session first',notLoaded:'Load the workspace configuration first',boolean:'Boolean',field:'Configuration field',value:'Value',operationsHint:'Network checks contact only the configured endpoints; backups create local files.',empty:'No result yet',yes:'Enabled',no:'Disabled'};
-    const TOOLS_ZH = {title:'CS科研工作台',intro:'工作区配置、连接检测、增量同步与版本化备份。',workspace:'工作区目录',session:'会话 ID',load:'加载配置',save:'保存此项',open:'打开工作台',config:'配置',actions:'操作',result:'最近结果',pending:'执行中…',cancel:'取消',confirm:'确认执行此写入操作',approval:'请核对目标工作区和参数后确认；此操作可能修改本地或远端文件。',secret:'这里不保存密码。请使用 DSH 凭据存储，或 NUTSTORE_USERNAME / NUTSTORE_PASSWORD 环境变量。',context:'选择已有会话作为权限与审计上下文，不会启动模型对话。',error:'请求失败',health:'检查插件',git:'Git 状态',zotero:'检测 Zotero',dav:'检测 WebDAV',list:'列出远端目录',push:'上传目录',pull:'下载目录',obsidian:'备份 Obsidian',backupZotero:'备份 Zotero',dsh:'备份 DSH',verify:'校验快照',local:'本地同步目录',remote:'远端子目录',snapshot:'快照目录',sources:'备份路径读取当前工作区配置。恢复仍通过带显式确认的工具执行。',choose:'选择目录',noSession:'请先选择会话',notLoaded:'请先加载工作区配置',boolean:'布尔值',field:'配置字段',value:'值',operationsHint:'连接检测只访问配置中的端点；备份会创建本地文件。',empty:'暂无结果',yes:'启用',no:'停用'};
+    const TOOLS_EN = {title:'CS research workbench',intro:'Workspace configuration, connection checks, sync and versioned backups.',workspace:'Workspace directory',session:'Session ID',load:'Load configuration',save:'Save field',open:'Open workbench',config:'Configuration',actions:'Operations',result:'Last result',pending:'Running…',cancel:'Cancel',confirm:'Confirm this write operation',approval:'Review the target workspace and arguments before confirming. This operation may change local or remote files.',secret:'Passwords are not stored here. Configure credentials in the DSH credential store or NUTSTORE_USERNAME / NUTSTORE_PASSWORD environment variables.',context:'Select an existing session to provide a permission and audit context. No model turn is started.',error:'Request failed',health:'Check plugin',git:'Git status',zotero:'Check Zotero',dav:'Check WebDAV',list:'List remote directory',push:'Upload directory',pull:'Download directory',obsidian:'Back up Obsidian',backupZotero:'Back up Zotero',dsh:'Back up DSH',verify:'Verify snapshot',local:'Local sync directory',remote:'Remote subdirectory',snapshot:'Snapshot directory',sources:'Backup paths come from the current workspace configuration. Restore remains available through the explicit-confirmation tool.',choose:'Choose directory',noSession:'Choose a session first',notLoaded:'Load the workspace configuration first',boolean:'Boolean',field:'Configuration field',value:'Value',operationsHint:'Network checks contact only the configured endpoints; backups create local files.',empty:'No result yet',yes:'Enabled',no:'Disabled',cloudBackup:'Cloud backup',backupWorkspace:'Backup config',backupUpload:'Upload Nutstore',backupGithub:'Backup GitHub',backupAll:'Backup all',obsidianTools:'Obsidian tools',links:'Links',backlinks:'Backlinks',brokenLinks:'Broken links',listDir:'List',template:'Template',daily:'Daily',attach:'Attach',rename:'Rename',graph:'Graph',canvas:'Canvas',bookmarks:'Bookmarks',paperNote:'Paper note',path:'Path',destination:'Destination',source:'Source',date:'Date',scope:'Scope',templatePath:'Template',zkey:'Zotero key'};
+    const TOOLS_ZH = {title:'CS科研工作台',intro:'工作区配置、连接检测、增量同步与版本化备份。',workspace:'工作区目录',session:'会话 ID',load:'加载配置',save:'保存此项',open:'打开工作台',config:'配置',actions:'操作',result:'最近结果',pending:'执行中…',cancel:'取消',confirm:'确认执行此写入操作',approval:'请核对目标工作区和参数后确认；此操作可能修改本地或远端文件。',secret:'这里不保存密码。请使用 DSH 凭据存储，或 NUTSTORE_USERNAME / NUTSTORE_PASSWORD 环境变量。',context:'选择已有会话作为权限与审计上下文，不会启动模型对话。',error:'请求失败',health:'检查插件',git:'Git 状态',zotero:'检测 Zotero',dav:'检测 WebDAV',list:'列出远端目录',push:'上传目录',pull:'下载目录',obsidian:'备份 Obsidian',backupZotero:'备份 Zotero',dsh:'备份 DSH',verify:'校验快照',local:'本地同步目录',remote:'远端子目录',snapshot:'快照目录',sources:'备份路径读取当前工作区配置。恢复仍通过带显式确认的工具执行。',choose:'选择目录',noSession:'请先选择会话',notLoaded:'请先加载工作区配置',boolean:'布尔值',field:'配置字段',value:'值',operationsHint:'连接检测只访问配置中的端点；备份会创建本地文件。',empty:'暂无结果',yes:'启用',no:'停用',cloudBackup:'云端备份',backupWorkspace:'备份参数',backupUpload:'上传坚果云',backupGithub:'备份 GitHub',backupAll:'一键备份',obsidianTools:'Obsidian 工具',links:'双链',backlinks:'反链',brokenLinks:'死链',listDir:'列目录',template:'模板生成',daily:'日记',attach:'附件',rename:'重命名',graph:'图谱',canvas:'Canvas',bookmarks:'书签',paperNote:'文献笔记',path:'路径',destination:'目标',source:'源文件',date:'日期',scope:'目录',templatePath:'模板',zkey:'Zotero key'};
     const TOOLS_FIELDS = ['obsidian.vaultPath','obsidian.autoDetect','obsidian.trashDir','git.remote','git.branch','git.autoInit','git.pullRebase','zotero.localApi','zotero.dataDir','nutstore.baseUrl','nutstore.remoteRoot','nutstore.username','nutstore.credentialKey','backup.localDir','backup.dshHome','backup.dshProfile','backup.includeDshSessions'];
     const TOOLS_CSS = '.dsh-csrw-panel{box-sizing:border-box;max-width:1040px;width:100%;margin:0 auto;padding:28px;color:var(--dsw-alias-label-primary);font-size:14px;overflow:auto;height:100%}.dsh-csrw-panel *{box-sizing:border-box}.dsh-csrw-panel h1{font-size:24px;margin:0}.dsh-csrw-head{margin:0 0 10px}.dsh-csrw-panel h2{font-size:17px;margin:0 0 16px}.dsh-csrw-panel p{color:var(--dsw-alias-label-secondary);line-height:1.6}.dsh-csrw-card{background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l1);border-radius:12px;padding:20px;margin:18px 0}.dsh-csrw-row{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin:12px 0}.dsh-csrw-panel label{display:flex;flex-direction:column;gap:7px;flex:1 1 240px}.dsh-csrw-panel input,.dsh-csrw-panel select{width:100%;min-height:36px;border:1px solid var(--dsw-alias-border-l2);border-radius:7px;padding:7px 10px;background:var(--dsw-alias-bg-base);color:inherit;font:inherit}.dsh-csrw-panel button{min-height:36px;border:1px solid var(--dsw-alias-border-l2);border-radius:7px;padding:7px 14px;background:var(--dsw-alias-bg-layer-2);color:inherit;font:inherit;cursor:pointer}.dsh-csrw-panel button:disabled{opacity:.5;cursor:not-allowed}.dsh-csrw-panel button:focus-visible,.dsh-csrw-panel input:focus-visible,.dsh-csrw-panel select:focus-visible{outline:2px solid var(--dsw-alias-brand-primary);outline-offset:2px}.dsh-csrw-panel pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:420px;overflow:auto;background:var(--dsw-alias-bg-base);padding:14px;border-radius:8px;font-size:12px}.dsh-csrw-alert{border-left:3px solid var(--dsw-alias-state-warn-primary);padding:12px}.dsh-csrw-error{color:var(--dsw-alias-state-error-primary)}.dsh-csrw-icon-slot{display:inline-flex;align-items:center;justify-content:center;line-height:1;vertical-align:middle;align-self:center;flex:none}.dsh-csrw-icon-slot svg{display:block}';
     const toolsGlyph = { fill: 'none', stroke: '#000', strokeWidth: 0.5333333333333333, strokeLinecap: 'round', strokeLinejoin: 'round' };
@@ -25,11 +25,18 @@ window.__ModuleLoader__.load({
     function ToolsPanel(props) {
       const ctx = props.ctx;
       const t = props.t;
+      const desk = props.desk;
       const useSessions = props.useSessions;
       const sessionList = useSessions ? useSessions((s) => s) : { ids: [], byId: {} };
       const [,localeUpdate]=useState(0);useEffect(()=>ctx.locale.subscribe(()=>localeUpdate(v=>v+1)),[]);
-      const [workspace,setWorkspace]=useState(''),[sessionId,setSessionId]=useState(''),[config,setConfig]=useState(null),[field,setField]=useState(TOOLS_FIELDS[0]),[value,setValue]=useState(''),[busy,setBusy]=useState(false),[result,setResult]=useState(null),[error,setError]=useState(''),[pending,setPending]=useState(null),[local,setLocal]=useState(''),[remote,setRemote]=useState(''),[snapshot,setSnapshot]=useState('');
+      const [workspace,setWorkspace]=useState(''),[sessionId,setSessionId]=useState(''),[config,setConfig]=useState(null),[field,setField]=useState(TOOLS_FIELDS[0]),[value,setValue]=useState(''),[busy,setBusy]=useState(false),[result,setResult]=useState(null),[error,setError]=useState(''),[pending,setPending]=useState(null),[local,setLocal]=useState(''),[remote,setRemote]=useState(''),[snapshot,setSnapshot]=useState(''),[obsPath,setObsPath]=useState(''),[obsDest,setObsDest]=useState(''),[obsTemplate,setObsTemplate]=useState(''),[obsDate,setObsDate]=useState(''),[obsSource,setObsSource]=useState(''),[obsScope,setObsScope]=useState(''),[obsFrom,setObsFrom]=useState(''),[paperKey,setPaperKey]=useState('');
       useEffect(()=>{if(sessionId&&!sessionList.byId[sessionId]){setSessionId('');setPending(null);}},[sessionList,sessionId]);
+      const [prefLang,setPrefLang]=useState('zh'),[prefDock,setPrefDock]=useState(true),[prefBusy,setPrefBusy]=useState(false),[prefError,setPrefError]=useState('');
+      useEffect(()=>{fetch(API_BASE+'state').then(r=>r.json()).then(d=>{const s=d.state&&d.state.settings;if(s){setPrefLang(s.language||'zh');setPrefDock(s.dockOpen!==false);}}).catch(()=>{});},[]);
+      async function prefPost(path,body){const res=await fetch(API_BASE+path,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body)});const data=await res.json().catch(()=>({}));if(!res.ok)throw new Error(data.error||'preferences failed');return data;}
+      async function changeLang(next){setPrefBusy(true);setPrefError('');try{await prefPost('settings',{language:next});desk.setLanguage(next);desk.setDesk({});setPrefLang(next);}catch(err){setPrefError(err.message);}finally{setPrefBusy(false);}}
+      async function changeDock(value){setPrefBusy(true);setPrefError('');try{await prefPost('settings',{dockOpen:value});desk.setDesk({dockOpen:value});setPrefDock(value);}catch(err){setPrefError(err.message);}finally{setPrefBusy(false);}}
+      async function clearSamples(){setPrefBusy(true);setPrefError('');try{await prefPost('ops',{ops:[{op:'clear_samples'}],label:desk.t('clearSamples')});desk.loadDesk();}catch(err){setPrefError(err.message);}finally{setPrefBusy(false);}}
       const request=useRef(null);useEffect(()=>()=>request.current?.abort(),[]);
       async function run(operation,args={},confirmed=false){
         if(!sessionId){setError(t('noSession'));return;}
@@ -42,9 +49,13 @@ window.__ModuleLoader__.load({
       const actual=field.split('.').reduce((a,k)=>a?.[k],config),isBoolean=typeof actual==='boolean';
       useEffect(()=>{setValue(actual??'');},[field,config]);
       return h('section',{className:'dsh-csrw-panel','aria-label':t('title')},h('style',null,TOOLS_CSS),h('header',{className:'dsh-csrw-head'},h('h1',null,t('title'))),
+        h('div',{className:'dsh-csrw-card'},h('h2',null,desk.t('settings')),h('div',{className:'dsh-csrw-row'},h('label',null,desk.t('language'),h('select',{value:prefLang,disabled:prefBusy,onChange:e=>changeLang(e.target.value)},h('option',{value:'zh'},'中文'),h('option',{value:'en'},'English'))),h('label',null,desk.t('dockOpen'),h('select',{value:String(prefDock),disabled:prefBusy,onChange:e=>changeDock(e.target.value==='true')},h('option',{value:'true'},'√'),h('option',{value:'false'},'—')))),h('div',{className:'dsh-csrw-row'},h('button',{type:'button',disabled:prefBusy,onClick:clearSamples},desk.t('clearSamples'))),prefError?h('p',{className:'dsh-csrw-error',role:'alert'},prefError):null,h('p',null,desk.t('undoHint'))),
         h('div',{className:'dsh-csrw-card'},h('div',{className:'dsh-csrw-row'},input('workspace',workspace,v=>{setWorkspace(v);setConfig(null);setPending(null);setResult(null);setError('');}),h('button',{type:'button',disabled:busy,onClick:async()=>{try{const p=await ctx.get('uiWorkspace')?.pickDirectory();if(p){setWorkspace(p);setConfig(null);setPending(null);setResult(null);setError('');}}catch(e){setError(e.message);}}},t('choose')),h('label',null,t('session'),h('select',{value:sessionId,disabled:busy,onChange:e=>{setSessionId(e.target.value);setPending(null);setResult(null);setConfig(null);}},h('option',{value:''},t('noSession')),...sessionList.ids.map(id=>h('option',{value:id,key:id},sessionList.byId[id]?.displayTitle||id))))),h('p',null,t('context')),h('div',{className:'dsh-csrw-row'},action('load','dsh_csrw_config_show'),action('health','dsh_csrw_health'))),
         h('div',{className:'dsh-csrw-card'},h('h2',null,t('config')),h('p',null,t('secret')),h('div',{className:'dsh-csrw-row'},h('label',null,t('field'),h('select',{value:field,onChange:e=>setField(e.target.value),disabled:busy},...TOOLS_FIELDS.map(k=>h('option',{key:k,value:k},k)))),h('label',null,t('value'),isBoolean?h('select',{value:String(value),onChange:e=>setValue(e.target.value==='true'),disabled:busy},h('option',{value:'true'},t('yes')),h('option',{value:'false'},t('no'))):h('input',{value:String(value),disabled:busy,onChange:e=>setValue(e.target.value)})),h('button',{disabled:busy||!config,onClick:()=>setPending({operation:'dsh_csrw_config_set',args:{key:field,value}})},t('save'))),config&&h('pre',null,JSON.stringify(config,null,2))),
         h('div',{className:'dsh-csrw-card'},h('h2',null,t('actions')),h('p',null,t('operationsHint')),h('div',{className:'dsh-csrw-row'},action('git','dsh_csrw_git_status'),action('zotero','dsh_csrw_zotero_search',{query:'a',limit:1}),action('dav','dsh_csrw_nutstore_test'),action('list','dsh_csrw_nutstore_list',{remotePath:remote})),h('div',{className:'dsh-csrw-row'},input('local',local,setLocal),input('remote',remote,setRemote)),h('div',{className:'dsh-csrw-row'},action('push','dsh_csrw_nutstore_push',{localPath:local,remotePath:remote},true),action('pull','dsh_csrw_nutstore_pull',{localPath:local,remotePath:remote},true)),h('p',null,t('sources')),h('div',{className:'dsh-csrw-row'},action('obsidian','dsh_csrw_backup_obsidian',{},true),action('backupZotero','dsh_csrw_backup_zotero',{},true),action('dsh','dsh_csrw_backup_dsh',{},true)),h('div',{className:'dsh-csrw-row'},input('snapshot',snapshot,setSnapshot),action('verify','dsh_csrw_snapshot_verify',{snapshotPath:snapshot}))),
+        h('div',{className:'dsh-csrw-card'},h('h2',null,t('cloudBackup')),h('p',null,t('sources')),h('div',{className:'dsh-csrw-row'},action('backupWorkspace','dsh_csrw_backup_workspace',{},true),action('backupUpload','dsh_csrw_backup_upload',{},true)),h('div',{className:'dsh-csrw-row'},action('backupGithub','dsh_csrw_backup_github',{},true),action('backupAll','dsh_csrw_backup_all',{},true))),
+        h('div',{className:'dsh-csrw-card'},h('h2',null,t('obsidianTools')),h('div',{className:'dsh-csrw-row'},input('path',obsPath,setObsPath),action('links','dsh_csrw_obsidian_links',{path:obsPath}),action('backlinks','dsh_csrw_obsidian_backlinks',{path:obsPath}),action('brokenLinks','dsh_csrw_obsidian_broken_links',{path:obsPath})),h('div',{className:'dsh-csrw-row'},input('scope',obsScope,setObsScope),action('listDir','dsh_csrw_obsidian_list',{scope:obsScope}),action('graph','dsh_csrw_obsidian_graph',{}),action('bookmarks','dsh_csrw_obsidian_bookmarks',{})),h('div',{className:'dsh-csrw-row'},input('templatePath',obsTemplate,setObsTemplate),input('destination',obsDest,setObsDest),action('template','dsh_csrw_obsidian_template',{template:obsTemplate,destination:obsDest},true)),h('div',{className:'dsh-csrw-row'},input('date',obsDate,setObsDate),action('daily','dsh_csrw_obsidian_daily',{date:obsDate},true)),h('div',{className:'dsh-csrw-row'},input('source',obsSource,setObsSource),input('destination',obsDest,setObsDest),action('attach','dsh_csrw_obsidian_attach',{source:obsSource,destination:obsDest},true)),h('div',{className:'dsh-csrw-row'},input('path',obsFrom,setObsFrom),input('destination',obsDest,setObsDest),action('rename','dsh_csrw_obsidian_rename',{path:obsFrom,destination:obsDest},true)),h('div',{className:'dsh-csrw-row'},input('path',obsPath,setObsPath),action('canvas','dsh_csrw_obsidian_canvas',{path:obsPath,operation:'read'}))),
+        h('div',{className:'dsh-csrw-card'},h('h2',null,t('paperNote')),h('div',{className:'dsh-csrw-row'},input('zkey',paperKey,setPaperKey),action('paperNote','dsh_csrw_paper_to_note',{key:paperKey},true))),
         pending&&h('div',{className:'dsh-csrw-card dsh-csrw-alert',role:'region','aria-label':t('confirm')},h('p',null,t('approval')),h('pre',null,JSON.stringify({workspace,...pending},null,2)),h('div',{className:'dsh-csrw-row'},h('button',{disabled:busy,onClick:()=>{const p=pending;setPending(null);return run(p.operation,p.args,true);}},t('confirm')),h('button',{disabled:busy,onClick:()=>setPending(null)},t('cancel')))),
         h('div',{className:'dsh-csrw-card','aria-live':'polite'},h('h2',null,t('result')),busy&&h('div',null,t('pending'),' ',h('button',{onClick:()=>request.current?.abort()},t('cancel'))),error&&h('p',{className:'dsh-csrw-error',role:'alert'},error),h('pre',null,result?JSON.stringify(result,null,2):t('empty'))));
     }
@@ -75,6 +86,8 @@ window.__ModuleLoader__.load({
       cancel: '取消',
       assistantPlaceholder: '想改什么，直接说',
       assistantEmpty: '告诉我今天要做什么，或者问我现在积压了多少事。',
+      assistantSuggestion1: '今天有什么事？', assistantSuggestion2: '积压了多少？', assistantSuggestion3: '记一件事',
+      engineModel: '模型', engineLocal: '本地规则', clearChat: '清空对话',
       title: '标题', body: '内容', due: '截止', priority: '优先级', estimate: '预计分钟',
       authors: '作者', venue: '发表场所', year: '年份', doi: 'DOI', url: '链接', status: '状态',
       projectOf: '所属项目', none: '无',
@@ -113,6 +126,8 @@ window.__ModuleLoader__.load({
       cancel: 'Cancel',
       assistantPlaceholder: 'Tell me what to change',
       assistantEmpty: 'Tell me what to do today, or ask how much is queued.',
+      assistantSuggestion1: 'What is due today?', assistantSuggestion2: 'How much is queued?', assistantSuggestion3: 'Log something',
+      engineModel: 'Model', engineLocal: 'Local', clearChat: 'Clear chat',
       title: 'Title', body: 'Content', due: 'Due', priority: 'Priority', estimate: 'Minutes',
       authors: 'Authors', venue: 'Venue', year: 'Year', doi: 'DOI', url: 'URL', status: 'Status',
       projectOf: 'Project', none: 'None',
@@ -139,7 +154,7 @@ window.__ModuleLoader__.load({
     let snapshot = {
       state: null, canUndo: false, error: null, view: 'todo', mode: 'scatter', kindFilter: 'all',
       query: '', related: null, capture: null, dockOpen: true, chatInput: '', thinking: false,
-      toast: null, settingsOpen: false, focusId: null, cam: { x: 0, y: 0, z: 1 }, camAnim: false,
+      toast: null, focusId: null, cam: { x: 0, y: 0, z: 1 }, camAnim: false,
       modelsOpen: false, models: [], modelsLoading: false,
       month: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
     }
@@ -524,10 +539,6 @@ window.__ModuleLoader__.load({
 .rd-seg{display:flex;padding:3px;border-radius:999px;background:var(--dsw-alias-bg-layer-2)}
 .rd-seg button{border:0;background:transparent;color:var(--dsw-alias-label-secondary);font:inherit;font-size:12px;height:28px;padding:0 11px;border-radius:999px;cursor:pointer}
 .rd-seg button.is-on{background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-primary);box-shadow:0 1px 3px rgb(0 0 0 / 8%)}
-.rd-chips{display:flex;align-items:center;gap:4px;height:30px}
-.rd-chips button{border:0;background:transparent;color:var(--dsw-alias-label-secondary);font:inherit;font-size:12px;height:26px;padding:0 10px;border-radius:999px;cursor:pointer}
-.rd-chips button.is-on{background:var(--dsw-alias-bg-layer-2);color:var(--dsw-alias-label-primary)}
-.rd-dockbar .rd-divider{width:.5px;height:18px;background:var(--dsw-alias-border-l1)}
 .rd-round-plus{width:34px;height:34px;border-radius:50%;border:0;background:var(--dsw-alias-label-primary);color:var(--dsw-alias-bg-base);display:grid;place-items:center;cursor:pointer}
 .rd-list{padding:104px 28px 120px;max-width:1080px;margin:0 auto;overflow:auto;height:100%}
 .rd-board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:start}
@@ -571,16 +582,36 @@ window.__ModuleLoader__.load({
 .rd-btn.is-primary{border-color:transparent;background:var(--dsw-alias-label-primary);color:var(--dsw-alias-bg-base)}
 .rd-btn:disabled{opacity:.45;cursor:default}
 .rd-dock{position:absolute;top:0;right:0;bottom:0;width:var(--dock-w);z-index:25;display:flex;flex-direction:column;background:var(--glass);border-left:.5px solid var(--dsw-alias-border-l1);backdrop-filter:blur(28px)}
-.rd-dock-head{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 8px;font-size:12px;color:var(--dsw-alias-label-secondary)}
+.rd-dock-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 16px 10px;font-size:13px;color:var(--dsw-alias-label-primary)}
+.rd-dock-title{display:flex;align-items:center;gap:8px;font-weight:600}
+.rd-dock-engine{font-size:11px;font-weight:400;color:var(--dsw-alias-label-tertiary,#9a9a9a);padding:2px 8px;border-radius:999px;background:var(--dsw-alias-bg-layer-1);border:.5px solid var(--dsw-alias-border-l1);white-space:nowrap;max-width:160px;overflow:hidden;text-overflow:ellipsis}
+.rd-dock-actions{display:flex;align-items:center;gap:4px}
+.rd-dock-clear{border:0;background:none;color:var(--dsw-alias-label-secondary);cursor:pointer;font:inherit;font-size:11px;padding:4px 8px;border-radius:999px}
+.rd-dock-clear:hover{color:var(--dsw-alias-label-primary);background:var(--dsw-alias-bg-layer-1)}
 .rd-dock-head button{border:0;background:none;color:inherit;cursor:pointer;font:inherit;font-size:16px;line-height:1}
-.rd-chat{flex:1;overflow:auto;padding:8px 16px;display:flex;flex-direction:column;gap:10px}
-.rd-msg{font-size:13px;line-height:1.55;max-width:100%}
-.rd-msg.is-user{align-self:flex-end;background:var(--dsw-alias-bg-layer-2);padding:8px 12px;border-radius:14px 14px 4px 14px;max-width:86%}
-.rd-msg.is-bot{color:var(--dsw-alias-label-secondary);white-space:pre-wrap}
+.rd-chat{flex:1;overflow:auto;padding:8px 16px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth}
+.rd-msg{font-size:13px;line-height:1.55;max-width:86%;display:flex;flex-direction:column;gap:3px}
+.rd-msg.is-user{align-self:flex-end;background:var(--dsw-alias-bg-layer-2);padding:8px 12px;border-radius:14px 14px 4px 14px}
+.rd-msg.is-bot{align-self:flex-start;background:var(--dsw-alias-bg-layer-1);padding:8px 12px;border-radius:4px 14px 14px 14px;color:var(--dsw-alias-label-primary);white-space:pre-wrap}
+.rd-msg-engine{align-self:flex-start;font-size:10px;color:var(--dsw-alias-label-tertiary,#9a9a9a);letter-spacing:.02em}
+.rd-msg-time{align-self:flex-end;font-size:10px;color:var(--dsw-alias-label-tertiary,#9a9a9a)}
 .rd-chat-empty{color:var(--dsw-alias-label-tertiary,#9a9a9a);font-size:12px;line-height:1.6;margin-top:12px}
-.rd-chat-input{display:flex;gap:6px;padding:10px 12px 14px}
-.rd-chat-input input{flex:1;min-width:0;height:36px;border-radius:10px;border:.5px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-1);color:inherit;font:inherit;font-size:13px;padding:0 10px;outline:none}
-.rd-chat-input button{width:36px;height:36px;border-radius:10px;border:0;background:var(--dsw-alias-brand-primary);color:#fff;display:grid;place-items:center;cursor:pointer}
+.rd-chat-empty p{margin:0 0 10px}
+.rd-suggest{display:flex;flex-wrap:wrap;gap:6px}
+.rd-suggest button{border:.5px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);color:var(--dsw-alias-label-secondary);font:inherit;font-size:12px;padding:6px 10px;border-radius:999px;cursor:pointer}
+.rd-suggest button:hover{color:var(--dsw-alias-label-primary);border-color:var(--dsw-alias-brand-primary)}
+.rd-thinking{flex-direction:row;gap:5px;align-items:center;padding:10px 12px}
+.rd-thinking-dot{width:6px;height:6px;border-radius:50%;background:var(--dsw-alias-label-secondary);animation:rd-blink 1.2s infinite}
+.rd-thinking-dot:nth-child(2){animation-delay:.2s}
+.rd-thinking-dot:nth-child(3){animation-delay:.4s}
+@keyframes rd-blink{0%,80%,100%{opacity:.25;transform:translateY(0)}40%{opacity:1;transform:translateY(-3px)}}
+.rd-chat-input{display:flex;gap:6px;padding:10px 12px 14px;align-items:flex-end}
+.rd-chat-input textarea{flex:1;min-width:0;min-height:36px;max-height:120px;resize:none;border-radius:10px;border:.5px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-1);color:inherit;font:inherit;font-size:13px;line-height:1.5;padding:8px 10px;outline:none}
+.rd-chat-input button{width:36px;height:36px;border-radius:10px;border:0;background:var(--dsw-alias-brand-primary);color:#fff;display:grid;place-items:center;cursor:pointer;flex:none}
+.rd-chat-input button:disabled{opacity:.55;cursor:default}
+.rd-chat-input button.is-loading{opacity:1}
+.rd-spinner{width:14px;height:14px;border:2px solid rgb(255 255 255 / 35%);border-top-color:#fff;border-radius:50%;animation:rd-spin .7s linear infinite}
+@keyframes rd-spin{to{transform:rotate(360deg)}}
 .rd-toast{position:absolute;left:50%;bottom:76px;transform:translateX(-50%);z-index:70;display:flex;align-items:center;gap:12px;padding:9px 14px;border-radius:12px;background:var(--dsw-alias-label-primary);color:var(--dsw-alias-bg-base);font-size:12px;box-shadow:0 14px 40px rgb(0 0 0 / 18%)}
 .rd-toast.is-error{background:#d64545;color:#fff}
 .rd-toast button{border:0;background:transparent;color:inherit;font:inherit;font-size:12px;text-decoration:underline;cursor:pointer;padding:0}
@@ -589,8 +620,10 @@ window.__ModuleLoader__.load({
 .rd-root.is-narrow .rd-hero-line{font-size:27px}
 .rd-root.is-compact .rd-hero-anchor{width:340px}
 .rd-root.is-compact .rd-hero-line{font-size:23px}
-.rd-root.is-compact .rd-dock{width:min(320px,88%)}
-@media (prefers-reduced-motion:reduce){.rd-ambient i{animation:none}.rd-node,.rd-hero-input,.rd-world,.rd-content{transition:none}}
+.rd-root.is-compact .rd-dock{width:min(320px,88%);box-shadow:-12px 0 40px rgb(0 0 0 / 16%)}
+.rd-root.is-compact.has-dock .rd-content{right:0}
+.rd-root.is-compact.has-dock .rd-topbar{right:0}
+@media (prefers-reduced-motion:reduce){.rd-ambient i{animation:none}.rd-node,.rd-hero-input,.rd-world,.rd-content,.rd-thinking-dot,.rd-spinner{transition:none}.rd-thinking-dot,.rd-spinner{animation:none}}
 `
 
     // ---------- 组件 ----------
@@ -869,14 +902,10 @@ window.__ModuleLoader__.load({
 
     function Dockbar() {
       const mode = useSel((s) => s.mode)
-      const filter = useSel((s) => s.kindFilter)
       const dockOpen = useSel((s) => s.dockOpen)
       const modes = [['scatter', t('scatter')], ['list', t('list')], ['calendar', t('calendar')]]
-      const chips = [['all', 'All'], ['task', 'Todo'], ['project', 'Projects'], ['paper', 'Papers'], ['idea', 'Ideas'], ['note', 'KnowledgeBase']]
       return h('div', { className: 'rd-dockbar' },
         h('div', { className: 'rd-seg' }, ...modes.map(([id, label]) => h('button', { key: id, type: 'button', className: mode === id ? 'is-on' : '', onClick: () => setDesk({ mode: id }) }, label))),
-        mode === 'scatter' ? h('span', { className: 'rd-divider' }) : null,
-        mode === 'scatter' ? h('div', { className: 'rd-chips' }, ...chips.map(([id, label]) => h('button', { key: id, type: 'button', className: filter === id ? 'is-on' : '', onClick: () => setDesk({ kindFilter: id }) }, label))) : null,
         h('button', { type: 'button', className: 'rd-round-plus', title: t('capture'), 'aria-label': t('capture'), onClick: () => setDesk({ capture: 'task' }) }, h(Icon, { name: 'plus', size: 17 })),
         dockOpen ? null : h('button', { type: 'button', className: 'rd-open-dock', onClick: () => setDesk({ dockOpen: true }) }, h(Icon, { name: 'chat', size: 14 }), t('assistant')))
     }
@@ -945,20 +974,48 @@ window.__ModuleLoader__.load({
       const state = useSel((s) => s.state)
       const dockOpen = useSel((s) => s.dockOpen)
       const thinking = useSel((s) => s.thinking)
-      const focused = useSel((s) => s.focusId)
       const [value, setValue] = useState('')
-      if (!dockOpen) return null
+      const chatRef = useRef(null)
       const chat = state?.chat ?? []
+      const chosen = state?.settings?.assistant
+      const engineLabel = chosen && typeof chosen === 'object' ? (chosen.model ?? t('modelLocal')) : t('modelLocal')
+      const submit = () => {
+        const text = value.trim()
+        if (!text || thinking) return
+        setValue('')
+        sendChat(text)
+      }
+      useEffect(() => {
+        const el = chatRef.current
+        if (el) el.scrollTop = el.scrollHeight
+      }, [chat.length, thinking])
+      if (!dockOpen) return null
+      const suggestions = [t('assistantSuggestion1'), t('assistantSuggestion2'), t('assistantSuggestion3')]
       return h('aside', { className: 'rd-dock', 'aria-label': t('assistant') },
         h('div', { className: 'rd-dock-head' },
-          h('span', null, t('assistant')),
-          h('button', { type: 'button', title: t('cancel'), onClick: () => { setDesk({ dockOpen: false }); saveSettings({ dockOpen: false }) } }, '×')),
-        h('div', { className: 'rd-chat' },
-          chat.length ? chat.map((row) => h('div', { key: row.id, className: `rd-msg ${row.role === 'user' ? 'is-user' : 'is-bot'}` }, row.text)) : h('div', { className: 'rd-chat-empty' }, t('assistantEmpty')),
-          thinking ? h('div', { className: 'rd-msg is-bot' }, '…') : null),
-        h('form', { className: 'rd-chat-input', onSubmit: (event) => { event.preventDefault(); const text = value.trim(); if (!text) return; setValue(''); sendChat(text) } },
-          h('input', { value, placeholder: t('assistantPlaceholder'), 'aria-label': t('assistantPlaceholder'), onChange: (event) => setValue(event.target.value) }),
-          h('button', { type: 'submit', disabled: !value.trim() || thinking, 'aria-label': t('send') }, h(Icon, { name: 'send', size: 15 }))))
+          h('span', { className: 'rd-dock-title' }, t('assistant'), h('span', { className: 'rd-dock-engine' }, engineLabel)),
+          h('div', { className: 'rd-dock-actions' },
+            chat.length ? h('button', { type: 'button', className: 'rd-dock-clear', onClick: () => dispatchOps([{ op: 'clear_chat' }], { label: t('clearChat') }) }, t('clearChat')) : null,
+            h('button', { type: 'button', title: t('cancel'), 'aria-label': t('cancel'), onClick: () => { setDesk({ dockOpen: false }); saveSettings({ dockOpen: false }) } }, '×'))),
+        h('div', { ref: chatRef, className: 'rd-chat' },
+          chat.length
+            ? chat.map((row) => h('div', { key: row.id, className: `rd-msg ${row.role === 'user' ? 'is-user' : 'is-bot'}` },
+                row.role === 'assistant' && row.engine ? h('span', { className: 'rd-msg-engine' }, row.engine === 'model' ? t('engineModel') : t('engineLocal')) : null,
+                h('span', null, row.text),
+                row.at ? h('time', { className: 'rd-msg-time', dateTime: row.at }, relTime(row.at)) : null))
+            : h('div', { className: 'rd-chat-empty' },
+                h('p', null, t('assistantEmpty')),
+                h('div', { className: 'rd-suggest' }, ...suggestions.map((s) => h('button', { key: s, type: 'button', onClick: () => sendChat(s) }, s)))),
+          thinking ? h('div', { className: 'rd-msg is-bot rd-thinking' },
+            h('span', { className: 'rd-thinking-dot' }), h('span', { className: 'rd-thinking-dot' }), h('span', { className: 'rd-thinking-dot' })) : null),
+        h('form', { className: 'rd-chat-input', onSubmit: (event) => { event.preventDefault(); submit() } },
+          h('textarea', {
+            value, rows: 1, placeholder: t('assistantPlaceholder'), 'aria-label': t('assistantPlaceholder'),
+            onChange: (event) => setValue(event.target.value),
+            onKeyDown: (event) => { if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) { event.preventDefault(); submit() } },
+          }),
+          h('button', { type: 'submit', disabled: !value.trim() || thinking, className: thinking ? 'is-loading' : '', 'aria-label': t('send') },
+            thinking ? h('span', { className: 'rd-spinner' }) : h(Icon, { name: 'send', size: 15 }))))
     }
 
     function ModelButton() {
@@ -997,27 +1054,6 @@ window.__ModuleLoader__.load({
             h('button', { type: 'button', className: 'rd-btn', onClick: () => setDesk({ modelsOpen: false }) }, dict() === en ? 'Close' : '关闭'))))
     }
 
-    function SettingsDialog() {
-      const open = useSel((s) => s.settingsOpen)
-      const state = useSel((s) => s.state)
-      if (!open) return null
-      const languageValue = state?.settings?.language ?? 'zh'
-      return h('div', { className: 'rd-dialog-backdrop', onPointerDown: (event) => { if (event.target === event.currentTarget) setDesk({ settingsOpen: false }) } },
-        h('div', { className: 'rd-dialog' },
-          h('h3', null, t('settings')),
-          h('label', { className: 'rd-field' }, h('span', null, t('language')),
-            h('select', { value: languageValue, onChange: async (event) => { const next = event.target.value; language = next; await saveSettings({ language: next }); setDesk({ settingsOpen: false }) } },
-              h('option', { value: 'zh' }, '中文'), h('option', { value: 'en' }, 'English'))),
-          h('label', { className: 'rd-field' }, h('span', null, t('dockOpen')),
-            h('select', { value: String(snapshot.dockOpen), onChange: (event) => saveSettings({ dockOpen: event.target.value === 'true' }) },
-              h('option', { value: 'true' }, '√'), h('option', { value: 'false' }, '—'))),
-          h('div', { className: 'rd-form-foot' },
-            h('button', { type: 'button', className: 'rd-btn', onClick: () => { setDesk({ settingsOpen: false }); dispatchOps([{ op: 'clear_samples' }], { label: t('clearSamples') }) } }, t('clearSamples')),
-            h('span', { style: { flex: 1 } }),
-            h('span', { className: 'rd-model-hint', style: { margin: 0 } }, t('undoHint')),
-            h('button', { type: 'button', className: 'rd-btn', onClick: () => setDesk({ settingsOpen: false }) }, dict() === en ? 'Close' : '关闭'))))
-    }
-
     function PlaceholderView() {
       const state = useSel((s) => s.state)
       const view = useSel((s) => s.view)
@@ -1037,6 +1073,7 @@ window.__ModuleLoader__.load({
     function Topbar() {
       const view = useSel((s) => s.view)
       const ready = useSel((s) => Boolean(s.state))
+      const dockOpen = useSel((s) => s.dockOpen)
       const nav = [['todo', 'Todo'], ['project', 'Projects'], ['paper', 'Papers'], ['idea', 'Ideas'], ['kb', 'KnowledgeBase']]
       return h('header', { className: 'rd-topbar' },
         h('nav', { className: 'rd-nav', 'aria-label': t('workbench') }, ...nav.map(([id, label]) => h('button', {
@@ -1045,7 +1082,7 @@ window.__ModuleLoader__.load({
         }, label))),
         h('span', { style: { flex: 1 } }),
         ready ? h(ModelButton) : null,
-        h(IconButton, { name: 'gear', label: t('gear'), onClick: () => setDesk({ settingsOpen: true }) }))
+        h(IconButton, { name: 'chat', label: t('assistant'), onClick: () => { const next = !dockOpen; setDesk({ dockOpen: next }); saveSettings({ dockOpen: next }) } }))
     }
 
     function Desk() {
@@ -1110,7 +1147,6 @@ window.__ModuleLoader__.load({
               h('button', { type: 'button', title: t('zoomIn'), 'aria-label': t('zoomIn'), onClick: () => zoomCenter(1.25) }, '+'))) : null,
         ready ? h(AssistantDock) : null,
         ready ? h(CaptureDialog) : null,
-        ready ? h(SettingsDialog) : null,
         ready ? h(ModelPicker) : null,
         h(Toast))))
     }
@@ -1129,7 +1165,8 @@ window.__ModuleLoader__.load({
         ctx.effect(() => ctx.locale.register('dsh-csrw', 'zh', TOOLS_ZH))
         const tt = ctx.locale.bind('dsh-csrw')
         const register = (name, options, component) => ctx.slots.inject(name, () => ctx.slots.register({ name, ...options }, component))
-        const toolsPanel = (props) => h(ToolsPanel, { ...props, ctx, t: tt })
+        const desk = { t, setLanguage: (value) => { language = value }, setDesk, loadDesk }
+        const toolsPanel = (props) => h(ToolsPanel, { ...props, ctx, t: tt, desk })
         register('main', { key: UI_ID }, Desk)
         register('sidebar.panellist', { id: UI_ID, order: 45, label: () => tt('title') }, PanelIcon)
         register('settings.section', { id: UI_ID, order: 17, label: () => tt('title') }, toolsPanel)
