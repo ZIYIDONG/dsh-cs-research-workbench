@@ -1,5 +1,5 @@
 # Only inserts this plugin; no overrides to existing DSH configuration.
 - insert:
-    - id: csrw
+    - id: dsh-csrw
       name: dsh-cs-research-workbench
       config: {}

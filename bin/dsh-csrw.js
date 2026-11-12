@@ -27,9 +27,9 @@ try {
   }
   const tools = definitions(ctx);
   if (!command.length) {
-    console.log('csrw <module> <operation> [--workspace <directory>] [--args <JSON> | --args-file <file>]\ncsrw health\ncsrw <module> <operation> --help\n' + tools.map(t => t.name.replace(/^csrw_/, '').replaceAll('_', ' ') + '  ' + t.description).join('\n'));
+    console.log('dsh-csrw <module> <operation> [--workspace <directory>] [--args <JSON> | --args-file <file>]\ndsh-csrw health\ndsh-csrw <module> <operation> --help\n' + tools.map(t => t.name.replace(/^dsh_csrw_/, '').replaceAll('_', ' ') + '  ' + t.description).join('\n'));
   } else {
-    const name = 'csrw_' + command.join('_');
+    const name = 'dsh_csrw_' + command.join('_');
     const definition = tools.find(t => t.name === name);
     if (!definition) throw new Error('Unknown command: ' + command.join(' '));
     if (help) console.log(JSON.stringify({ name, description: definition.description, parameters: definition.parameters }, null, 2));

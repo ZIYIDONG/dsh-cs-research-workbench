@@ -10,7 +10,7 @@ import { setConfig, DEFAULTS } from '../lib/services/config.js';
 const base = path.resolve('.test-artifacts');
 await fs.mkdir(base, { recursive: true });
 const definitions = zoteroTools({ get: () => undefined });
-const call = (name, args, signal = new AbortController().signal) => definitions.find(tool => tool.name === `csrw_zotero_${name}`).execute(args, { signal });
+const call = (name, args, signal = new AbortController().signal) => definitions.find(tool => tool.name === `dsh_csrw_zotero_${name}`).execute(args, { signal });
 const article = { key: 'ABCD1234', data: { key: 'ABCD1234', itemType: 'journalArticle', title: 'Secure systems', date: '2026', DOI: '10.1234/test', creators: [{ creatorType: 'author', firstName: 'A', lastName: 'Researcher' }], abstractNote: 'Evidence', tags: [{ tag: 'security' }] } };
 async function fixture(t, respond) {
   const root = await fs.mkdtemp(path.join(base, 'zotero-'));
@@ -31,7 +31,7 @@ function json(res, value, total) {
 }
 
 test('Zotero uses five canonical DSL tools and defaults to credential-free local API', () => {
-  assert.deepEqual(definitions.map(tool => tool.name), ['search', 'item', 'notes', 'attachments', 'cite'].map(name => `csrw_zotero_${name}`));
+  assert.deepEqual(definitions.map(tool => tool.name), ['search', 'item', 'notes', 'attachments', 'cite'].map(name => `dsh_csrw_zotero_${name}`));
   assert.equal(DEFAULTS.zotero.localApi, 'http://127.0.0.1:23119/api');
   assert.equal(definitions[0].parameters.properties.query.type, 'string');
   const value = { items: [], total: 0, nextStart: null, truncated: false };

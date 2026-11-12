@@ -10,7 +10,7 @@ import { DEFAULTS } from '../lib/services/config.js';
 import { hashBytes } from '../lib/utils/hash.js';
 const signal = () => new AbortController().signal;
 async function fixture(t) {
- const root = await fs.mkdtemp(path.join(os.tmpdir(), 'csrw-snapshot-'));
+ const root = await fs.mkdtemp(path.join(os.tmpdir(), 'dsh-csrw-snapshot-'));
  const cleanup = []; t.after(async () => { for (const fn of cleanup) await fn(); await fs.rm(root, { recursive: true, force: true, maxRetries: 3, retryDelay: 50 }); });
  const vault = path.join(root, 'vault'); await fs.mkdir(path.join(vault, '.obsidian'), { recursive: true });
  await fs.writeFile(path.join(vault, 'note.md'), 'original');
@@ -26,7 +26,7 @@ test('versioned manifest, hashes, local default and credential exclusion', async
  await fs.writeFile(path.join(vault, 'config.json'), '{"apiKey":"top-secret"}');
  await fs.writeFile(path.join(vault, 'preferences.json'), '{"theme":"dark"}');
  const snap = await createSnapshot(root, { sources: ['obsidian'], vaultPath: vault }, signal());
- assert.equal(path.dirname(snap.snapshotPath), path.join(root, '.csrw', 'backups'));
+ assert.equal(path.dirname(snap.snapshotPath), path.join(root, '.dsh-csrw', 'backups'));
  const m = await manifest(snap); assert.equal(m.version, 1); assert.ok(Date.parse(m.createdAt));
  assert.equal(m.files.find(f => f.path === 'note.md').sha256, hashBytes('original'));
  assert.equal(m.files.find(f => f.path === 'note.md').size, 8);
@@ -139,7 +139,7 @@ test('abort and unsupported target errors propagate', async t => {
 
 test('six canonical defineTool contracts render one JSON block and preserve exceptions', async t => {
  const { root, options } = await fixture(t); const definitions = backupTools({});
- assert.deepEqual(definitions.map(d => d.name), ['csrw_backup_obsidian', 'csrw_backup_zotero', 'csrw_backup_dsh', 'csrw_snapshot_create', 'csrw_snapshot_verify', 'csrw_snapshot_restore']);
+ assert.deepEqual(definitions.map(d => d.name), ['dsh_csrw_backup_obsidian', 'dsh_csrw_backup_zotero', 'dsh_csrw_backup_dsh', 'dsh_csrw_snapshot_create', 'dsh_csrw_snapshot_verify', 'dsh_csrw_snapshot_restore']);
  for (const d of definitions) { assert.equal(d.output.schema.type, 'object'); assert.equal(d.output.schema.additionalProperties, false); assert.ok(Array.isArray(d.output.schema.required)); }
  const d = definitions[0]; const result = await d.execute({ workspace: root, ...options }, { signal: signal() });
  const blocks = d.output.render({}, result); assert.equal(blocks.length, 1); assert.deepEqual(JSON.parse(blocks[0].text), result);

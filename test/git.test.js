@@ -12,7 +12,7 @@ const base = path.resolve('.test-artifacts');
 await fs.mkdir(base, { recursive: true });
 const definitions = gitTools({ get: () => undefined });
 const exec = () => ({ signal: new AbortController().signal });
-const call = (name, args, execution = exec()) => definitions.find(tool => tool.name === `csrw_git_${name}`).execute(args, execution);
+const call = (name, args, execution = exec()) => definitions.find(tool => tool.name === `dsh_csrw_git_${name}`).execute(args, execution);
 async function fixture(repo = true) {
   const root = await fs.mkdtemp(path.join(base, 'git-'));
   if (repo) await fs.mkdir(path.join(root, '.git'));
@@ -42,7 +42,7 @@ function mockGit(t, root, respond = () => '') {
 }
 
 test('Git exports five real DSL tools with canonical JSON output and pre-abort rejection', async () => {
-  assert.deepEqual(definitions.map(tool => tool.name), ['status', 'init', 'commit', 'push', 'pull'].map(name => `csrw_git_${name}`));
+  assert.deepEqual(definitions.map(tool => tool.name), ['status', 'init', 'commit', 'push', 'pull'].map(name => `dsh_csrw_git_${name}`));
   assert.equal(definitions[2].parameters.properties.files.type, 'array');
   const root = await fixture(false);
   assert.deepEqual(await call('status', { workspace: root }), { initialized: false, changes: [], dirty: false });
@@ -60,7 +60,7 @@ test('Git init preserves existing ignores, adds sensitive exclusions, and is ide
   const calls = mockGit(t, root, async args => { if (args.includes('init')) await fs.mkdir(path.join(root, '.git')); return ''; });
   assert.deepEqual(await call('init', { workspace: root }), { initialized: true, created: true, gitignoreUpdated: true });
   const before = await fs.readFile(path.join(root, '.gitignore'), 'utf8');
-  for (const rule of ['custom/', '.csrw/', '.env', '*.pem', '*credentials*', 'attachments/', 'storage/', '*.pdf']) assert.ok(before.split('\n').includes(rule));
+  for (const rule of ['custom/', '.dsh-csrw/', '.env', '*.pem', '*credentials*', 'attachments/', 'storage/', '*.pdf']) assert.ok(before.split('\n').includes(rule));
   assert.deepEqual(await call('init', { workspace: root }), { initialized: true, created: false, gitignoreUpdated: false });
   assert.equal(await fs.readFile(path.join(root, '.gitignore'), 'utf8'), before);
   assert.equal(calls.filter(call => call.args.includes('init')).length, 1);
@@ -82,7 +82,7 @@ test('Git commit validates all paths before staging and uses explicit --only fil
   await fs.writeFile(path.join(root, '-literal.md'), 'safe');
   await fs.mkdir(path.join(root, 'folder'));
   const calls = mockGit(t, root);
-  for (const file of ['../outside.md', '.csrw/config.json', '.git/config', '.env', 'credentials.json', 'paper.pdf', 'attachments/paper.txt', 'folder', '*.md', path.join(root, 'notes.md')]) {
+  for (const file of ['../outside.md', '.dsh-csrw/config.json', '.git/config', '.env', 'credentials.json', 'paper.pdf', 'attachments/paper.txt', 'folder', '*.md', path.join(root, 'notes.md')]) {
     await assert.rejects(call('commit', { workspace: root, message: 'test', files: ['notes.md', file] }));
   }
   assert.equal(calls.filter(call => call.args.includes('add')).length, 0);
@@ -156,7 +156,7 @@ test('Git autoInit is opt-in for commit and only runs after every path validates
  assert.equal(calls.some(c=>c.args.includes('init')),false);
  assert.equal((await call('commit',{workspace:root,message:'first',files:['notes.md']})).pushed,false);
  assert.equal(calls.filter(c=>c.args.includes('init')).length,1);
- assert.ok((await fs.readFile(path.join(root,'.gitignore'),'utf8')).includes('.csrw/'));
+ assert.ok((await fs.readFile(path.join(root,'.gitignore'),'utf8')).includes('.dsh-csrw/'));
 });
 
 test('real Git local integration when sandbox permits captured spawn (no external push)', async t => {
@@ -168,7 +168,7 @@ test('real Git local integration when sandbox permits captured spawn (no externa
   }
   // Identity is injected per test process, without modifying global or repository config.
   const previous = {};
-  for (const [key, value] of Object.entries({ GIT_AUTHOR_NAME: 'CSRW Test', GIT_AUTHOR_EMAIL: 'test@example.invalid', GIT_COMMITTER_NAME: 'CSRW Test', GIT_COMMITTER_EMAIL: 'test@example.invalid' })) {
+  for (const [key, value] of Object.entries({ GIT_AUTHOR_NAME: 'DSH-CSRW Test', GIT_AUTHOR_EMAIL: 'test@example.invalid', GIT_COMMITTER_NAME: 'DSH-CSRW Test', GIT_COMMITTER_EMAIL: 'test@example.invalid' })) {
     previous[key] = process.env[key]; process.env[key] = value;
   }
   try {

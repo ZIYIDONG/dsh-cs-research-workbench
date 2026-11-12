@@ -11,7 +11,7 @@
   },
   "keywords": [
     "dsh",
-    "csrw",
+    "dsh-csrw",
     "research",
     "computer-science",
     "research-workflow",
@@ -26,7 +26,7 @@
     "./client": "./client.js"
   },
   "bin": {
-    "csrw": "./bin/csrw.js"
+    "dsh-csrw": "./bin/dsh-csrw.js"
   },
   "files": [
     "lib",
@@ -36,7 +36,7 @@
     "icon.svg",
     "README.md",
     "LICENSE",
-    ".csrw.example.json",
+    ".dsh-csrw.example.json",
     "scripts/check.mjs",
     "scripts/check-identifiers.mjs",
     "test/*.test.js",

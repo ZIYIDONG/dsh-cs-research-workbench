@@ -62,7 +62,7 @@ test('registerDesk stays inert without a web server',()=>{
 });
 
 test('store copies the legacy csrw-desk state without deleting it',async()=>{
-  const dir=await mkdtemp(path.join(tmpdir(),'csrw-migrate-'));
+  const dir=await mkdtemp(path.join(tmpdir(),'dsh-csrw-migrate-'));
   const legacy=path.join(dir,'csrw-desk');
   const target=path.join(dir,'dsh-csrw');
   await mkdir(legacy,{recursive:true});
@@ -83,7 +83,7 @@ test('store copies the legacy csrw-desk state without deleting it',async()=>{
 });
 
 test('store refuses to migrate an unparsable legacy state',async()=>{
-  const dir=await mkdtemp(path.join(tmpdir(),'csrw-broken-'));
+  const dir=await mkdtemp(path.join(tmpdir(),'dsh-csrw-broken-'));
   const legacy=path.join(dir,'csrw-desk');
   await mkdir(legacy,{recursive:true});
   await writeFile(path.join(legacy,'state.json'),'{"todos":[');
