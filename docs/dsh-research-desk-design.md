@@ -114,7 +114,7 @@
 └─────────────────────────────────┘          └──────────────────────────────────┘
 ```
 
-**决策：独立新包，不塞进 dsh-csrw。** dsh-csrw 是已验收的无状态工具层（`scripts/check.mjs` 硬断言 46 个工具与 catalog 一致），desk 是有状态创作空间；两者通过 vault 文件协作，desk 页面上的「提交/同步」按钮调用 `dsh-csrw` CLI（`node bin/dsh-csrw.js`），不引入跨插件服务依赖。
+**决策：独立新包，不塞进 dsh-csrw。** dsh-csrw 是已验收的无状态工具层（`scripts/check.mjs` 硬断言 49 个工具与 catalog 一致），desk 是有状态创作空间；两者通过 vault 文件协作，desk 页面上的「提交/同步」按钮调用 `dsh-csrw` CLI（`node bin/dsh-csrw.js`），不引入跨插件服务依赖。
 
 **客户端不用 esbuild。** dsh-csrw 的 `client.js` 是手写 IIFE（`window.__ModuleLoader__.load({id, factory(require)})` + `React.createElement`），已在当前 DSH 0.2.2-rc.1 验证可注册 `main / sidebar.panellist / settings.section / settings.section.icon / plugins.bundle.config`。desk 沿用，v0.1 单文件；页面变多后加 `scripts/build-client.mjs`（零依赖拼接 + 语法检查）。
 

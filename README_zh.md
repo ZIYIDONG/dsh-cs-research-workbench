@@ -281,7 +281,7 @@ GET /dsh-csrw/api/state
 
 - `npm run check` 通过：语法、包元数据、49 个 `dsh_csrw_` 工具、六个模块全部 `ready`；`identifiers` 通过（`dsh-csrw-ui`、`/dsh-csrw/api`、`dsh-csrw`）。
 - `npm run check:ui` 通过：五处界面注册、图标几何、标题、设置分区 id 与中英文案全部匹配。
-- `npm test`：88 个用例全部通过（0 skip、0 fail）。其中 5 个是 `lib/desk/` 用例，2 个是工作台状态迁移用例，2 个是配置兼容用例；12 个是新增 Obsidian 双链/检索/模板/日记/附件/重命名/死链/图谱/Canvas/书签用例，2 个是 `paper_to_note` 文献笔记用例（用本机 mock HTTP 验证 Zotero 请求路径与生成内容），3 个是新增备份云端用例，4 个是新增 vault 同步用例（pull 新建、push 写回、冲突保留副本、知识库 kb 字段），4 个是新增坚果云用例（错误分类、删除确认、根保护、日志缺失）。"真实 Git 临时仓库集成"用例需要进程能用管道捕获子进程输出，在限制该能力的沙箱中按设计跳过，在普通终端通过。
+- `npm test`：88 个用例全部通过（0 skip、0 fail）。其中 5 个是 `lib/desk/` 用例，2 个是工作台状态迁移用例，2 个是配置兼容用例；12 个是新增 Obsidian 双链/检索/模板/日记/附件/重命名/死链/图谱/Canvas/书签用例，2 个是 `paper_to_note` 文献笔记用例（用本机 mock HTTP 验证 Zotero 请求路径与生成内容），3 个是新增备份云端用例，4 个是新增 vault 同步用例（pull 新建、push 写回、冲突保留副本、知识库 kb 字段），4 个是新增坚果云用例（错误分类、删除确认、根保护、日志缺失）。"真实 Git 临时仓库集成"用例需要进程能用管道捕获子进程输出，在限制该能力的沙箱中按设计跳过，在普通终端通过。2026-11-13 复跑（已并入保留策略、增量快照、敏感文件排除、远端地址策略、重试与坚果云错误分类用例）共 151 个用例全部通过，0 失败、0 跳过。
 - 运行期实测：`GET /dsh-csrw/api/state` 返回 401（路由已注册，需鉴权），旧路由 `GET /csrw-desk/state` 返回 404；客户端插槽列表里 `sidebar.panellist`（order 45）、`settings.section`（order 17）、`settings.section.icon` 均为 `dsh-csrw-ui`；`dsh_csrw_health` 返回 49 工具、六模块 `ready`。
 - 状态迁移实机验证：从 `~/.dsh/csrw-desk/` 复制到 `~/.dsh/dsh-csrw/`，读到 6 个待办、3 篇文献、3 个想法；旧文件 SHA-256 前后一致（未被改写），新目录含 `state.json` 与 `.migrated-from-csrw-desk` 标记。
 - 界面人工验收：设置分区、侧栏入口、标题与图标名称、工作台加载配置均按预期显示；插件卡片描述 41 字未截断。
