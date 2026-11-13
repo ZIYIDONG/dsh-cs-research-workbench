@@ -2,7 +2,13 @@
 
 # CS Research Workbench (dsh-cs-research-workbench)
 
-[![](https://img.shields.io/badge/powered_by-dsh-4D6BFE?style=flat-square&logo=deepseek&logoColor=white)](https://github.com/deepseek-ai/deepseek-harness) [![](https://img.shields.io/badge/powered_by-CodeBuddy-4D6BFE?style=flat-square&logo=codebuddy&logoColor=white)](https://www.codebuddy.cn/)
+[![](https://img.shields.io/badge/powered_by-dsh-4D6BFE?style=flat-square&logo=deepseek&logoColor=white)](https://github.com/deepseek-ai/deepseek-harness) 
+[![](https://img.shields.io/badge/powered_by-CodeBuddy-4D6BFE?style=flat-square&logo=codebuddy&logoColor=white)](https://www.codebuddy.cn/) 
+[![](https://img.shields.io/badge/version-0.1.1--dev.0-orange?style=flat-square)](https://github.com/deepseek-ai/deepseek-harness) 
+[![](https://img.shields.io/badge/license-GPL--3.0--only-green?style=flat-square)](LICENSE) 
+[![](https://img.shields.io/badge/node-%3E%3D22.16-339933?style=flat-square)](https://nodejs.org/) 
+[![](https://img.shields.io/badge/dsh-%3E%3D0.2.2--rc.1%20%3C0.3.0-4D6BFE?style=flat-square)](https://github.com/deepseek-ai/deepseek-harness) 
+[![](https://img.shields.io/badge/dsh--tools-0.2.2--rc.1-4D6BFE?style=flat-square)](https://www.npmjs.com/package/@deepseek-ai/dsh-tools) 
 
 **CS Research Workbench** (`dsh-cs-research-workbench`, `dsh-csrw` for short) is an **end-to-end research workbench for computer science**. It connects topic ideation, literature and notes, code and experiment versions, result archiving, and data backup into a single pipeline that runs entirely on your own machine.
 
