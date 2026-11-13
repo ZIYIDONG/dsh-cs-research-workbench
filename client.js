@@ -16,9 +16,9 @@ window.__ModuleLoader__.load({
     const HERO = { w: 540, h: 372 }
 
     // ---------- 原有工具面板：配置、连接检测、备份（并入设置页，不再单独占一个侧栏入口） ----------
-    const TOOLS_EN = {title:'CS research workbench',intro:'Workspace configuration, connection checks, sync and versioned backups.',workspace:'Workspace directory',session:'Session ID',load:'Load configuration',save:'Save field',open:'Open workbench',config:'Configuration',actions:'Operations',result:'Last result',pending:'Running…',cancel:'Cancel',confirm:'Confirm this write operation',approval:'Review the target workspace and arguments before confirming. This operation may change local or remote files.',secret:'Passwords are not stored here. Configure credentials in the DSH credential store or NUTSTORE_USERNAME / NUTSTORE_PASSWORD environment variables.',context:'Select an existing session to provide a permission and audit context. No model turn is started.',error:'Request failed',health:'Check plugin',git:'Git status',zotero:'Check Zotero',dav:'Check WebDAV',list:'List remote directory',push:'Upload directory',pull:'Download directory',obsidian:'Back up Obsidian',backupZotero:'Back up Zotero',dsh:'Back up DSH',verify:'Verify snapshot',local:'Local sync directory',remote:'Remote subdirectory',snapshot:'Snapshot directory',sources:'Backup paths come from the current workspace configuration. Restore remains available through the explicit-confirmation tool.',choose:'Choose directory',noSession:'Choose a session first',notLoaded:'Load the workspace configuration first',boolean:'Boolean',field:'Configuration field',value:'Value',operationsHint:'Network checks contact only the configured endpoints; backups create local files.',empty:'No result yet',yes:'Enabled',no:'Disabled',cloudBackup:'Cloud backup',backupWorkspace:'Backup config',backupUpload:'Upload Nutstore',backupGithub:'Backup GitHub',backupAll:'Backup all',obsidianTools:'Obsidian tools',links:'Links',backlinks:'Backlinks',brokenLinks:'Broken links',listDir:'List',template:'Template',daily:'Daily',attach:'Attach',rename:'Rename',graph:'Graph',canvas:'Canvas',bookmarks:'Bookmarks',paperNote:'Paper note',path:'Path',destination:'Destination',source:'Source',date:'Date',scope:'Scope',templatePath:'Template',zkey:'Zotero key'};
-    const TOOLS_ZH = {title:'CS科研工作台',intro:'工作区配置、连接检测、增量同步与版本化备份。',workspace:'工作区目录',session:'会话 ID',load:'加载配置',save:'保存此项',open:'打开工作台',config:'配置',actions:'操作',result:'最近结果',pending:'执行中…',cancel:'取消',confirm:'确认执行此写入操作',approval:'请核对目标工作区和参数后确认；此操作可能修改本地或远端文件。',secret:'这里不保存密码。请使用 DSH 凭据存储，或 NUTSTORE_USERNAME / NUTSTORE_PASSWORD 环境变量。',context:'选择已有会话作为权限与审计上下文，不会启动模型对话。',error:'请求失败',health:'检查插件',git:'Git 状态',zotero:'检测 Zotero',dav:'检测 WebDAV',list:'列出远端目录',push:'上传目录',pull:'下载目录',obsidian:'备份 Obsidian',backupZotero:'备份 Zotero',dsh:'备份 DSH',verify:'校验快照',local:'本地同步目录',remote:'远端子目录',snapshot:'快照目录',sources:'备份路径读取当前工作区配置。恢复仍通过带显式确认的工具执行。',choose:'选择目录',noSession:'请先选择会话',notLoaded:'请先加载工作区配置',boolean:'布尔值',field:'配置字段',value:'值',operationsHint:'连接检测只访问配置中的端点；备份会创建本地文件。',empty:'暂无结果',yes:'启用',no:'停用',cloudBackup:'云端备份',backupWorkspace:'备份参数',backupUpload:'上传坚果云',backupGithub:'备份 GitHub',backupAll:'一键备份',obsidianTools:'Obsidian 工具',links:'双链',backlinks:'反链',brokenLinks:'死链',listDir:'列目录',template:'模板生成',daily:'日记',attach:'附件',rename:'重命名',graph:'图谱',canvas:'Canvas',bookmarks:'书签',paperNote:'文献笔记',path:'路径',destination:'目标',source:'源文件',date:'日期',scope:'目录',templatePath:'模板',zkey:'Zotero key'};
-    const TOOLS_FIELDS = ['obsidian.vaultPath','obsidian.autoDetect','obsidian.trashDir','obsidian.ideasDir','obsidian.notesDir','git.remote','git.branch','git.autoInit','git.pullRebase','git.backupRemote','git.backupBranch','git.backupRepoDir','zotero.localApi','zotero.dataDir','nutstore.baseUrl','nutstore.remoteRoot','nutstore.username','nutstore.credentialKey','backup.target','backup.localDir','backup.dshHome','backup.dshProfile','backup.includeDshSessions'];
+    const TOOLS_EN = {title:'CS research workbench',intro:'Workspace configuration, connection checks, sync and versioned backups.',workspace:'Workspace directory',session:'Session ID',load:'Load configuration',save:'Save field',open:'Open workbench',config:'Configuration',actions:'Operations',result:'Last result',pending:'Running…',cancel:'Cancel',confirm:'Confirm this write operation',approval:'Review the target workspace and arguments before confirming. This operation may change local or remote files.',secret:'Passwords are not stored here. Configure credentials in the DSH credential store or NUTSTORE_USERNAME / NUTSTORE_PASSWORD environment variables.',context:'Select an existing session to provide a permission and audit context. No model turn is started.',error:'Request failed',health:'Check plugin',git:'Git status',zotero:'Check Zotero',dav:'Check WebDAV',list:'List remote directory',push:'Upload directory',pull:'Download directory',obsidian:'Back up Obsidian',backupZotero:'Back up Zotero',dsh:'Back up DSH',verify:'Verify snapshot',local:'Local sync directory',remote:'Remote subdirectory',snapshot:'Snapshot directory',sources:'Backup paths come from the current workspace configuration. Restore remains available through the explicit-confirmation tool.',choose:'Choose directory',noSession:'Choose a session first',notLoaded:'Load the workspace configuration first',boolean:'Boolean',field:'Configuration field',value:'Value',operationsHint:'Network checks contact only the configured endpoints; backups create local files.',empty:'No result yet',yes:'Enabled',no:'Disabled',cloudBackup:'Cloud backup',nutstore:'Nutstore',nutstoreHint:'Credentials come from the DSH credential store (api-key) or NUTSTORE_USERNAME / NUTSTORE_PASSWORD env vars, never entered in the UI.',logs:'Sync logs',deleteRemote:'Delete remote',backupWorkspace:'Backup config',backupUpload:'Upload Nutstore',backupGithub:'Backup GitHub',backupAll:'Backup all',obsidianTools:'Obsidian tools',links:'Links',backlinks:'Backlinks',brokenLinks:'Broken links',listDir:'List',template:'Template',daily:'Daily',attach:'Attach',rename:'Rename',graph:'Graph',canvas:'Canvas',bookmarks:'Bookmarks',paperNote:'Paper note',path:'Path',destination:'Destination',source:'Source',date:'Date',scope:'Scope',templatePath:'Template',zkey:'Zotero key'};
+    const TOOLS_ZH = {title:'CS科研工作台',intro:'工作区配置、连接检测、增量同步与版本化备份。',workspace:'工作区目录',session:'会话 ID',load:'加载配置',save:'保存此项',open:'打开工作台',config:'配置',actions:'操作',result:'最近结果',pending:'执行中…',cancel:'取消',confirm:'确认执行此写入操作',approval:'请核对目标工作区和参数后确认；此操作可能修改本地或远端文件。',secret:'这里不保存密码。请使用 DSH 凭据存储，或 NUTSTORE_USERNAME / NUTSTORE_PASSWORD 环境变量。',context:'选择已有会话作为权限与审计上下文，不会启动模型对话。',error:'请求失败',health:'检查插件',git:'Git 状态',zotero:'检测 Zotero',dav:'检测 WebDAV',list:'列出远端目录',push:'上传目录',pull:'下载目录',obsidian:'备份 Obsidian',backupZotero:'备份 Zotero',dsh:'备份 DSH',verify:'校验快照',local:'本地同步目录',remote:'远端子目录',snapshot:'快照目录',sources:'备份路径读取当前工作区配置。恢复仍通过带显式确认的工具执行。',choose:'选择目录',noSession:'请先选择会话',notLoaded:'请先加载工作区配置',boolean:'布尔值',field:'配置字段',value:'值',operationsHint:'连接检测只访问配置中的端点；备份会创建本地文件。',empty:'暂无结果',yes:'启用',no:'停用',cloudBackup:'云端备份',nutstore:'坚果云',nutstoreHint:'凭据由 DSH 凭据存储（api-key）或 NUTSTORE_USERNAME / NUTSTORE_PASSWORD 环境变量提供，不在界面录入。',logs:'同步日志',deleteRemote:'删除远端',backupWorkspace:'备份参数',backupUpload:'上传坚果云',backupGithub:'备份 GitHub',backupAll:'一键备份',obsidianTools:'Obsidian 工具',links:'双链',backlinks:'反链',brokenLinks:'死链',listDir:'列目录',template:'模板生成',daily:'日记',attach:'附件',rename:'重命名',graph:'图谱',canvas:'Canvas',bookmarks:'书签',paperNote:'文献笔记',path:'路径',destination:'目标',source:'源文件',date:'日期',scope:'目录',templatePath:'模板',zkey:'Zotero key'};
+    const TOOLS_FIELDS = ['obsidian.vaultPath','obsidian.autoDetect','obsidian.trashDir','obsidian.ideasDir','obsidian.notesDir','git.remote','git.branch','git.autoInit','git.pullRebase','git.backupRemote','git.backupBranch','git.backupRepoDir','zotero.localApi','zotero.dataDir','nutstore.baseUrl','nutstore.remoteRoot','nutstore.username','nutstore.credentialKey','nutstore.retry','nutstore.retryDelay','backup.target','backup.localDir','backup.dshHome','backup.dshProfile','backup.includeDshSessions','backup.keep','backup.mode'];
     const TOOLS_CSS = '.dsh-csrw-panel{box-sizing:border-box;max-width:1040px;width:100%;margin:0 auto;padding:28px;color:var(--dsw-alias-label-primary);font-size:14px;overflow:auto;height:100%}.dsh-csrw-panel *{box-sizing:border-box}.dsh-csrw-panel h1{font-size:24px;margin:0}.dsh-csrw-head{margin:0 0 10px}.dsh-csrw-panel h2{font-size:17px;margin:0 0 16px}.dsh-csrw-panel p{color:var(--dsw-alias-label-secondary);line-height:1.6}.dsh-csrw-card{background:var(--dsw-alias-bg-layer-1);border:1px solid var(--dsw-alias-border-l1);border-radius:12px;padding:20px;margin:18px 0}.dsh-csrw-row{display:flex;flex-wrap:wrap;gap:10px;align-items:end;margin:12px 0}.dsh-csrw-panel label{display:flex;flex-direction:column;gap:7px;flex:1 1 240px}.dsh-csrw-panel input,.dsh-csrw-panel select{width:100%;min-height:36px;border:1px solid var(--dsw-alias-border-l2);border-radius:7px;padding:7px 10px;background:var(--dsw-alias-bg-base);color:inherit;font:inherit}.dsh-csrw-panel button{min-height:36px;border:1px solid var(--dsw-alias-border-l2);border-radius:7px;padding:7px 14px;background:var(--dsw-alias-bg-layer-2);color:inherit;font:inherit;cursor:pointer}.dsh-csrw-panel button:disabled{opacity:.5;cursor:not-allowed}.dsh-csrw-panel button:focus-visible,.dsh-csrw-panel input:focus-visible,.dsh-csrw-panel select:focus-visible{outline:2px solid var(--dsw-alias-brand-primary);outline-offset:2px}.dsh-csrw-panel pre{white-space:pre-wrap;overflow-wrap:anywhere;max-height:420px;overflow:auto;background:var(--dsw-alias-bg-base);padding:14px;border-radius:8px;font-size:12px}.dsh-csrw-alert{border-left:3px solid var(--dsw-alias-state-warn-primary);padding:12px}.dsh-csrw-error{color:var(--dsw-alias-state-error-primary)}.dsh-csrw-icon-slot{display:inline-flex;align-items:center;justify-content:center;line-height:1;vertical-align:middle;align-self:center;flex:none}.dsh-csrw-icon-slot svg{display:block}';
     const toolsGlyph = { fill: 'none', stroke: '#000', strokeWidth: 0.5333333333333333, strokeLinecap: 'round', strokeLinejoin: 'round' };
     function ToolsIcon({ size = 20 }) {
@@ -56,6 +56,7 @@ window.__ModuleLoader__.load({
         h('div',{className:'dsh-csrw-card'},h('h2',null,t('config')),h('p',null,t('secret')),h('div',{className:'dsh-csrw-row'},h('label',null,t('field'),h('select',{value:field,onChange:e=>setField(e.target.value),disabled:busy},...TOOLS_FIELDS.map(k=>h('option',{key:k,value:k},k)))),h('label',null,t('value'),isBoolean?h('select',{value:String(value),onChange:e=>setValue(e.target.value==='true'),disabled:busy},h('option',{value:'true'},t('yes')),h('option',{value:'false'},t('no'))):h('input',{value:String(value),disabled:busy,onChange:e=>setValue(e.target.value)})),h('button',{disabled:busy||!config,onClick:()=>setPending({operation:'dsh_csrw_config_set',args:{key:field,value}})},t('save'))),config&&h('pre',null,JSON.stringify(config,null,2))),
         h('div',{className:'dsh-csrw-card'},h('h2',null,t('actions')),h('p',null,t('operationsHint')),h('div',{className:'dsh-csrw-row'},action('git','dsh_csrw_git_status'),action('zotero','dsh_csrw_zotero_search',{query:'a',limit:1}),action('dav','dsh_csrw_nutstore_test'),action('list','dsh_csrw_nutstore_list',{remotePath:remote})),h('div',{className:'dsh-csrw-row'},input('local',local,setLocal),input('remote',remote,setRemote)),h('div',{className:'dsh-csrw-row'},action('push','dsh_csrw_nutstore_push',{localPath:local,remotePath:remote},true),action('pull','dsh_csrw_nutstore_pull',{localPath:local,remotePath:remote},true)),h('p',null,t('sources')),h('div',{className:'dsh-csrw-row'},action('obsidian','dsh_csrw_backup_obsidian',{},true),action('backupZotero','dsh_csrw_backup_zotero',{},true),action('dsh','dsh_csrw_backup_dsh',{},true)),h('div',{className:'dsh-csrw-row'},input('snapshot',snapshot,setSnapshot),action('verify','dsh_csrw_snapshot_verify',{snapshotPath:snapshot}))),
         h('div',{className:'dsh-csrw-card'},h('h2',null,t('cloudBackup')),h('p',null,t('sources')),h('div',{className:'dsh-csrw-row'},action('backupWorkspace','dsh_csrw_backup_workspace',{},true),action('backupUpload','dsh_csrw_backup_upload',{},true)),h('div',{className:'dsh-csrw-row'},action('backupGithub','dsh_csrw_backup_github',{},true),action('backupAll','dsh_csrw_backup_all',{},true))),
+        h('div',{className:'dsh-csrw-card'},h('h2',null,t('nutstore')),h('p',null,t('nutstoreHint')),h('div',{className:'dsh-csrw-row'},action('dav','dsh_csrw_nutstore_test'),action('logs','dsh_csrw_nutstore_logs',{limit:20})),h('div',{className:'dsh-csrw-row'},input('remote',remote,setRemote),action('deleteRemote','dsh_csrw_nutstore_delete',{remotePath:remote,confirm:true},true))),
         h('div',{className:'dsh-csrw-card'},h('h2',null,t('obsidianTools')),h('div',{className:'dsh-csrw-row'},input('path',obsPath,setObsPath),action('links','dsh_csrw_obsidian_links',{path:obsPath}),action('backlinks','dsh_csrw_obsidian_backlinks',{path:obsPath}),action('brokenLinks','dsh_csrw_obsidian_broken_links',{path:obsPath})),h('div',{className:'dsh-csrw-row'},input('scope',obsScope,setObsScope),action('listDir','dsh_csrw_obsidian_list',{scope:obsScope}),action('graph','dsh_csrw_obsidian_graph',{}),action('bookmarks','dsh_csrw_obsidian_bookmarks',{})),h('div',{className:'dsh-csrw-row'},input('templatePath',obsTemplate,setObsTemplate),input('destination',obsDest,setObsDest),action('template','dsh_csrw_obsidian_template',{template:obsTemplate,destination:obsDest},true)),h('div',{className:'dsh-csrw-row'},input('date',obsDate,setObsDate),action('daily','dsh_csrw_obsidian_daily',{date:obsDate},true)),h('div',{className:'dsh-csrw-row'},input('source',obsSource,setObsSource),input('destination',obsDest,setObsDest),action('attach','dsh_csrw_obsidian_attach',{source:obsSource,destination:obsDest},true)),h('div',{className:'dsh-csrw-row'},input('path',obsFrom,setObsFrom),input('destination',obsDest,setObsDest),action('rename','dsh_csrw_obsidian_rename',{path:obsFrom,destination:obsDest},true)),h('div',{className:'dsh-csrw-row'},input('path',obsPath,setObsPath),action('canvas','dsh_csrw_obsidian_canvas',{path:obsPath,operation:'read'}))),
         h('div',{className:'dsh-csrw-card'},h('h2',null,t('paperNote')),h('div',{className:'dsh-csrw-row'},input('zkey',paperKey,setPaperKey),action('paperNote','dsh_csrw_paper_to_note',{key:paperKey},true))),
         pending&&h('div',{className:'dsh-csrw-card dsh-csrw-alert',role:'region','aria-label':t('confirm')},h('p',null,t('approval')),h('pre',null,JSON.stringify({workspace,...pending},null,2)),h('div',{className:'dsh-csrw-row'},h('button',{disabled:busy,onClick:()=>{const p=pending;setPending(null);return run(p.operation,p.args,true);}},t('confirm')),h('button',{disabled:busy,onClick:()=>setPending(null)},t('cancel')))),
@@ -65,7 +66,7 @@ window.__ModuleLoader__.load({
     // ---------- 文案 ----------
     const zh = {
       workbench: '科研工作台',
-      navTodo: '待办', navProject: '项目', navPaper: '文献库', navIdea: '想法', navKb: '知识库', navBrain: '想法 · 知识库', backupSync: '备份 / 同步', backupSyncHint: '选择会话作为权限上下文；一键备份先建本地快照，再按配置上传坚果云与 GitHub。', mdEdit: '编辑', mdPreview: '预览', mdSplit: '分栏', brEmpty: '选择左侧条目开始编辑，或点击「＋」新建', deleteEntry: '删除', editItem: '编辑条目', syncVault: '同步', syncPickIdeas: '选择想法目录', syncPickNotes: '选择知识库目录', syncNoDir: '请先选择同步目录', syncing: '同步中…', syncDone: '同步完成', syncConflict: '发现冲突',
+      navTodo: '待办', navProject: '项目', navPaper: '文献库', navIdea: '想法', navKb: '知识库', navBrain: '想法 · 知识库', backupSync: '备份 / 同步', backupSyncHint: '选择会话作为权限上下文；一键备份先建本地快照，再按配置上传坚果云与 GitHub。', backupCenter: '备份中心', backupSettings: '备份设置', cloudSettings: '云端设置', saveConfig: '保存配置', backupAll: '一键备份', backupObsidian: '备份 Obsidian', backupZotero: '备份 Zotero', backupDsh: '备份 DSH', backupWorkspace: '备份工作区', backupUpload: '上传坚果云', backupGithub: '备份 GitHub', snapshotVerify: '校验快照', snapshotPrune: '清理旧快照', nutstoreTest: '连接检测', nutstoreLogs: '同步日志', snapshotPath: '快照路径', tabActions: '操作', tabConfig: '配置', target: '目标', localDir: '本地目录', keep: '保留数量', mode: '模式', includeSessions: '包含会话', dshHome: 'DSH Home', dshProfile: 'DSH Profile', remoteRoot: '远端目录', credentialKey: '凭据名', retry: '重试次数', retryDelay: '重试间隔(ms)', backupRemote: 'GitHub 远程', backupBranch: '分支', backupRepoDir: '仓库目录', load: '加载配置', baseUrl: 'Base URL', username: '用户名', yes: '启用', no: '停用', session: '会话', mdEdit: '编辑', mdPreview: '预览', mdSplit: '分栏', brEmpty: '选择左侧条目开始编辑，或点击「＋」新建', deleteEntry: '删除', editItem: '编辑条目', syncVault: '同步', syncPickIdeas: '选择想法目录', syncPickNotes: '选择知识库目录', syncNoDir: '请先选择同步目录', syncing: '同步中…', syncDone: '同步完成', syncConflict: '发现冲突',
       pendingLine: '还有{n}件事等你推进',
       heroPlaceholder: '记下一件事、一个想法，或贴一个 DOI / 链接',
       send: '记下',
@@ -101,11 +102,27 @@ window.__ModuleLoader__.load({
       ideaStatus: { seed: '种子', exploring: '探索中', parked: '搁置' },
       kb: { concept: '概念', pitfall: '踩坑', formula: '公式', tool: '工具', snippet: '代码', template: '模板' },
       cleared: '已撤销：{label}', toastAdd: '已记下',
+      // 撤销 label：调用方只传语言无关的 key，渲染时才翻译（见 labelText）。
+      // 与 host.js 共用同一批字符串，改名前先对齐 host。
+      labelOpDefault: '操作', labelChat: '对话',
+      labelAddPaper: '记下一篇文献', labelAddIdea: '记下一个想法', labelAddLink: '记下一个链接', labelAddTodo: '记下一件事',
+      labelArrange: '摆放卡片',
+      workspaceRequired: '请先填入工作区绝对路径', choose: '选择目录',
+      externalConfirm: '备份源位于工作区之外：{path}；确认后将以该路径继续。',
+      githubConfirm: '将推送到 {remote}；仓库目录 {repoDir}',
+      backupAllConfirm: '将创建本地快照并推送到 {remote}（{repoDir}）；若 backup.target 为 nutstore，快照还会上传坚果云（该步骤无确认门）。',
+      noRemoteHint: '未配置 git.backupRemote，本次不会推送。',
+      localRoot: '本地根', snapshotDir: '快照目录', secretBlocked: '含疑似密钥，未上传：{n} 个文件',
+      saveFailed: '以下字段保存失败：{keys}',
+      credentialChangeTitle: '凭据发送目标变更（保存后凭据将发往新地址）',
+      pathChangeTitle: '读写位置变更（该位置在工作区之外）',
+      pruneConfirm: '将删除保留数量以外的旧快照，操作不可恢复。确认执行？',
+      uploadConfirm: '将把本地备份目录增量上传到坚果云；内容冲突时保留 .local/.remote 副本，上传期间远端被改动会报错并要求重跑。确认执行？',
       pageSoon: '这一页的骨架下一轮补上。现在先把首页做扎实。',
     }
     const en = {
       workbench: 'Research desk',
-      navTodo: 'Todo', navProject: 'Projects', navPaper: 'Papers', navIdea: 'Ideas', navKb: 'KnowledgeBase', navBrain: 'Ideas & KB', backupSync: 'Backup / Sync', backupSyncHint: 'Choose a session as permission context. Backup all creates a local snapshot, then uploads to Nutstore and GitHub per config.', mdEdit: 'Edit', mdPreview: 'Preview', mdSplit: 'Split', brEmpty: 'Select an entry to edit, or click "+" to create', deleteEntry: 'Delete', editItem: 'Edit item', syncVault: 'Sync', syncPickIdeas: 'Pick ideas dir', syncPickNotes: 'Pick notes dir', syncNoDir: 'Pick sync directories first', syncing: 'Syncing…', syncDone: 'Synced', syncConflict: 'Conflicts',
+      navTodo: 'Todo', navProject: 'Projects', navPaper: 'Papers', navIdea: 'Ideas', navKb: 'KnowledgeBase', navBrain: 'Ideas & KB', backupSync: 'Backup / Sync', backupSyncHint: 'Choose a session as permission context. Backup all creates a local snapshot, then uploads to Nutstore and GitHub per config.', backupCenter: 'Backup center', backupSettings: 'Backup settings', cloudSettings: 'Cloud settings', saveConfig: 'Save config', backupAll: 'Backup all', backupObsidian: 'Back up Obsidian', backupZotero: 'Back up Zotero', backupDsh: 'Back up DSH', backupWorkspace: 'Back up workspace', backupUpload: 'Upload Nutstore', backupGithub: 'Backup GitHub', snapshotVerify: 'Verify snapshot', snapshotPrune: 'Prune snapshots', nutstoreTest: 'Check connection', nutstoreLogs: 'Sync logs', snapshotPath: 'Snapshot path', tabActions: 'Operations', tabConfig: 'Configuration', target: 'Target', localDir: 'Local directory', keep: 'Keep', mode: 'Mode', includeSessions: 'Include sessions', dshHome: 'DSH Home', dshProfile: 'DSH Profile', remoteRoot: 'Remote root', credentialKey: 'Credential key', retry: 'Retry count', retryDelay: 'Retry delay (ms)', backupRemote: 'GitHub remote', backupBranch: 'Branch', backupRepoDir: 'Repo directory', load: 'Load config', baseUrl: 'Base URL', username: 'Username', yes: 'Enabled', no: 'Disabled', session: 'Session', mdEdit: 'Edit', mdPreview: 'Preview', mdSplit: 'Split', brEmpty: 'Select an entry to edit, or click "+" to create', deleteEntry: 'Delete', editItem: 'Edit item', syncVault: 'Sync', syncPickIdeas: 'Pick ideas dir', syncPickNotes: 'Pick notes dir', syncNoDir: 'Pick sync directories first', syncing: 'Syncing…', syncDone: 'Synced', syncConflict: 'Conflicts',
       pendingLine: '{n} things waiting for you',
       heroPlaceholder: 'Log a task, an idea, or paste a DOI / link',
       send: 'Log',
@@ -141,6 +158,20 @@ window.__ModuleLoader__.load({
       ideaStatus: { seed: 'Seed', exploring: 'Exploring', parked: 'Parked' },
       kb: { concept: 'Concept', pitfall: 'Pitfall', formula: 'Formula', tool: 'Tool', snippet: 'Snippet', template: 'Template' },
       cleared: 'Undid: {label}', toastAdd: 'Logged',
+      labelOpDefault: 'Operation', labelChat: 'Chat',
+      labelAddPaper: 'Log a paper', labelAddIdea: 'Log an idea', labelAddLink: 'Log a link', labelAddTodo: 'Log a task',
+      labelArrange: 'Arrange cards',
+      workspaceRequired: 'Enter the absolute workspace path first', choose: 'Choose directory',
+      externalConfirm: 'The source resolves outside the workspace: {path}. Confirm to continue with that path.',
+      githubConfirm: 'Will push to {remote}; repo directory {repoDir}',
+      backupAllConfirm: 'Creates a local snapshot, then pushes to {remote} ({repoDir}); with backup.target=nutstore the snapshot is also uploaded to Nutstore (that step has no confirmation gate).',
+      noRemoteHint: 'git.backupRemote is not configured; nothing will be pushed.',
+      localRoot: 'Local root', snapshotDir: 'Snapshot dir', secretBlocked: 'Held back as possible secrets: {n} files',
+      saveFailed: 'Fields that failed to save: {keys}',
+      credentialChangeTitle: 'Credential target change (secrets will be sent to the new address)',
+      pathChangeTitle: 'Read/write location change (that location is outside the workspace)',
+      pruneConfirm: 'Snapshots beyond the keep count will be permanently deleted. This cannot be undone. Continue?',
+      uploadConfirm: 'Upload the local backup directory to Nutstore; content conflicts keep .local/.remote copies, but a mid-upload remote change errors out and must be retried.',
       pageSoon: 'This page is coming in the next round; the home page comes first.',
     }
     let language = 'zh'
@@ -150,6 +181,14 @@ window.__ModuleLoader__.load({
       const value = dict()[key] ?? zh[key] ?? key
       if (typeof value !== 'string') return value
       return vars ? value.replace(/\{(\w+)\}/g, (_, name) => String(vars[name] ?? '')) : value
+    }
+    // 撤销 label 可能是语言无关的 key（新契约），也可能是历史/外部调用传进来的原文。
+    // 命中 key 就翻译；未命中的 camelCase 串按 key 处理并回退到通用文案，避免把裸 key 显示给用户。
+    function labelText(value) {
+      if (typeof value !== 'string' || !value) return ''
+      const hit = dict()[value] ?? zh[value]
+      if (typeof hit === 'string') return hit
+      return /^[a-z][A-Za-z0-9]*$/.test(value) ? t('labelOpDefault') : value
     }
     const statusText = (kind, value) => (dict()[(kind === 'task' ? 'todoStatus' : kind === 'project' ? 'projectStatus' : kind === 'paper' ? 'paperStatus' : 'ideaStatus')] ?? {})[value] ?? value
 
@@ -195,7 +234,7 @@ window.__ModuleLoader__.load({
       }
     }
 
-    async function dispatchOps(ops, { label = '操作', undoable = true, silent = false } = {}) {
+    async function dispatchOps(ops, { label = 'labelOpDefault', undoable = true, silent = false } = {}) {
       try {
         const data = await request(ROUTES.ops, { ops, label, undoable })
         setDesk({ state: data.state, canUndo: undoable || snapshot.canUndo })
@@ -212,7 +251,7 @@ window.__ModuleLoader__.load({
       try {
         const data = await request(ROUTES.undo, {})
         setDesk({ state: data.state, canUndo: data.canUndo, toast: null })
-        if (data.label) toast(t('cleared', { label: data.label }))
+        if (data.label) toast(t('cleared', { label: labelText(data.label) }))
       } catch (err) {
         toast(err.message, { error: true })
       }
@@ -393,13 +432,13 @@ window.__ModuleLoader__.load({
       const value = String(text || '').trim()
       if (!value) return null
       if (/^(10\.\d{4,9}\/|arxiv:|https?:\/\/(arxiv\.org|doi\.org))/i.test(value) || /doi/i.test(value)) {
-        return { ops: [{ op: 'add_item', kind: 'paper', title: value.replace(/^https?:\/\/\S+$/i, '').slice(0, 90) || '待补充标题', doi: /^10\./.test(value) ? value : '', url: /^https?:/i.test(value) ? value : '' }], label: '记下一篇文献' }
+        return { ops: [{ op: 'add_item', kind: 'paper', title: value.replace(/^https?:\/\/\S+$/i, '').slice(0, 90) || '待补充标题', doi: /^10\./.test(value) ? value : '', url: /^https?:/i.test(value) ? value : '' }], label: 'labelAddPaper' }
       }
       if (/^(问题|假设|方法|局限)[:：]/.test(value)) {
-        return { ops: [{ op: 'add_item', kind: 'idea', title: value.replace(/^(问题|假设|方法|局限)[:：]/, '').slice(0, 90), kind: /^假设/.test(value) ? 'hypothesis' : /^问题/.test(value) ? 'question' : /^方法/.test(value) ? 'method' : 'idea' }], label: '记下一个想法' }
+        return { ops: [{ op: 'add_item', kind: 'idea', title: value.replace(/^(问题|假设|方法|局限)[:：]/, '').slice(0, 90), kind: /^假设/.test(value) ? 'hypothesis' : /^问题/.test(value) ? 'question' : /^方法/.test(value) ? 'method' : 'idea' }], label: 'labelAddIdea' }
       }
       if (/^https?:\/\//i.test(value)) {
-        return { ops: [{ op: 'add_item', kind: 'idea', title: value.slice(0, 90), body: '', kind: 'link' }], label: '记下一个链接' }
+        return { ops: [{ op: 'add_item', kind: 'idea', title: value.slice(0, 90), body: '', kind: 'link' }], label: 'labelAddLink' }
       }
       const patch = {}
       const due = value.match(/(\d{4}-\d{2}-\d{2}|\d{1,2}月\d{1,2}日)/)
@@ -410,7 +449,7 @@ window.__ModuleLoader__.load({
       if (priority) patch.priority = priority[1].toUpperCase()
       const project = value.match(/@([^\s，,。]+)/)
       if (project) patch.projectId = project[1]
-      return { ops: [{ op: 'add_item', kind: 'todo', title: value.slice(0, 90), ...patch }], label: '记下一件事' }
+      return { ops: [{ op: 'add_item', kind: 'todo', title: value.slice(0, 90), ...patch }], label: 'labelAddTodo' }
     }
 
     // ---------- 图标 ----------
@@ -621,6 +660,12 @@ window.__ModuleLoader__.load({
 .rd-root.is-compact .rd-br-list{width:220px}
 .rd-backup-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
 .rd-backup-result{white-space:pre-wrap;overflow-wrap:anywhere;max-height:260px;overflow:auto;background:var(--dsw-alias-bg-base);padding:12px;border-radius:8px;font-size:12px}
+.rd-backup-dialog{max-width:760px;max-height:86vh;overflow:auto}
+.rd-backup-section{display:flex;flex-direction:column;gap:10px;margin:6px 0}
+.rd-backup-section h4{margin:8px 0 0;font-size:12px;font-weight:600;color:var(--dsw-alias-label-tertiary,#9a9a9a);letter-spacing:.03em}
+.rd-backup-row{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end}
+.rd-backup-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.rd-backup-path{flex:1 1 220px;min-width:160px;height:34px;border-radius:9px;border:.5px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-1);color:inherit;font:inherit;font-size:13px;padding:0 10px}
 .rd-board-col{display:flex;flex-direction:column;gap:14px;min-width:0}
 .rd-board-card{padding:16px 16px 12px;border-radius:16px;background:var(--dsw-alias-bg-layer-1);border:.5px solid var(--dsw-alias-border-l1);box-shadow:0 8px 24px rgb(0 0 0 / 5%)}
 .rd-board-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin-bottom:10px}
@@ -883,7 +928,7 @@ window.__ModuleLoader__.load({
           if (moved) {
             const movedX = node.x + (ev.clientX - start.x) / camRef.current.z
             const movedY = node.y + (ev.clientY - start.y) / camRef.current.z
-            dispatchOps([{ op: 'set_pos', kind: item.kind === 'task' ? 'todo' : item.kind, id: item.id, pos: { x: movedX, y: movedY, r: node.r } }], { label: dict() === en ? 'Arrange cards' : '摆放卡片', undoable: false, silent: true })
+            dispatchOps([{ op: 'set_pos', kind: item.kind === 'task' ? 'todo' : item.kind, id: item.id, pos: { x: movedX, y: movedY, r: node.r } }], { label: 'labelArrange', undoable: false, silent: true })
           } else {
             setDesk({ editing: { kind: item.kind, id: item.id } })
           }
@@ -1410,30 +1455,248 @@ window.__ModuleLoader__.load({
       const [busy, setBusy] = useState(false)
       const [result, setResult] = useState(null)
       const [error, setError] = useState('')
+      const [tab, setTab] = useState('actions')
+      const [config, setConfig] = useState(null)
+      const [form, setForm] = useState({})
+      const [snapshotPath, setSnapshotPath] = useState('')
+      const [workspace, setWorkspace] = useState('')
+      const [pending, setPending] = useState(null)
+      const failureRef = useRef(null)
+      const abortRef = useRef(null)
       if (!open) return null
-      const run = async (operation) => {
-        if (!sessionId.trim()) { setError(t('noSession')); return }
+      // 传输层：只发请求 + 归一化失败（不碰 React 状态），供"面板先读一次 config_show"复用。
+      const transport = async (operation, args, confirmed) => {
         const controller = new AbortController()
-        setBusy(true); setError(''); setResult(null)
+        abortRef.current?.abort()   // 新请求取代旧请求：保留可取消能力，不再用一次性 controller
+        abortRef.current = controller
         try {
-          const remoteResult = await ctxRef?.remote?.commands?.execute(sessionId.trim(), '/dsh-csrw ' + JSON.stringify({ operation, args: {}, confirmed: true }), [], controller.signal)
-          if (!remoteResult?.ok) throw remoteResult?.error ?? new Error(t('error'))
+          const payload = { operation, args: { ...args, workspace: workspace.trim() }, confirmed }
+          const remoteResult = await ctxRef?.remote?.commands?.execute(sessionId.trim(), '/dsh-csrw ' + JSON.stringify(payload), [], controller.signal)
+          if (!remoteResult?.ok) return { ok: false, message: String(remoteResult?.error?.message ?? remoteResult?.error ?? t('error')) }
           const response = remoteResult.value
-          if (!response || response.result?.kind !== 'success') throw new Error(response?.result?.text || t('error'))
-          setResult(JSON.parse(response.result.text))
+          if (!response || response.result?.kind !== 'success') {
+            return { ok: false, message: response?.result?.text || t('error'), code: response?.result?.code, path: response?.result?.path }
+          }
+          return { ok: true, data: JSON.parse(response.result.text) }
         } catch (err) {
-          if (!controller.signal.aborted) setError(err?.message || String(err))
-        } finally { setBusy(false) }
+          return { ok: false, message: err?.message || String(err), code: err?.code, path: err?.path }
+        }
       }
-      const act = (operation, label) => h('button', { type: 'button', className: 'rd-btn', disabled: busy, onClick: () => run(operation) }, t(label))
+      const ready = () => {
+        if (!sessionId.trim()) { setError(t('noSession')); return false }
+        if (!workspace.trim()) { setError(t('workspaceRequired')); return false }
+        return true
+      }
+      // 两个旗标互不代偿：confirm 只表达"批准这份 payload"；工具级 confirm 由调用点显式给定。
+      const exec = async (operation, args = {}, confirm = false, toolConfirm = false) => {
+        if (!ready()) return null
+        setBusy(true); setError(''); setResult(null); setPending(null)
+        const outcome = await transport(operation, toolConfirm ? { ...args, confirm: true } : args, confirm)
+        setBusy(false)
+        if (!outcome.ok) { failureRef.current = outcome; setError(outcome.message); return null }
+        failureRef.current = null
+        setResult(outcome.data)
+        return outcome.data
+      }
+      const flat = (cfg) => {
+        const out = {}
+        for (const [section, values] of Object.entries(cfg ?? {})) {
+          if (!values || typeof values !== 'object' || Array.isArray(values)) continue
+          for (const [key, value] of Object.entries(values)) out[`${section}.${key}`] = value
+        }
+        return out
+      }
+      const loadConfig = async () => {
+        const data = await exec('dsh_csrw_config_show')
+        if (data?.config) { setConfig(data.config); setForm(flat(data.config)) }
+      }
+      const setField = (key, value) => setForm((previous) => ({ ...previous, [key]: value }))
+      // 敏感字段分两类（写时门）：凭据作用域改变"凭据发往哪里"，路径改变"读写哪个位置"。
+      const CREDENTIAL_KEYS = ['nutstore.baseUrl', 'nutstore.username', 'nutstore.credentialKey']
+      const PATH_SCOPED_KEYS = ['backup.localDir', 'obsidian.vaultPath', 'zotero.dataDir', 'backup.dshHome', 'backup.dshProfile']
+      const saveAll = () => {
+        if (!config) return
+        const base = flat(config)
+        const changes = Object.entries(form).filter(([key, value]) => String(value) !== String(base[key]))
+        if (!changes.length) { setResult({ saved: 0, failed: [] }); return }
+        setError('')
+        // 先把 old -> new 摆到面板上；用户看过之后才逐个提交。
+        setPending({ kind: 'save', changes: changes.map(([key, value]) => ({ key, from: base[key], to: value })) })
+      }
+      const runSave = async (rows) => {
+        if (!ready()) return
+        const base = flat(config)
+        const failed = []
+        let saved = 0
+        for (const row of rows) {
+          const original = base[row.key]
+          const coerced = typeof original === 'boolean' ? (row.to === 'true' || row.to === true) : typeof original === 'number' ? Number(row.to) : row.to
+          // 每次请求都独立带信封 confirmed=true；args.confirm 只给两类敏感字段，绝不传 confirmExternalPath
+          // （config 里的路径没有 payload，越界控制点在 setConfig 的写时门）。
+          const sensitive = CREDENTIAL_KEYS.includes(row.key) || PATH_SCOPED_KEYS.includes(row.key)
+          const data = await exec('dsh_csrw_config_set', { key: row.key, value: coerced }, true, sensitive)
+          if (data) saved += 1
+          else failed.push({ key: row.key, error: failureRef.current?.message || '' })
+        }
+        const refreshed = await transport('dsh_csrw_config_show', {}, false)
+        if (refreshed.ok && refreshed.data?.config) { setConfig(refreshed.data.config); setForm(flat(refreshed.data.config)) }
+        setResult({ saved, failed })
+      }
+      const READ_OPS = new Set(['dsh_csrw_nutstore_test', 'dsh_csrw_nutstore_logs', 'dsh_csrw_snapshot_verify'])
+      const PUSH_OPS = new Set(['dsh_csrw_backup_github', 'dsh_csrw_backup_all'])
+      // 单击即写、且后果需要单独说明的操作：删除不可恢复 / 上传远端。
+      // 不复用 kind:'call'（那句 externalConfirm 讲"路径在工作区外"，对这两类会误导）。
+      const CONFIRM_OPS = new Map([
+        ['dsh_csrw_snapshot_prune', { titleKey: 'pruneConfirm', toolConfirm: true }],
+        ['dsh_csrw_backup_upload', { titleKey: 'uploadConfirm', toolConfirm: false }],
+      ])
+      // 面板先行：先只读读一次 config，把 remote/repoDir 冻结进面板，保证"看到的值 = 执行时用的值"。
+      const openPushPanel = async (operation) => {
+        if (!ready()) return
+        setBusy(true); setError(''); setResult(null); setPending(null)
+        const outcome = await transport('dsh_csrw_config_show', {}, false)
+        setBusy(false)
+        if (!outcome.ok) { setError(outcome.message); return }
+        const git = outcome.data?.config?.git
+        if (!git || typeof git.backupRemote !== 'string') { setError(t('error')); return }
+        setPending({ kind: 'push', operation, remote: git.backupRemote, repoDir: typeof git.backupRepoDir === 'string' ? git.backupRepoDir : '' })
+      }
+      // 越界：先不带 confirmExternalPath 跑一次，只有命中 EXTERNAL_PATH_REQUIRED 才回显 host 给的绝对路径。
+      const runExternalAware = async (operation, args = {}, toolConfirm = false) => {
+        const data = await exec(operation, args, true, toolConfirm)
+        if (data) return data
+        const failure = failureRef.current
+        if (failure?.code === 'EXTERNAL_PATH_REQUIRED') {
+          setPending({ kind: 'call', operation, args: { ...args, confirmExternalPath: true }, toolConfirm, path: typeof failure.path === 'string' ? failure.path : '' })
+        }
+        return null
+      }
+      const runAction = (operation, args = {}) => {
+        if (READ_OPS.has(operation)) return exec(operation, args, false, false)
+        if (PUSH_OPS.has(operation)) return openPushPanel(operation)
+        const confirmOp = CONFIRM_OPS.get(operation)
+        if (confirmOp) {
+          // 面板先行：用户点了"确认"之后才发第一个请求（不先跑一次再补确认）。
+          setError(''); setResult(null)
+          setPending({ kind: 'tool', operation, args, toolConfirm: confirmOp.toolConfirm, titleKey: confirmOp.titleKey })
+          return null
+        }
+        return runExternalAware(operation, args, false)
+      }
+      const confirmPending = () => {
+        const current = pending
+        if (!current) return
+        setPending(null)
+        if (current.kind === 'save') return runSave(current.changes)
+        if (current.kind === 'push') return exec(current.operation, {}, true, true)
+        return exec(current.operation, current.args, true, current.toolConfirm)
+      }
+      const act = (operation, label, args = {}, primary = false) => h('button', { type: 'button', className: primary ? 'rd-btn is-primary' : 'rd-btn', disabled: busy || !sessionId.trim() || !workspace.trim(), onClick: () => runAction(operation, args) }, t(label))
+      const field = (key, label, control) => h('label', { className: 'rd-field', key }, h('span', null, t(label)), control)
+      const textField = (key, label) => field(key, label, h('input', { value: form[key] ?? '', disabled: busy, onChange: (event) => setField(key, event.target.value) }))
+      const numberField = (key, label) => field(key, label, h('input', { type: 'number', min: 0, value: form[key] ?? '', disabled: busy, onChange: (event) => setField(key, event.target.value) }))
+      const selectField = (key, label, options) => field(key, label, h('select', { value: String(form[key] ?? ''), disabled: busy, onChange: (event) => setField(key, event.target.value) }, ...options.map(([value, text]) => h('option', { key: value, value }, text))))
+      const boolField = (key, label) => selectField(key, label, [['true', t('yes')], ['false', t('no')]])
+      const actionsTab = h('div', { className: 'rd-backup-section' },
+        h('p', { className: 'rd-hint' }, t('backupSyncHint')),
+        h('div', { className: 'rd-backup-row' }, act('dsh_csrw_backup_all', 'backupAll', {}, true)),
+        h('h4', null, t('backupSettings')),
+        h('div', { className: 'rd-backup-row' }, act('dsh_csrw_backup_obsidian', 'backupObsidian'), act('dsh_csrw_backup_zotero', 'backupZotero'), act('dsh_csrw_backup_dsh', 'backupDsh'), act('dsh_csrw_backup_workspace', 'backupWorkspace')),
+        h('h4', null, t('cloudSettings')),
+        h('div', { className: 'rd-backup-row' }, act('dsh_csrw_backup_upload', 'backupUpload'), act('dsh_csrw_backup_github', 'backupGithub'), act('dsh_csrw_nutstore_test', 'nutstoreTest'), act('dsh_csrw_nutstore_logs', 'nutstoreLogs')),
+        h('h4', null, t('snapshotPath')),
+        h('div', { className: 'rd-backup-row' }, h('input', { className: 'rd-backup-path', value: snapshotPath, placeholder: t('snapshotPath'), disabled: busy, onChange: (event) => setSnapshotPath(event.target.value) }), act('dsh_csrw_snapshot_verify', 'snapshotVerify', { snapshotPath }), act('dsh_csrw_snapshot_prune', 'snapshotPrune')))
+      const configTab = h('div', { className: 'rd-backup-section' },
+        !config
+          ? h('div', { className: 'rd-backup-row' }, h('button', { type: 'button', className: 'rd-btn', disabled: busy || !sessionId.trim(), onClick: loadConfig }, t('load')))
+          : h(React.Fragment, null,
+            h('h4', null, t('backupSettings')),
+            h('div', { className: 'rd-backup-grid' },
+              selectField('backup.target', 'target', [['local', 'local'], ['nutstore', 'nutstore']]),
+              textField('backup.localDir', 'localDir'),
+              numberField('backup.keep', 'keep'),
+              selectField('backup.mode', 'mode', [['full', 'full'], ['incremental', 'incremental']]),
+              boolField('backup.includeDshSessions', 'includeSessions'),
+              textField('backup.dshHome', 'dshHome'),
+              textField('backup.dshProfile', 'dshProfile')),
+            h('h4', null, t('cloudSettings')),
+            h('div', { className: 'rd-backup-grid' },
+              textField('nutstore.baseUrl', 'baseUrl'),
+              textField('nutstore.remoteRoot', 'remoteRoot'),
+              textField('nutstore.username', 'username'),
+              textField('nutstore.credentialKey', 'credentialKey'),
+              numberField('nutstore.retry', 'retry'),
+              numberField('nutstore.retryDelay', 'retryDelay'),
+              textField('git.backupRemote', 'backupRemote'),
+              textField('git.backupBranch', 'backupBranch'),
+              textField('git.backupRepoDir', 'backupRepoDir')),
+            h('div', { className: 'rd-backup-row' }, h('button', { type: 'button', className: 'rd-btn is-primary', disabled: busy, onClick: saveAll }, t('saveConfig')))))
+      const diffRow = (row, index) => h('p', { key: `d${index}`, className: 'rd-hint' }, `${row.key}：${String(row.from)} → ${String(row.to)}`)
+      const pendingButtons = h('div', { className: 'rd-backup-row' },
+        h('button', { type: 'button', className: 'rd-btn is-primary', disabled: busy, onClick: confirmPending }, t('confirm')),
+        h('button', { type: 'button', className: 'rd-btn', disabled: busy, onClick: () => setPending(null) }, t('cancel')))
+      const pendingPanel = (() => {
+        if (!pending) return null
+        if (pending.kind === 'save') {
+          const credential = pending.changes.filter((row) => CREDENTIAL_KEYS.includes(row.key))
+          const paths = pending.changes.filter((row) => PATH_SCOPED_KEYS.includes(row.key))
+          const plain = pending.changes.filter((row) => !CREDENTIAL_KEYS.includes(row.key) && !PATH_SCOPED_KEYS.includes(row.key))
+          return h('div', { className: 'rd-backup-section' },
+            h('h4', null, t('saveConfig')),
+            credential.length ? h('p', { className: 'rd-hint' }, t('credentialChangeTitle')) : null,
+            ...credential.map((row, index) => diffRow(row, `c${index}`)),
+            paths.length ? h('p', { className: 'rd-hint' }, t('pathChangeTitle')) : null,
+            ...paths.map((row, index) => diffRow(row, `p${index}`)),
+            ...plain.map((row, index) => diffRow(row, `n${index}`)),
+            pendingButtons)
+        }
+        const title = pending.kind === 'push'
+          ? t(pending.operation === 'dsh_csrw_backup_all' ? 'backupAllConfirm' : 'githubConfirm', { remote: pending.remote || t('none'), repoDir: pending.repoDir || t('none') })
+          : pending.kind === 'tool'
+            ? t(pending.titleKey)
+            : t('externalConfirm', { path: pending.path || '—' })
+        return h('div', { className: 'rd-backup-section' },
+          h('h4', null, title),
+          pending.kind === 'push' && !pending.remote ? h('p', { className: 'rd-hint' }, t('noRemoteHint')) : null,
+          pendingButtons)
+      })()
+      // 结果区：本地根/快照目录三级兜底 + blocked / nutstore.blocked / nutstoreError + 部分保存失败。
+      const sourceLine = (() => {
+        if (!result || typeof result !== 'object') return null
+        const direct = typeof result.source === 'string' ? result.source.trim() : ''
+        if (direct) return { label: 'localRoot', path: direct }
+        const nested = typeof result.nutstore?.source === 'string' ? result.nutstore.source.trim() : ''
+        if (nested) return { label: 'localRoot', path: nested }
+        const snapshot = typeof result.snapshotPath === 'string' ? result.snapshotPath.trim() : ''
+        if (snapshot) return { label: 'snapshotDir', path: snapshot }
+        return null
+      })()
+      const blockedRows = Array.isArray(result?.blocked) ? result.blocked : Array.isArray(result?.nutstore?.blocked) ? result.nutstore.blocked : []
+      const blockedCount = typeof result?.secretsBlocked === 'number' ? result.secretsBlocked : blockedRows.length
+      const failedRows = Array.isArray(result?.failed) ? result.failed : []
+      const outcomeView = result ? h('div', null,
+        sourceLine ? h('p', { className: 'rd-hint' }, `${t(sourceLine.label)}：${sourceLine.path}`) : null,
+        blockedRows.length ? h('p', { className: 'rd-hint', style: { color: 'var(--dsw-alias-state-warn-primary)' } }, t('secretBlocked', { n: blockedCount })) : null,
+        ...blockedRows.slice(0, 20).map((row, index) => h('p', { key: `bl${index}`, className: 'rd-hint' }, `${row?.path ?? ''}${row?.reason ? ` — ${row.reason}` : ''}`)),
+        typeof result.nutstoreError === 'string' && result.nutstoreError ? h('p', { className: 'rd-hint', style: { color: 'var(--dsw-alias-state-error-primary)' } }, result.nutstoreError) : null,
+        failedRows.length ? h('p', { className: 'rd-hint', style: { color: 'var(--dsw-alias-state-error-primary)' } }, t('saveFailed', { keys: failedRows.map((row) => row.key).join('、') })) : null,
+        h('pre', { className: 'rd-backup-result' }, JSON.stringify(result, null, 2))) : null
       return h('div', { className: 'rd-dialog-backdrop', onPointerDown: (event) => { if (event.target === event.currentTarget) setDesk({ backupOpen: false }) } },
-        h('div', { className: 'rd-dialog' },
-          h('h3', null, t('backupSync')),
-          h('p', { className: 'rd-hint' }, t('backupSyncHint')),
+        h('div', { className: 'rd-dialog rd-backup-dialog' },
+          h('h3', null, t('backupCenter')),
+          h('label', { className: 'rd-field' }, h('span', null, t('workspace')), h('div', { className: 'rd-backup-row' },
+            h('input', { value: workspace, placeholder: t('workspace'), disabled: busy, onChange: (event) => setWorkspace(event.target.value) }),
+            h('button', { type: 'button', className: 'rd-btn', disabled: busy, onClick: async () => {
+              try { const picked = await ctxRef?.get('uiWorkspace')?.pickDirectory(); if (picked) setWorkspace(picked) } catch (err) { setError(err?.message || String(err)) }
+            } }, t('choose')))),
           h('label', { className: 'rd-field' }, h('span', null, t('session')), h('input', { value: sessionId, placeholder: t('noSession'), onChange: (event) => setSessionId(event.target.value) })),
-          h('div', { className: 'rd-backup-actions' }, act('dsh_csrw_backup_all', 'backupAll'), act('dsh_csrw_backup_upload', 'backupUpload'), act('dsh_csrw_backup_github', 'backupGithub')),
+          h('div', { className: 'rd-seg' },
+            h('button', { type: 'button', className: tab === 'actions' ? 'is-on' : '', onClick: () => setTab('actions') }, t('tabActions')),
+            h('button', { type: 'button', className: tab === 'config' ? 'is-on' : '', onClick: () => setTab('config') }, t('tabConfig'))),
+          tab === 'actions' ? actionsTab : configTab,
+          pendingPanel,
           error ? h('p', { className: 'rd-hint', style: { color: 'var(--dsw-alias-state-error-primary)' } }, error) : null,
-          result ? h('pre', { className: 'rd-backup-result' }, JSON.stringify(result, null, 2)) : null,
+          outcomeView,
           h('div', { className: 'rd-form-foot' }, h('button', { type: 'button', className: 'rd-btn', onClick: () => setDesk({ backupOpen: false }) }, t('cancel')))))
     }
 
