@@ -1,6 +1,9 @@
+[English](README.md) | **中文**
+
 # CS科研工作台 (dsh-cs-research-workbench)
 
-[English](README.md) | **中文**
+
+[![](https://img.shields.io/badge/powered_by-dsh-4D6BFE?style=flat-square&logo=deepseek&logoColor=white)](https://github.com/deepseek-ai/deepseek-harness) [![](https://img.shields.io/badge/powered_by-CodeBuddy-4D6BFE?style=flat-square&logo=codebuddy&logoColor=white)](https://www.codebuddy.cn/)
 
 **CS科研工作台**（`dsh-cs-research-workbench`，简称 `dsh-csrw`）是**面向计算机科学的全流程科研工作台**：把选题构思、文献与笔记、代码与实验版本、结果归档、资料备份串成一条能在本机跑起来的链路。
 
@@ -287,5 +290,3 @@ GET /dsh-csrw/api/state
 - 界面人工验收：设置分区、侧栏入口、标题与图标名称、工作台加载配置均按预期显示；插件卡片描述 41 字未截断。
 - 外部服务边界：本机未运行 Zotero，真实 API 搜索/条目读取未验收；未提供坚果云应用密码，真实远端往返未验收；两者在不可用时都返回明确错误而不是假成功。Obsidian 端子验收使用临时 vault（非用户真实数据）：write/append/move/trash 正常，`../` 越界与默认覆盖被拒绝，`snapshot_verify` 能检出被篡改文件，`snapshot_restore` 未传 `confirm: true` 时拒绝。
 - 尚未实现：项目、文献两页只有条数占位，没有列表与编辑界面（想法·知识库已合并为编辑阅读器，具备条目列表、Markdown 编辑/预览/分栏与 Obsidian 双向同步；工作台界面层，与 Obsidian 执行层无关）。Obsidian 本地能力清单（`docs/obsidian-local-features.md`）已全部实现。
-
-[![](https://img.shields.io/badge/powered_by-dsh-4D6BFE?style=flat-square&logo=deepseek&logoColor=white)](https://github.com/deepseek-ai/deepseek-harness) [![](https://img.shields.io/badge/powered_by-CodeBuddy-4D6BFE?style=flat-square&logo=codebuddy&logoColor=white)](https://www.codebuddy.cn/)

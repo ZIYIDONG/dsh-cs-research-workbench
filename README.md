@@ -1,6 +1,8 @@
+**English** | [中文](README_zh.md)
+
 # CS Research Workbench (dsh-cs-research-workbench)
 
-**English** | [中文](README_zh.md)
+[![](https://img.shields.io/badge/powered_by-dsh-4D6BFE?style=flat-square&logo=deepseek&logoColor=white)](https://github.com/deepseek-ai/deepseek-harness) [![](https://img.shields.io/badge/powered_by-CodeBuddy-4D6BFE?style=flat-square&logo=codebuddy&logoColor=white)](https://www.codebuddy.cn/)
 
 **CS Research Workbench** (`dsh-cs-research-workbench`, `dsh-csrw` for short) is an **end-to-end research workbench for computer science**. It connects topic ideation, literature and notes, code and experiment versions, result archiving, and data backup into a single pipeline that runs entirely on your own machine.
 
@@ -287,5 +289,3 @@ The UI in this version covers the three todo views, the ideas/knowledge-base edi
 - Manual UI acceptance: the settings section, sidebar entry, titles, and icon names displayed as expected, and loading config in the workbench worked; the plugin card description (41 characters) was not truncated.
 - External service boundaries: Zotero was not running locally, so real API search/item reads were not accepted; no Nutstore app password was provided, so a real remote round trip was not accepted. Both return explicit errors rather than fake success when unavailable. Obsidian-side acceptance used a temporary vault (never real user data): write/append/move/trash worked, `../` escapes and default overwrite were rejected, `snapshot_verify` detected tampered files, and `snapshot_restore` refused without `confirm: true`.
 - Not yet implemented: the Projects and Papers pages only hold counts, with no list or editing UI (ideas and the knowledge base are merged into an editor/reader with an entry list, Markdown edit/preview/split, and two-way Obsidian sync — this is the workbench UI layer and unrelated to the Obsidian execution layer). The Obsidian local capability list (`docs/obsidian-local-features.md`) is fully implemented.
-
-[![](https://img.shields.io/badge/powered_by-dsh-4D6BFE?style=flat-square&logo=deepseek&logoColor=white)](https://github.com/deepseek-ai/deepseek-harness) [![](https://img.shields.io/badge/powered_by-CodeBuddy-4D6BFE?style=flat-square&logo=codebuddy&logoColor=white)](https://www.codebuddy.cn/)
