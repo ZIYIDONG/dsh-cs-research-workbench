@@ -80,7 +80,7 @@ node bin/dsh-csrw.js health
 1. 顶栏导航区重组：「监控台」排最左，用分隔线与其余分组明确区分；随后是四个标签——待办、项目、文献、想法·知识库（想法与知识库合并为一个入口）。右侧是助手模型按钮、备份/同步按钮和助手开关（点击收起/唤起右侧助手 Dock，状态持久化到偏好）。
 2. 首屏两行数字：还有 N 件事等你推进、M 篇文献排在本周；下面是一句话记录框。
 3. 一句话按内容分流：DOI/arXiv → 文献，`问题:`/`假设:`/`方法:`/`局限:` 或链接 → 想法，带日期/`@项目`/`#P0`/`~30min` → 任务，其余 → 任务。
-4. Todo 页为上下分区：上部散落画布（可拖动卡片、滚轮平移、`Ctrl/⌘ + 滚轮` 缩放）+ 一句话记录框，下部五项待办分类列表（Todo: All / Projects / Paper / Idea / 知识库）。底部 dock 栏（视图切换与快速记录按钮）已移除，快速记录入口在待办列表头部。
+4. Todo 页为上下两段式毛玻璃面板（`20px` 圆角、`blur(24px)`、统一透明度，间距 `16px`）：上方面板是待办概览 + 输入区（散落画布可拖动卡片、滚轮平移、`Ctrl/⌘ + 滚轮` 缩放；右下角有缩放/重置按钮；一句话记录框居中），下方面板是五项待办分类列表（Todo: All / Projects / Paper / Idea / 知识库）。点击散落卡片或列表行打开编辑对话框，可改字段或删除；列表面板内部滚动，快速记录入口在列表头部；空状态按面板各自呈现。
 5. 想法·知识库合并页是一个「类似 Obsidian 的编辑阅读器」：左侧想法/知识库条目列表（可新建、选中），右侧 Markdown 编辑器，支持编辑/预览/分栏三种模式，渲染标题、列表、代码块、加粗、斜体、链接与双链 `[[...]]`，可直接新建、编辑、删除条目。页面顶部提供「同步」工具栏：选择想法/知识库目录后，可把工作台条目与本地 Obsidian 笔记双向同步（手动触发，走 `POST /api/vault-sync`）；冲突保留 `.conflict.md` 副本、不自动覆盖。
 6. 快速记录按类型分栏：任务（优先级、截止、项目、状态）、文献（DOI、URL、阅读状态）、想法（类型：想法/假设/问题/方法）、知识库（概念/坑/公式/工具/片段/模板），填完直接写进本地状态。
 7. 右侧助手 Dock：不选模型时用本地规则（建任务、查今天、统计待办），不联网；在顶栏选定模型后，助手只依据当前工作台数据作答，要求 120 字内、不编造条目，模型调用失败会回退本地规则并在返回里标明 `engine`。
@@ -254,3 +254,5 @@ GET /dsh-csrw/api/state
 - 界面人工验收：设置分区、侧栏入口、标题与图标名称、工作台加载配置均按预期显示；插件卡片描述 41 字未截断。
 - 外部服务边界：本机未运行 Zotero，真实 API 搜索/条目读取未验收；未提供坚果云应用密码，真实远端往返未验收；两者在不可用时都返回明确错误而不是假成功。Obsidian 端子验收使用临时 vault（非用户真实数据）：write/append/move/trash 正常，`../` 越界与默认覆盖被拒绝，`snapshot_verify` 能检出被篡改文件，`snapshot_restore` 未传 `confirm: true` 时拒绝。
 - 尚未实现：项目、文献、想法、知识库四页只有条数占位，没有列表与编辑界面（工作台界面层，与 Obsidian 执行层无关）。Obsidian 本地能力清单（`docs/obsidian-local-features.md`）已全部实现。
+
+[![](https://img.shields.io/badge/powered_by-dsh-4D6BFE?style=flat-square&logo=deepseek&logoColor=white)](https://github.com/deepseek-ai/deepseek-harness) [![](https://img.shields.io/badge/powered_by-CodeBuddy-4D6BFE?style=flat-square&logo=codebuddy&logoColor=white)](https://www.codebuddy.cn/)

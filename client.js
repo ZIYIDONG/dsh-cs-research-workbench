@@ -65,7 +65,7 @@ window.__ModuleLoader__.load({
     // ---------- 文案 ----------
     const zh = {
       workbench: '科研工作台',
-      navTodo: '待办', navProject: '项目', navPaper: '文献库', navIdea: '想法', navKb: '知识库', navBrain: '想法 · 知识库', backupSync: '备份 / 同步', backupSyncHint: '选择会话作为权限上下文；一键备份先建本地快照，再按配置上传坚果云与 GitHub。', mdEdit: '编辑', mdPreview: '预览', mdSplit: '分栏', brEmpty: '选择左侧条目开始编辑，或点击「＋」新建', deleteEntry: '删除', syncVault: '同步', syncPickIdeas: '选择想法目录', syncPickNotes: '选择知识库目录', syncNoDir: '请先选择同步目录', syncing: '同步中…', syncDone: '同步完成', syncConflict: '发现冲突',
+      navTodo: '待办', navProject: '项目', navPaper: '文献库', navIdea: '想法', navKb: '知识库', navBrain: '想法 · 知识库', backupSync: '备份 / 同步', backupSyncHint: '选择会话作为权限上下文；一键备份先建本地快照，再按配置上传坚果云与 GitHub。', mdEdit: '编辑', mdPreview: '预览', mdSplit: '分栏', brEmpty: '选择左侧条目开始编辑，或点击「＋」新建', deleteEntry: '删除', editItem: '编辑条目', syncVault: '同步', syncPickIdeas: '选择想法目录', syncPickNotes: '选择知识库目录', syncNoDir: '请先选择同步目录', syncing: '同步中…', syncDone: '同步完成', syncConflict: '发现冲突',
       pendingLine: '还有{n}件事等你推进',
       heroPlaceholder: '记下一件事、一个想法，或贴一个 DOI / 链接',
       send: '记下',
@@ -90,7 +90,7 @@ window.__ModuleLoader__.load({
       assistantEmpty: '告诉我今天要做什么，或者问我现在积压了多少事。',
       assistantSuggestion1: '今天有什么事？', assistantSuggestion2: '积压了多少？', assistantSuggestion3: '记一件事',
       engineModel: '模型', engineLocal: '本地规则', clearChat: '清空对话',
-      title: '标题', body: '内容', due: '截止', priority: '优先级', estimate: '预计分钟',
+      title: '标题', body: '内容', due: '截止', priority: '优先级', estimate: '预计分钟', notes: '备注',
       authors: '作者', venue: '发表场所', year: '年份', doi: 'DOI', url: '链接', status: '状态',
       projectOf: '所属项目', none: '无',
       save: '保存', settings: '偏好', language: '语言', dockOpen: '显示助手',
@@ -105,7 +105,7 @@ window.__ModuleLoader__.load({
     }
     const en = {
       workbench: 'Research desk',
-      navTodo: 'Todo', navProject: 'Projects', navPaper: 'Papers', navIdea: 'Ideas', navKb: 'KnowledgeBase', navBrain: 'Ideas & KB', backupSync: 'Backup / Sync', backupSyncHint: 'Choose a session as permission context. Backup all creates a local snapshot, then uploads to Nutstore and GitHub per config.', mdEdit: 'Edit', mdPreview: 'Preview', mdSplit: 'Split', brEmpty: 'Select an entry to edit, or click "+" to create', deleteEntry: 'Delete', syncVault: 'Sync', syncPickIdeas: 'Pick ideas dir', syncPickNotes: 'Pick notes dir', syncNoDir: 'Pick sync directories first', syncing: 'Syncing…', syncDone: 'Synced', syncConflict: 'Conflicts',
+      navTodo: 'Todo', navProject: 'Projects', navPaper: 'Papers', navIdea: 'Ideas', navKb: 'KnowledgeBase', navBrain: 'Ideas & KB', backupSync: 'Backup / Sync', backupSyncHint: 'Choose a session as permission context. Backup all creates a local snapshot, then uploads to Nutstore and GitHub per config.', mdEdit: 'Edit', mdPreview: 'Preview', mdSplit: 'Split', brEmpty: 'Select an entry to edit, or click "+" to create', deleteEntry: 'Delete', editItem: 'Edit item', syncVault: 'Sync', syncPickIdeas: 'Pick ideas dir', syncPickNotes: 'Pick notes dir', syncNoDir: 'Pick sync directories first', syncing: 'Syncing…', syncDone: 'Synced', syncConflict: 'Conflicts',
       pendingLine: '{n} things waiting for you',
       heroPlaceholder: 'Log a task, an idea, or paste a DOI / link',
       send: 'Log',
@@ -130,7 +130,7 @@ window.__ModuleLoader__.load({
       assistantEmpty: 'Tell me what to do today, or ask how much is queued.',
       assistantSuggestion1: 'What is due today?', assistantSuggestion2: 'How much is queued?', assistantSuggestion3: 'Log something',
       engineModel: 'Model', engineLocal: 'Local', clearChat: 'Clear chat',
-      title: 'Title', body: 'Content', due: 'Due', priority: 'Priority', estimate: 'Minutes',
+      title: 'Title', body: 'Content', due: 'Due', priority: 'Priority', estimate: 'Minutes', notes: 'Notes',
       authors: 'Authors', venue: 'Venue', year: 'Year', doi: 'DOI', url: 'URL', status: 'Status',
       projectOf: 'Project', none: 'None',
       save: 'Save', settings: 'Preferences', language: 'Language', dockOpen: 'Show assistant',
@@ -158,7 +158,7 @@ window.__ModuleLoader__.load({
       state: null, canUndo: false, error: null, view: 'todo', mode: 'scatter', kindFilter: 'all',
       query: '', related: null, capture: null, dockOpen: true, chatInput: '', thinking: false,
       toast: null, focusId: null, dashboardOpen: true, cam: { x: 0, y: 0, z: 1 }, camAnim: false,
-      modelsOpen: false, models: [], modelsLoading: false, backupOpen: false,
+      modelsOpen: false, models: [], modelsLoading: false, backupOpen: false, editing: null,
       month: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
     }
     const listeners = new Set()
@@ -564,10 +564,13 @@ window.__ModuleLoader__.load({
 .rd-round-plus{width:34px;height:34px;border-radius:50%;border:0;background:var(--dsw-alias-label-primary);color:var(--dsw-alias-bg-base);display:grid;place-items:center;cursor:pointer}
 .rd-list{padding:104px 28px 120px;max-width:1080px;margin:0 auto;overflow:auto;height:100%}
 .rd-board{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:start}
-.rd-todo-split{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--dsw-alias-bg-base)}
-.rd-todo-stage{position:relative;flex:1 1 55%;min-height:0;overflow:hidden}
-.rd-todo-stage .rd-hero-anchor{top:44%;transform:translate(-50%,-50%) scale(.88)}
-.rd-todo-list{flex:0 0 45%;min-height:0;display:flex;flex-direction:column;border-top:1px solid var(--dsw-alias-border-l1);background:var(--dsw-alias-bg-layer-1);box-shadow:0 -10px 32px rgb(0 0 0 / 7%)}
+.rd-glass-panel{border-radius:20px;background:var(--glass);border:.5px solid var(--dsw-alias-border-l1);backdrop-filter:blur(24px) saturate(1.05);-webkit-backdrop-filter:blur(24px) saturate(1.05);box-shadow:0 8px 32px rgb(0 0 0 / 6%);overflow:hidden}
+.rd-todo-split{position:absolute;inset:0;padding:72px 20px 20px;display:flex;flex-direction:column;gap:16px;overflow:hidden}
+.rd-pane-top{position:relative;flex:1 1 55%;min-height:0}
+.rd-pane-top .rd-hero-anchor{top:44%;transform:translate(-50%,-50%) scale(.88)}
+.rd-pane-bottom{flex:0 0 45%;min-height:0;display:flex;flex-direction:column}
+.rd-pane-corner{position:absolute;right:14px;bottom:14px;z-index:7}
+.rd-todo-list{flex:1;min-height:0;display:flex;flex-direction:column}
 .rd-todo-list-head{display:flex;align-items:center;gap:12px;padding:16px 24px 12px;border-bottom:1px solid var(--dsw-alias-border-l1)}
 .rd-todo-list-head h2{margin:0;font-size:15px;font-weight:600;color:var(--dsw-alias-label-primary)}
 .rd-todo-list-count{font-size:12px;color:var(--dsw-alias-label-tertiary,#9a9a9a)}
@@ -575,8 +578,11 @@ window.__ModuleLoader__.load({
 .rd-todo-bucket{min-width:0;display:flex;flex-direction:column;gap:6px;padding:12px 14px;border-radius:12px;background:var(--dsw-alias-bg-base);border:1px solid var(--dsw-alias-border-l1);box-shadow:0 2px 8px rgb(0 0 0 / 4%)}
 .rd-todo-bucket h3{margin:0 0 2px;font-size:12px;font-weight:600;color:var(--dsw-alias-label-secondary)}
 .rd-todo-bucket-rows{display:flex;flex-direction:column;gap:5px}
-.rd-todo-row{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;line-height:1.4}
+.rd-todo-row{display:flex;align-items:center;justify-content:space-between;gap:8px;width:100%;font-size:12px;line-height:1.4;border:0;background:transparent;color:inherit;font-family:inherit;text-align:left;padding:3px 5px;border-radius:6px;cursor:pointer}
+.rd-todo-row:hover{background:var(--dsw-alias-bg-layer-1)}
 .rd-todo-row-title{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--dsw-alias-label-primary)}
+.rd-root.is-compact .rd-todo-split{padding:64px 10px 10px;gap:10px}
+.rd-root.is-compact .rd-pane-bottom{flex-basis:50%}
 .rd-root.is-compact .rd-todo-list-body{grid-template-columns:repeat(2,minmax(0,1fr))}
 .rd-brain{position:absolute;inset:0;padding:64px 18px 18px}
 .rd-br-sync{display:flex;align-items:center;gap:10px;padding:0 4px 12px}
@@ -653,6 +659,7 @@ window.__ModuleLoader__.load({
 .rd-form-foot{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
 .rd-btn{height:34px;padding:0 14px;border-radius:9px;border:.5px solid var(--dsw-alias-border-l2);background:var(--dsw-alias-bg-layer-1);color:inherit;font:inherit;font-size:13px;cursor:pointer}
 .rd-btn.is-primary{border-color:transparent;background:var(--dsw-alias-label-primary);color:var(--dsw-alias-bg-base)}
+.rd-btn.is-danger{color:var(--dsw-alias-state-error-primary);border-color:color-mix(in srgb,var(--dsw-alias-state-error-primary) 35%,transparent)}
 .rd-btn:disabled{opacity:.45;cursor:default}
 .rd-dock{position:absolute;top:0;right:0;bottom:0;width:var(--dock-w);z-index:25;display:flex;flex-direction:column;background:var(--glass);border-left:.5px solid var(--dsw-alias-border-l1);backdrop-filter:blur(28px)}
 .rd-dock-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 16px 10px;font-size:13px;color:var(--dsw-alias-label-primary)}
@@ -877,6 +884,8 @@ window.__ModuleLoader__.load({
             const movedX = node.x + (ev.clientX - start.x) / camRef.current.z
             const movedY = node.y + (ev.clientY - start.y) / camRef.current.z
             dispatchOps([{ op: 'set_pos', kind: item.kind === 'task' ? 'todo' : item.kind, id: item.id, pos: { x: movedX, y: movedY, r: node.r } }], { label: dict() === en ? 'Arrange cards' : '摆放卡片', undoable: false, silent: true })
+          } else {
+            setDesk({ editing: { kind: item.kind, id: item.id } })
           }
         }
         window.addEventListener('pointermove', move)
@@ -946,11 +955,11 @@ window.__ModuleLoader__.load({
       const projectName = (id) => (state?.projects ?? []).find((row) => row.id === id)?.name
       const open = todos.filter((row) => row.status !== 'done')
       const buckets = [
-        ['all', 'Todo: All', open.map((row) => ({ id: row.id, title: row.title, meta: statusText('task', row.status) }))],
-        ['projects', 'Todo: Projects', open.filter((row) => row.projectId).map((row) => ({ id: row.id, title: row.title, meta: projectName(row.projectId) ?? '' }))],
-        ['paper', 'Todo: Paper', papers.filter((row) => row.status === 'inbox' || row.status === 'reading').map((row) => ({ id: row.id, title: row.title, meta: statusText('paper', row.status) }))],
-        ['ideas', 'Todo: Idea', ideas.filter((row) => row.status === 'seed').map((row) => ({ id: row.id, title: row.title, meta: statusText('idea', row.status) }))],
-        ['notes', 'Todo: 知识库', notes.filter((row) => row.status === 'draft').map((row) => ({ id: row.id, title: row.title, meta: row.kb ?? '' }))],
+        ['all', 'Todo: All', open.map((row) => ({ id: row.id, kind: 'task', title: row.title, meta: statusText('task', row.status) }))],
+        ['projects', 'Todo: Projects', open.filter((row) => row.projectId).map((row) => ({ id: row.id, kind: 'task', title: row.title, meta: projectName(row.projectId) ?? '' }))],
+        ['paper', 'Todo: Paper', papers.filter((row) => row.status === 'inbox' || row.status === 'reading').map((row) => ({ id: row.id, kind: 'paper', title: row.title, meta: statusText('paper', row.status) }))],
+        ['ideas', 'Todo: Idea', ideas.filter((row) => row.status === 'seed').map((row) => ({ id: row.id, kind: 'idea', title: row.title, meta: statusText('idea', row.status) }))],
+        ['notes', 'Todo: 知识库', notes.filter((row) => row.status === 'draft').map((row) => ({ id: row.id, kind: 'note', title: row.title, meta: row.kb ?? '' }))],
       ]
       return h('div', { className: 'rd-todo-list' },
         h('div', { className: 'rd-todo-list-head' },
@@ -962,7 +971,7 @@ window.__ModuleLoader__.load({
           ...buckets.map(([key, title, rows]) => h('section', { key, className: 'rd-todo-bucket' },
             h('h3', null, title),
             rows.length
-              ? h('div', { className: 'rd-todo-bucket-rows' }, ...rows.slice(0, 6).map((row) => h('div', { key: row.id, className: 'rd-todo-row' },
+              ? h('div', { className: 'rd-todo-bucket-rows' }, ...rows.slice(0, 6).map((row) => h('button', { key: row.id, type: 'button', className: 'rd-todo-row', onClick: () => setDesk({ editing: { kind: row.kind, id: row.id } }) },
                 h('span', { className: 'rd-todo-row-title' }, row.title),
                 row.meta ? h('span', { className: 'rd-tag' }, row.meta) : null)))
               : h('p', { className: 'rd-board-empty' }, t('empty'))))))
@@ -970,8 +979,14 @@ window.__ModuleLoader__.load({
 
     function TodoSplit() {
       return h('div', { className: 'rd-todo-split' },
-        h('div', { className: 'rd-todo-stage' }, h(Hero), h(ScatterView)),
-        h(TodoList))
+        h('section', { className: 'rd-glass-panel rd-pane-top', 'aria-label': t('dashboard') },
+          h(Hero), h(ScatterView),
+          h('div', { className: 'rd-pane-corner' },
+            h('div', { className: 'rd-zoom' },
+              h('button', { type: 'button', title: t('zoomOut'), 'aria-label': t('zoomOut'), onClick: () => zoomCenter(1 / 1.25) }, '−'),
+              h('button', { type: 'button', className: 'rd-zoom-fit', title: t('zoomFit'), 'aria-label': t('zoomFit'), onClick: resetCamera }, h(Icon, { name: 'target', size: 15 })),
+              h('button', { type: 'button', title: t('zoomIn'), 'aria-label': t('zoomIn'), onClick: () => zoomCenter(1.25) }, '+')))),
+        h('section', { className: 'rd-glass-panel rd-pane-bottom', 'aria-label': t('navTodo') }, h(TodoList)))
     }
 
     function inlineMd(text) {
@@ -1253,6 +1268,58 @@ window.__ModuleLoader__.load({
             h('button', { type: 'submit', className: 'rd-btn is-primary' }, t('addTask')))))
     }
 
+    function ItemDialog() {
+      const editing = useSel((s) => s.editing)
+      const state = useSel((s) => s.state)
+      const [form, setForm] = useState({})
+      const kindMap = { task: 'todo', paper: 'paper', idea: 'idea', note: 'note' }
+      const listMap = { todo: 'todos', paper: 'papers', idea: 'ideas', note: 'notes' }
+      const kind = editing ? (kindMap[editing.kind] ?? editing.kind) : null
+      const row = editing ? (state?.[listMap[kind]] ?? []).find((x) => x.id === editing.id) ?? null : null
+      useEffect(() => {
+        if (!row) return
+        setForm({ title: row.title ?? '', due: row.due ?? '', priority: row.priority ?? 'P2', estimateMinutes: row.estimateMinutes ?? '', projectId: row.projectId ?? '', notes: row.notes ?? '', status: row.status ?? 'todo' })
+      }, [editing])
+      if (!editing || !row) return null
+      const set = (key, value) => setForm((p) => ({ ...p, [key]: value }))
+      const close = () => setDesk({ editing: null })
+      const save = async () => {
+        const title = String(form.title ?? '').trim()
+        if (!title) return
+        const ops = []
+        if (kind === 'todo') {
+          if (form.status && form.status !== row.status) ops.push({ op: 'set_status', kind: 'todo', id: editing.id, status: form.status })
+          ops.push({ op: 'update_item', kind: 'todo', id: editing.id, patch: { title, due: form.due || null, priority: form.priority || 'P2', estimateMinutes: form.estimateMinutes ? Number(form.estimateMinutes) : null, projectId: form.projectId || null, notes: form.notes ?? '' } })
+        } else {
+          ops.push({ op: 'update_item', kind, id: editing.id, patch: { title } })
+        }
+        await dispatchOps(ops, { label: dict() === en ? 'Edit item' : '编辑条目' })
+        close()
+      }
+      const remove = async () => {
+        await dispatchOps([{ op: 'delete_item', kind, id: editing.id }], { label: dict() === en ? 'Delete item' : '删除条目' })
+        close()
+      }
+      const field = (label, control) => h('label', { className: 'rd-field' }, h('span', null, label), control)
+      const input = (key, props = {}) => h('input', { value: form[key] ?? '', onChange: (event) => set(key, event.target.value), ...props })
+      return h('div', { className: 'rd-dialog-backdrop', onPointerDown: (event) => { if (event.target === event.currentTarget) close() } },
+        h('form', { className: 'rd-dialog', onSubmit: (event) => { event.preventDefault(); save() } },
+          h('h3', null, t('editItem')),
+          field(t('title'), input('title', { autoFocus: true, required: true })),
+          kind === 'todo' ? h('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 } },
+            field(t('due'), input('due', { type: 'date' })),
+            field(t('priority'), h('select', { value: form.priority ?? 'P2', onChange: (event) => set('priority', event.target.value) }, ...['P0', 'P1', 'P2', 'P3'].map((value) => h('option', { key: value, value }, value)))),
+            field(t('estimate'), input('estimateMinutes', { type: 'number', min: 0, step: 5 })),
+            field(t('projectOf'), h('select', { value: form.projectId ?? '', onChange: (event) => set('projectId', event.target.value) }, h('option', { value: '' }, t('none')), ...(state?.projects ?? []).map((r) => h('option', { key: r.id, value: r.id }, r.name)))),
+            field(t('status'), h('select', { value: form.status ?? 'todo', onChange: (event) => set('status', event.target.value) }, ...['todo', 'doing', 'waiting', 'done'].map((value) => h('option', { key: value, value }, statusText('task', value)))))) : null,
+          kind === 'todo' ? field(t('notes'), h('textarea', { value: form.notes ?? '', onChange: (event) => set('notes', event.target.value) })) : null,
+          h('div', { className: 'rd-form-foot' },
+            h('button', { type: 'button', className: 'rd-btn is-danger', onClick: remove }, t('deleteEntry')),
+            h('span', { style: { flex: 1 } }),
+            h('button', { type: 'button', className: 'rd-btn', onClick: close }, t('cancel')),
+            h('button', { type: 'submit', className: 'rd-btn is-primary' }, t('save')))))
+    }
+
     function AssistantDock() {
       const state = useSel((s) => s.state)
       const dockOpen = useSel((s) => s.dockOpen)
@@ -1496,13 +1563,9 @@ window.__ModuleLoader__.load({
                 : view === 'todo'
                   ? (dashboardOpen ? h(Dashboard) : h(TodoSplit))
                   : h(Active)),
-          ready && view === 'todo' && !dashboardOpen ? h('div', { className: 'rd-corner is-right' },
-            h('div', { className: 'rd-zoom' },
-              h('button', { type: 'button', title: t('zoomOut'), 'aria-label': t('zoomOut'), onClick: () => zoomCenter(1 / 1.25) }, '−'),
-              h('button', { type: 'button', className: 'rd-zoom-fit', title: t('zoomFit'), 'aria-label': t('zoomFit'), onClick: resetCamera }, h(Icon, { name: 'target', size: 15 })),
-              h('button', { type: 'button', title: t('zoomIn'), 'aria-label': t('zoomIn'), onClick: () => zoomCenter(1.25) }, '+'))) : null,
         ready ? h(AssistantDock) : null,
         ready ? h(CaptureDialog) : null,
+        ready ? h(ItemDialog) : null,
         ready ? h(ModelPicker) : null,
         ready ? h(BackupDialog) : null,
         h(Toast))))
