@@ -1,0 +1,48 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: verify (${{ matrix.os }}, node 22)
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        # Windows 是主要开发环境（路径边界、盘符校验），Ubuntu 保证可移植性。
+        # 若 Ubuntu 长期因平台差异变红而失去闸门意义，可只保留 windows-latest。
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+          cache: npm
+
+      # Git 集成用例会在临时仓库里执行 commit，runner 默认没有提交身份。
+      - name: Configure git identity
+        run: |
+          git config --global user.email "ci@dsh-csrw.invalid"
+          git config --global user.name "dsh-csrw ci"
+
+      # 插件本身零依赖，devDependencies 只用于本地跑测试；不执行安装脚本。
+      - run: npm install --ignore-scripts
+
+      - name: Syntax, metadata, tool count, identifiers
+        run: npm run check
+
+      - name: UI registration and interaction
+        run: npm run check:ui
+
+      - name: Unit and integration tests
+        run: npm test

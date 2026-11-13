@@ -1,0 +1,35 @@
+---
+description: dsh-csrw 提交规范：commit message 一律英文、禁止中文，含前缀风格、长度、body 要求与历史提交处理约定。
+alwaysApply: true
+enabled: true
+updatedAt: 2026-11-13T00:00:00.000Z
+---
+
+# 提交规范
+
+## 语言
+
+1. 提交信息一律使用**英文**：subject、body、footer 全部英文，不得出现中文字符。
+2. 存量提交中的中文不回改、不重写历史；除非用户明确要求。
+
+## 格式
+
+3. 前缀沿用现有风格：`feat:`、`feat(scope):`、`fix(scope):`、`refactor:`、`docs:`、`chore:`、`test:`、`build:`。
+4. subject 不超过 72 字符，祈使句，首字母小写，结尾不加句号。
+5. body 说明「为什么改」与「验证了什么」，每行不超过 72 字符，仍用英文。
+6. 一个提交只做一件事；混合改动先拆分再提交。
+
+## 禁区
+
+7. 禁止 `update`、`fix bug`、`wip`、`changes` 这类无信息量的 subject。
+8. 禁止用拼音或音译绕过英文要求（如 `feat: todo ye`），必须改写成英文表述（`feat: add todo filter by priority`）。
+9. 禁止在提交信息中出现凭据、含用户名的路径、内网地址。
+
+## 示例
+
+```
+feat(todo): add filter by priority to the todo list
+
+Filter chips persist to workspace state so the selection survives
+a page reload. Verified with npm run check and npm test.
+```

@@ -1,0 +1,8 @@
+#!/bin/sh
+# Reject commit messages that are not written in English.
+# Source of truth lives in the repository; copy or link this file to .git/hooks/commit-msg.
+root=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
+script="$root/.githooks/check-commit-msg.mjs"
+[ -f "$script" ] || exit 0
+command -v node >/dev/null 2>&1 || exit 0
+exec node "$script" "$1"

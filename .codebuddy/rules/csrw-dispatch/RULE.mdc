@@ -1,0 +1,66 @@
+---
+description: dsh-csrw 多 agent 派单矩阵：按改动落点决定派哪个成员、用 sub-agent 还是 team；合并门槛分两层——CI 硬闸门（github actions）与 review 软门槛。
+alwaysApply: true
+enabled: true
+updatedAt: 2026-11-13T00:00:00.000Z
+---
+
+# dsh-csrw 派单矩阵
+
+改动开始前先判定落点，再决定形态。成员定义在 `.codebuddy/agents/*.md`，本规则只决定"派谁、怎么排"。
+
+## 按落点派单
+
+| 改动落点 | 成员 | 形态 |
+| --- | --- | --- |
+| `lib/index.js`、`lib/tools/**`、`lib/desk/**`、`lib/services/**`、`lib/utils/**`、`lib/ui-command.js`、`bin/` | `csrw-host` | sub-agent |
+| `client.js`、`locale/**`、`scripts/verify-ui*.mjs`、`icon.svg` | `csrw-webui` | sub-agent |
+| 同时命中上面两行 | `csrw-host` + `csrw-webui` | team，文件不重叠可并行 |
+| 涉及文件写入/删除、快照恢复、WebDAV 或 Git 远端、凭据读取、备份排除 | 追加 `csrw-security` | team 成员，只读 |
+| 工具增删或改名、配置项、界面入口、安全承诺变化 | 追加 `csrw-docs` | sub-agent，最后收口 |
+| 任意代码改动落地 | `csrw-test` | 串行闸门，不可跳过 |
+
+## 不派单的情形
+
+同时满足以下三条时，主 agent 直接改，不派成员：
+
+1. 只涉及单文件；
+2. 改动小于 30 行且无对外契约变化（工具名、参数、返回 JSON、路由、配置字段、文案 key）；
+3. 无写入、远端、凭据、恢复类副作用。
+
+## 形态判定
+
+1. 这件事是否必须带着主 agent 的上下文才能做对（为什么改、提交如何拆分、方案取舍）？是 → 自己做。
+2. 结果是一次结论（探索、审查、验证）→ sub-agent。
+3. 需要持续协作、中途补充需求 → team。
+4. 两个成员会改同一文件 → 不并行，改串行。
+
+## 派单必须携带
+
+- 文件白名单（成员越界即停下回报，不自行扩大范围）；
+- 验收标准（跑哪条命令、看什么输出）；
+- 与其他成员的接口约定（新增 `/dsh-csrw/api/*` 必须先给请求/响应 JSON 样例）。
+
+## 合并门槛
+
+### 硬闸门：CI 说了算
+
+自动化在 `.github/workflows/ci.yml`，`main` 分支保护要求 `verify (ubuntu-latest, node 22)` 与 `verify (windows-latest, node 22)` 必须通过。
+
+1. 红灯不允许合并，也**不允许**用跳过检查、`--no-verify`、临时禁用 workflow、改断言基线的方式换绿。
+2. CI 依次执行 `npm run check` → `npm run check:ui` → `npm test`。本地自报"测试通过"不构成证据，一律以 CI 的实际结果为准；未推送就说明未验证。
+3. CI 失败先归因：平台差异（Windows 专属路径断言、`node:sqlite` 版本行为）还是真实缺陷？判为平台差异时报告理由，不要直接改断言。
+4. 增删工具后 `scripts/check.mjs` 的 49 断言必然先红——这是设计意图，同步计数后才算修复。
+
+### 软门槛：需要 review 判定
+
+以下四项 CI 无法判定，仍由主 agent 与用户把关：
+
+5. `csrw-security` 出「阻塞」结论时不合并，修完复评。
+6. 工具数量、配置项、界面入口有变化但 `csrw-docs` 未同步 → 不算完成。
+7. 派单矩阵是否被遵守（该派谁、是否并行）由主 agent 自查并在交付里说明。
+8. 提交粒度与提交信息是否合理：一个提交一件事，说明动机与验证结果；提交信息必须为英文，细则见 `.codebuddy/rules/csrw-commit/RULE.mdc`。
+
+### 归因责任
+
+实现缺陷回退给 `csrw-host` / `csrw-webui`；测试缺陷由 `csrw-test` 自修并说明改了哪条断言、为什么合理；禁止为通过而弱化安全断言（路径越界拒绝、默认不覆盖、恢复需 `confirm`、凭据不入库）。
