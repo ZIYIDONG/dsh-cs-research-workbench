@@ -5,6 +5,7 @@ import path from 'node:path';
 import childProcess from 'node:child_process';
 import { EventEmitter } from 'node:events';
 import { PassThrough } from 'node:stream';
+import os from 'node:os';
 import { gitTools } from '../lib/tools/git.js';
 import { setConfig } from '../lib/services/config.js';
 
@@ -181,4 +182,29 @@ test('real Git local integration when sandbox permits captured spawn (no externa
   } finally {
     for (const [key, value] of Object.entries(previous)) { if (value === undefined) delete process.env[key]; else process.env[key] = value; }
   }
+});
+
+// 以下两条覆盖 git.js:70 的远端地址门：仓库里实际的 remote 可能不来自 config（手动 git remote add），
+// 所以只有在 push/pull 之前读 get-url 并校验，才是有效防线。夹具放在 os.tmpdir()，不写仓库。
+async function remoteFixture() {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'csrw-git-remote-'));
+  await fs.mkdir(path.join(root, '.git'));
+  return root;
+}
+
+test('Git refuses remote-helper remotes before spawning push or pull', async t => {
+  const root = await remoteFixture();
+  const calls = mockGit(t, root, args => (args.includes('get-url') ? 'ext::sh -c id\n' : ''));
+  await assert.rejects(call('push', { workspace: root }), /Remote helper syntax is not allowed: ext::/);
+  await assert.rejects(call('pull', { workspace: root }), /Remote helper syntax is not allowed: ext::/);
+  // 门在 spawn 之前生效：两条命令都不允许真的被执行。
+  assert.equal(calls.some(entry => entry.args.includes('push')), false);
+  assert.equal(calls.some(entry => entry.args.includes('pull')), false);
+});
+
+test('Git refuses remotes with embedded credentials without echoing them', async t => {
+  const root = await remoteFixture();
+  const calls = mockGit(t, root, args => (args.includes('get-url') ? 'https://u:p@127.0.0.1/r.git\n' : ''));
+  await assert.rejects(call('push', { workspace: root }), error => error.message.includes('must not embed a password') && error.message.includes('https:') && !error.message.includes('u:p'));
+  assert.equal(calls.some(entry => entry.args.includes('push')), false);
 });

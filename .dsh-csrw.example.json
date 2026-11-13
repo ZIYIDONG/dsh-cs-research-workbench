@@ -1,7 +1,7 @@
 {
-  "git": {"remote":"origin","branch":"main","autoInit":false,"pullRebase":false},
-  "nutstore": {"baseUrl":"https://dav.jianguoyun.com/dav/","remoteRoot":"dsh-csrw","username":"","credentialKey":"dsh-csrw/nutstore"},
-  "obsidian": {"vaultPath":"","autoDetect":true,"trashDir":".trash"},
+  "git": {"remote":"origin","branch":"main","autoInit":false,"pullRebase":false,"backupRemote":"","backupBranch":"backup","backupRepoDir":".dsh-csrw/backup-repo"},
+  "nutstore": {"baseUrl":"https://dav.jianguoyun.com/dav/","remoteRoot":"dsh-csrw","username":"","credentialKey":"dsh-csrw/nutstore","retry":2,"retryDelay":1000},
+  "obsidian": {"vaultPath":"","autoDetect":true,"trashDir":".trash","ideasDir":"ideas","notesDir":"kb"},
   "zotero": {"localApi":"http://127.0.0.1:23119/api","dataDir":""},
-  "backup": {"target":"local","localDir":".dsh-csrw/backups","includeDshSessions":false,"dshHome":"","dshProfile":""}
+  "backup": {"target":"local","localDir":".dsh-csrw/backups","includeDshSessions":false,"dshHome":"","dshProfile":"","keep":10,"mode":"full"}
 }

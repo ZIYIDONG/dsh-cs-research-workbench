@@ -63,3 +63,30 @@ GitHub 私有仓库承担「小体积高价值」元数据异地 + 版本化备�
 2. GitHub 凭据沿用 SSH agent，不新增密码存储。
 3. 坚果云上全量快照（含大附件）；GitHub 只上元数据/配置/专家团（小文件）。
 4. 备份为手动触发，不做后台定时同步（延续既有边界）。
+
+## 七、策略与配置（已实现）
+
+### 备份范围
+- 四源：`obsidian`（vault）、`zotero`（SQLite 一致副本）、`dsh`（prompts/plugins/skills/soul/config）、`workspace`（`.dsh-csrw/config.json` + 同步基线）
+- 排除：凭据路径、检测到敏感内容的文件、`node_modules`/`.git`、备份目录自身
+
+### 备份策略
+| 项 | 配置 | 默认 | 说明 |
+| --- | --- | --- | --- |
+| 模式 | `backup.mode` | `full` | `incremental` 时未变更文件用硬链接复用（同 inode，勿手改快照目录） |
+| 保留 | `backup.keep` | `10` | 创建快照后自动保留最近 N 个；`0` 不清理；`snapshot_prune` 可手动清理 |
+| 触发 | 工具调用 | 手动 | 不做后台定时（延续既有边界） |
+
+### 同步方向与冲突
+- 方向：本地为主 → 云端异地（坚果云 push/pull、GitHub commit/push）
+- 冲突：按 SHA-256 增量比对；冲突保留 `.local`/`.remote` 双份，不静默覆盖
+- 删除不传播
+
+### 失败重试
+- 配置：`nutstore.retry`（默认 2）、`nutstore.retryDelay`（默认 1000ms）
+- 策略：指数退避（delay × 2^n）；仅重试网络错误、超时、5xx、429；4xx 业务错误直接抛错
+
+### 关键流程
+1. 手动备份：`snapshot_create`/`backup_all` → `createSnapshot`（全量/增量 + 自动 prune）
+2. 云端分流：`backup_upload` → `nutstoreSync(push)`；`backup_github` → git init/commit/push
+3. 恢复：`nutstore_pull` → `snapshot_verify` → `snapshot_restore`（confirm + 预检 + 恢复前快照）
