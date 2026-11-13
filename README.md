@@ -1,46 +1,50 @@
-# CS科研工作台 (dsh-cs-research-workbench)
+# CS Research Workbench (dsh-cs-research-workbench)
 
-**CS科研工作台**（`dsh-cs-research-workbench`，简称 `dsh-csrw`）是**面向计算机科学的全流程科研工作台**：把选题构思、文献与笔记、代码与实验版本、结果归档、资料备份串成一条能在本机跑起来的链路。
+**English** | [中文](README_zh.md)
 
-工作台有六个入口：**待办、文献、项目、想法、知识库、同步与备份**。前五个是工作台页面，最后一个落在设置页与工具里——同步与备份处理的是文件和远端，不产生科研条目，所以不给它单独一页。
+**CS Research Workbench** (`dsh-cs-research-workbench`, `dsh-csrw` for short) is an **end-to-end research workbench for computer science**. It connects topic ideation, literature and notes, code and experiment versions, result archiving, and data backup into a single pipeline that runs entirely on your own machine.
 
-"全流程"指上述五段科研工作流，不含实验设备控制、投稿系统对接等外部环节；插件负责本机文件、版本与备份，不代替领域专用的实验工具。
+The workbench has four tabs: **Todos (with a monitor console), Projects, Papers, Ideas · Knowledge base** (ideas and the knowledge base share one entry). Two further entries do not take a tab: the top-bar **Backup / Sync** dialog and the **CS Research Workbench** section in DSH settings. They deal with files and remotes and do not create research entries, so neither gets a tab of its own.
+
+"End-to-end" means the five stages above. It does not include lab instrument control or submission-system integration: the plugin owns local files, versions, and backups, and does not replace domain-specific experiment tooling.
 
 > An end-to-end research workbench for Computer Science: todos, papers, projects, ideas, knowledge base, sync and backup.
 
-v0.1 分两层交付：**工作台界面**（本地状态、快速记录、助手、撤销）与其下的**执行层**（Obsidian 文件操作、Git、Zotero 本机只读 API、坚果云 WebDAV、可校验备份）。插件 ID 与 CLI 为 `dsh-csrw`，工具统一使用 `dsh_csrw_` 前缀（46 个），工作区配置目录为 `.dsh-csrw`，工作台状态存在 `$DSH_HOME/dsh-csrw/state.json`。
+**Current version: `0.1.1-dev.0` (dev build).**
 
-## 六个入口
+v0.1 ships in two layers: the **workbench UI** (local state, quick capture, assistant, undo) and the **execution layer** underneath it (Obsidian file operations, Git, the local read-only Zotero API, Nutstore WebDAV, verifiable backups). The plugin ID and CLI are `dsh-csrw`; all tools share the `dsh_csrw_` prefix (49 tools); the workspace config directory is `.dsh-csrw`; workbench state lives in `$DSH_HOME/dsh-csrw/state.json`.
 
-| 入口 | 存什么 | 当前状态 |
+## Four tabs and two non-page entries
+
+| Entry | What it stores | Current status |
 | --- | --- | --- |
-| 待办 `todo` | 任务标题、状态、优先级、截止时间、所属项目 | 已可用：散落画布、列表、日历三种视图，可拖动、可撤销 |
-| 项目 `project` | 项目本身的推进节奏 | 页面占位，只显示记录条数 |
-| 文献 `paper` | 题录、DOI/arXiv、阅读状态 | 页面占位，只显示记录条数 |
-| 想法 `idea` | 想法、假设、问题、方法 | 页面占位，只显示记录条数 |
-| 知识库 `kb` | 概念、坑、公式、工具、片段、模板 | 页面占位，只显示记录条数 |
-| 同步与备份 | 快照、远端副本 | 无页面，在设置页与 `dsh_csrw_nutstore_*` / `dsh_csrw_backup_*` 中 |
+| Todos `todo` | Task title, status, priority, due time, owning project | Available: scattered canvas, list, and calendar views; draggable and undoable |
+| Projects `project` | The pace of the project itself | Placeholder page; only shows the record count |
+| Papers `paper` | Bibliographic record, DOI/arXiv, reading status | Placeholder page; only shows the record count |
+| Ideas · Knowledge base `idea`/`kb` | Ideas, hypotheses, questions, methods; concepts, pitfalls, formulas, tools, snippets, templates | Available: entry list on the left, Markdown editor/preview/split on the right; create, edit, delete; two-way sync with the vault |
+| Sync and backup | Snapshots, remote copies | No page; lives in settings and in `dsh_csrw_nutstore_*` / `dsh_csrw_backup_*` |
+| Settings page | Workbench preferences, workspace and session selection, Git/Zotero/WebDAV checks, Obsidian and cloud backup cards | Available; the "CS Research Workbench" section in DSH settings |
 
-占位页不是空壳数据：快速记录和助手对话都能写进这五类条目，只是这四个页面目前只统计条数，还没有列表与编辑界面。增加或修改条目走快速记录，查条目走助手。
+Placeholder pages are not empty shells: quick capture and the assistant can both write entries in all six categories. Projects and Papers simply count rows today, with no list or editing UI yet. Ideas and the knowledge base are editable in their merged page. Project and paper entries are still created through quick capture and read through the assistant.
 
-工作台数据与 46 个工具是两套独立状态：工具不读写 `$DSH_HOME/dsh-csrw/state.json`。要让条目落成文件、版本或远端副本时，显式调用对应工具：
+Workbench data and the 49 tools are two independent states: the tools never read or write `$DSH_HOME/dsh-csrw/state.json`. When an entry must become a file, a version, or a remote copy, call the matching tool explicitly:
 
-| 想要的结果 | 用哪个 |
+| Desired result | Tool to use |
 | --- | --- |
-| 文献题录与引用 | `dsh_csrw_zotero_search` / `item` / `cite` |
-| 笔记与知识库落到 vault | `dsh_csrw_obsidian_write` / `append` |
-| 代码与实验版本 | `dsh_csrw_git_status` / `commit` / `push` / `pull` |
-| 目录同步到坚果云 | `dsh_csrw_nutstore_push` / `pull` |
-| 可校验的本地快照 | `dsh_csrw_snapshot_create` / `verify` / `restore` |
+| Bibliographic records and citations | `dsh_csrw_zotero_search` / `item` / `cite` |
+| Notes and knowledge base into the vault | `dsh_csrw_obsidian_write` / `append` |
+| Code and experiment versions | `dsh_csrw_git_status` / `commit` / `push` / `pull` |
+| Directory sync to Nutstore | `dsh_csrw_nutstore_push` / `pull` / `delete` / `logs` |
+| Verifiable local snapshots | `dsh_csrw_snapshot_create` / `verify` / `restore` |
 
-## 环境与安装
+## Requirements and installation
 
-- Node.js ≥22.16；DSH `>=0.2.2-rc.1 <0.3.0`。本次复验环境：Node 26.13.0、DSH 0.2.2-rc.1、Windows、Git 2.46.0.windows.1。Zotero SQLite 在线备份依赖 Node 内置 `node:sqlite` 的 `backup()`，不提供该 API 的运行时会让备份明确报错，不会退化为直接复制运行中的数据库。
-- Git 模块需要系统 `git`；`git` 不在 PATH 时，测试和工具都会明确失败，请先把 Git 加入 PATH。
-- Obsidian 操作直接读写 vault，无需 Obsidian REST 插件。
-- Zotero 需要运行中的本机 API，默认 `http://127.0.0.1:23119/api`。API 不可用时明确报错，不转向云端。
+- Node.js ≥22.16; DSH `>=0.2.2-rc.1 <0.3.0`. Verification environment: Node 26.13.0, DSH 0.2.2-rc.1, Windows, Git 2.46.0.windows.1. Zotero SQLite online backup uses `backup()` from the built-in `node:sqlite`; a runtime without that API fails explicitly instead of degrading to copying a live database.
+- The Git module needs a system `git`. If `git` is not on `PATH`, tests and tools fail explicitly — put Git on `PATH` first.
+- Obsidian operations read and write the vault directly; no Obsidian REST plugin is required.
+- Zotero needs a running local API, by default `http://127.0.0.1:23119/api`. When the API is unavailable the plugin fails explicitly and never falls back to the cloud.
 
-在源码目录安装依赖并检查：
+Install dependencies in the source directory and verify:
 
 ```powershell
 npm install --ignore-scripts
@@ -50,58 +54,58 @@ npm test
 node bin/dsh-csrw.js health
 ```
 
-`devDependencies` 中的 `@deepseek-ai/*` 包只是本地跑测试所需的 peer 依赖；插件运行在 DSH 中时由 DSH 提供这些包，安装插件本身不会安装它们。没有 npm 时可用 DSH 内置的 pnpm：`node <dsh-runtime>/pnpm/bin/pnpm.mjs install --ignore-scripts`。
+The `@deepseek-ai/*` packages in `devDependencies` are only peer dependencies needed to run tests locally; DSH provides them at runtime, and installing the plugin does not install them. Without npm, use the pnpm bundled with DSH: `node <dsh-runtime>/pnpm/bin/pnpm.mjs install --ignore-scripts`.
 
-在 DSH 中通过插件管理安装本目录或发布包。让代理调用 `plugin_manager` 的 `install_bundle`，`target` 为包目录的绝对路径；不要手工改写 profile。包的 `patches/bundle.yaml` 仅插入自己的插件行。安装结果中的 `application` 与 `warnings` 决定是否已生效；若版本替换需要重启，重启后用 `dsh_csrw_health` 验证。插件的中文/英文显示资源和原始 SVG 图标包含在包中。
+Install this directory or a published package through DSH plugin management. Have your agent call `plugin_manager`'s `install_bundle` with `target` set to the absolute package directory; do not hand-edit the profile. The package's `patches/bundle.yaml` only inserts its own plugin line. The `application` and `warnings` fields in the install result decide whether it took effect; if a version replacement needs a restart, restart and then verify with `dsh_csrw_health`. The Chinese/English display resources and the original SVG icon ship inside the package.
 
-本地直接运行 `node bin/dsh-csrw.js`。安装为命令行包后也可运行 `dsh-csrw`。命令与工具一一对应，如 `dsh-csrw obsidian read` 对应 `dsh_csrw_obsidian_read`；`--help` 列出完整命令。
+Run `node bin/dsh-csrw.js` directly from the source tree; after installing as a CLI package, `dsh-csrw` works too. Commands map one-to-one to tools — `dsh-csrw obsidian read` corresponds to `dsh_csrw_obsidian_read`. `--help` lists every command.
 
-## 命名规范
+## Naming conventions
 
-| 标识 | 取值 | 作用域 | 说明 |
+| Identifier | Value | Scope | Notes |
 | --- | --- | --- | --- |
-| npm 包名 | `dsh-cs-research-workbench` | npm / DSH 模块 | 改名必须重新安装 |
-| 插件名 | `dsh-csrw` | Host 插件 `name`、Locale 命名空间、CLI | 稳定，工具前缀与之对齐 |
-| UI 面板 ID | `dsh-csrw-ui` | 主面板、侧栏入口、设置分区、设置图标 | 四处必须同值 |
-| HTTP 路由 | `/dsh-csrw/api` | Host Web 服务 | 前端用相对基址 `dsh-csrw/api/` |
-| 工作台状态目录 | `$DSH_HOME/dsh-csrw/` | 本机持久化 | 自动从 `csrw-desk/` 复制，旧目录保留 |
-| 工作区配置 | `<workspace>/.dsh-csrw/` | 项目内配置、同步状态、备份 | 首次读取旧 `.csrw/` 配置时自动复制 |
-| 工具前缀 | `dsh_csrw_`（46 个） | 模型工具 | 工具名不允许连字符，用下划线分隔 |
-| 人工命令 | `/dsh-csrw` | DSH 命令面板 | 与 CLI 同名，不是模型工具 |
+| npm package name | `dsh-cs-research-workbench` | npm / DSH module | Renaming requires reinstalling |
+| Plugin name | `dsh-csrw` | Host plugin `name`, locale namespace, CLI | Stable; the tool prefix aligns with it |
+| UI panel ID | `dsh-csrw-ui` | Main panel, sidebar entry, settings section, settings icon | All four must share this value |
+| HTTP route | `/dsh-csrw/api` | Host web service | The frontend uses the relative base `dsh-csrw/api/` |
+| Workbench state directory | `$DSH_HOME/dsh-csrw/` | Local persistence | Copied automatically from `csrw-desk/`; the old directory is kept |
+| Workspace config | `<workspace>/.dsh-csrw/` | In-project config, sync state, backups | Reads of legacy `.csrw/` config are copied over automatically |
+| Tool prefix | `dsh_csrw_` (49 tools) | Model tools | Tool names cannot contain hyphens, hence underscores |
+| Human command | `/dsh-csrw` | DSH command palette | Same name as the CLI; it is not a model tool |
 
-所有对外标识统一使用 `dsh-csrw`：插件名、CLI、命令、配置目录、远端根目录、凭据键与工具前缀都是同一根命名，工具前缀因命名规则限制把 `-` 写成 `_`。这样做是为了明确"这是一个 DSH 插件"，而不是独立于 DSH 的 `csrw` 软件。全局标识由 `scripts/check-identifiers.mjs` 校验一致性，`npm run check` 会执行它。
+Every public identifier uses `dsh-csrw`: plugin name, CLI, command, config directory, remote root, credential key, and tool prefix all share the same root. The tool prefix replaces `-` with `_` because of naming rules. The point is to make clear that this is a DSH plugin, not a `csrw` application independent of DSH. `scripts/check-identifiers.mjs` enforces this consistency, and `npm run check` runs it.
 
-## 图形界面
+## Graphical interface
 
-安装插件并刷新 DSH 页面后，侧边栏新增 **CS科研工作台** 入口，主面板是科研首页；设置里保留同一名字的 **CS科研工作台** 分区，插件管理页也提供配置卡。主面板与设置页复用同一个原生 React 客户端半片（`client.js`，手写 IIFE，无构建步骤），不创建其他网页服务。
+After installing the plugin and refreshing the DSH page, the sidebar gains a **CS Research Workbench** entry whose main panel is the research home. Settings keeps a **CS Research Workbench** section with the same name, and the plugin management page also offers a config card. The main panel and the settings page share one native React client half (`client.js`, a hand-written IIFE with no build step); no separate web service is started.
 
-主面板（`/dsh-csrw/api/*` 路由，数据在 `$DSH_HOME/dsh-csrw/state.json`；旧目录 `csrw-desk/` 会在首次读取时自动复制，且旧文件保留）：
+Main panel (`/dsh-csrw/api/*` routes, data in `$DSH_HOME/dsh-csrw/state.json`; the legacy `csrw-desk/` directory is copied on first read and the old files are kept):
 
-1. 顶栏导航区重组：「监控台」排最左，用分隔线与其余分组明确区分；随后是四个标签——待办、项目、文献、想法·知识库（想法与知识库合并为一个入口）。右侧是助手模型按钮、备份/同步按钮和助手开关（点击收起/唤起右侧助手 Dock，状态持久化到偏好）。
-2. 首屏两行数字：还有 N 件事等你推进、M 篇文献排在本周；下面是一句话记录框。
-3. 一句话按内容分流：DOI/arXiv → 文献，`问题:`/`假设:`/`方法:`/`局限:` 或链接 → 想法，带日期/`@项目`/`#P0`/`~30min` → 任务，其余 → 任务。
-4. Todo 页为上下两段式毛玻璃面板（`20px` 圆角、`blur(24px)`、统一透明度，间距 `16px`）：上方面板是待办概览 + 输入区（散落画布可拖动卡片、滚轮平移、`Ctrl/⌘ + 滚轮` 缩放；右下角有缩放/重置按钮；一句话记录框居中），下方面板是五项待办分类列表（Todo: All / Projects / Paper / Idea / 知识库）。点击散落卡片或列表行打开编辑对话框，可改字段或删除；列表面板内部滚动，快速记录入口在列表头部；空状态按面板各自呈现。
-5. 想法·知识库合并页是一个「类似 Obsidian 的编辑阅读器」：左侧想法/知识库条目列表（可新建、选中），右侧 Markdown 编辑器，支持编辑/预览/分栏三种模式，渲染标题、列表、代码块、加粗、斜体、链接与双链 `[[...]]`，可直接新建、编辑、删除条目。页面顶部提供「同步」工具栏：选择想法/知识库目录后，可把工作台条目与本地 Obsidian 笔记双向同步（手动触发，走 `POST /api/vault-sync`）；冲突保留 `.conflict.md` 副本、不自动覆盖。
-6. 快速记录按类型分栏：任务（优先级、截止、项目、状态）、文献（DOI、URL、阅读状态）、想法（类型：想法/假设/问题/方法）、知识库（概念/坑/公式/工具/片段/模板），填完直接写进本地状态。
-7. 右侧助手 Dock：不选模型时用本地规则（建任务、查今天、统计待办），不联网；在顶栏选定模型后，助手只依据当前工作台数据作答，要求 120 字内、不编造条目，模型调用失败会回退本地规则并在返回里标明 `engine`。
-8. 工作台偏好（界面语言、助手栏默认展开、清除示例数据、撤销提示）不再占用顶栏入口，统一收进 DSH 设置页的「CS科研工作台」分区（见下）。
-9. 原生撤销 30 步（`Ctrl/⌘+Z`）、中英文案、窄屏适配（`<1020px` 两列、`<780px` 单列，窄屏默认收起助手）。
-10. 布局约定：所有全宽内容必须放进 `.rd-content`。助手 Dock 展开时内容区自动让出 `--dock-w`（336px），顶栏与 Toast 同步避让；不要用 `position: fixed` 或 `100vw` 自行铺满，否则会被右侧助手遮住。
-11. 监控台是首页（待办页）的默认落地视图：打开工作台默认展开，展示进行中/等待中/今日到期的任务、论文阅读进展（待读/精读/已读/已引用）、项目里程碑进度、最近备份摘要（走 `GET /dsh-csrw/api/backups`）。点顶栏的「待办」标签或监控台按钮可切换监控台与待办页；每次打开工作台都默认回到监控台。
-12. 备份/同步：顶栏「备份/同步」按钮打开对话框，选会话后一键备份、上传坚果云或备份 GitHub（走 `/dsh-csrw` 命令）；首次设置后不再变更的基础设置仍只保留在 DSH 设置区入口。
+1. Top-bar navigation regrouped: **Monitor** sits leftmost, separated from the rest by a divider; then the four tabs — Todos, Projects, Papers, Ideas · Knowledge base (ideas and knowledge base merged into one entry). On the right are the assistant model button, the backup/sync button, and the assistant toggle (click to collapse or summon the right-hand assistant dock; the state persists in preferences).
+2. First screen shows two rows of numbers: how many items are waiting for you, and how many papers are queued for this week; below them is a one-line capture box.
+3. One-line input is routed by content: DOI/arXiv → papers; `Question:` / `Hypothesis:` / `Method:` / `Limitation:` or a link → ideas; a date, `@project`, `#P0`, or `~30min` → tasks; everything else → tasks.
+4. The Todo page is a two-part frosted-glass layout (`20px` radius, `blur(24px)`, uniform opacity, `16px` spacing): the upper panel holds the todo overview plus input area (a scattered canvas of draggable cards, wheel to pan, `Ctrl/⌘ + wheel` to zoom; zoom/reset buttons bottom right; the one-line capture box centered), and the lower panel holds the five-category list (Todo: All / Projects / Paper / Idea / Knowledge base). Clicking a scattered card or a list row opens the edit dialog where fields can be changed or the entry deleted; the list panel scrolls internally and the quick-capture entry sits in its header; empty states are rendered per panel.
+5. The merged Ideas · Knowledge base page is an Obsidian-like editor/reader: entry list on the left (create and select), Markdown editor on the right with edit/preview/split modes, rendering headings, lists, code blocks, bold, italics, links, and `[[wikilinks]]`; entries can be created, edited, and deleted in place. A Sync toolbar at the top lets you pick the ideas/knowledge-base directory and sync workbench entries with local Obsidian notes both ways (manual trigger, via `POST /api/vault-sync`); conflicts keep a `.conflict.md` copy and are never overwritten automatically.
+6. Quick capture is split by type: task (priority, due date, project, status), paper (DOI, URL, reading status), idea (type: idea/hypothesis/question/method), knowledge base (concept/pitfall/formula/tool/snippet/template). Filling the form writes straight into local state.
+7. The right-hand assistant dock: with no model selected it uses local rules (create a task, check today, count todos) and stays offline; once a model is chosen in the top bar, the assistant answers only from current workbench data, is asked to stay within 120 characters and never invent entries, and falls back to local rules on model failure while marking the `engine` in the response.
+8. Workbench preferences (UI language, assistant dock expanded by default, clear sample data, undo hints) no longer occupy a top-bar entry; they all live in the **CS Research Workbench** section of DSH settings (see below).
+9. Native 30-step undo (`Ctrl/⌘+Z`), Chinese and English copy, and narrow-screen adaptation (two columns below `<1020px`, one column below `<780px`, assistant collapsed by default on narrow screens).
+10. Layout rules: all full-width content must sit inside `.rd-content`. When the assistant dock is expanded the content area yields `--dock-w` (336px), and the top bar and toasts keep clear of it too; do not use `position: fixed` or `100vw` to fill the width yourself or the assistant will cover it.
+11. The monitor console is the default landing view of the home (Todos) page: it opens by default, showing in-progress/waiting/due-today tasks, paper reading progress (to read / close read / read / cited), project milestone progress, and a recent backup summary (via `GET /dsh-csrw/api/backups`). Clicking the Todo tab or the monitor button switches between monitor and todo list; every visit returns to the monitor.
+12. Backup center: the top-bar Backup/Sync button opens a dialog (a session must be selected first as the permission context) with two pages. Operations: one-click backup, per-source backup (Obsidian / Zotero / DSH / workspace), upload to Nutstore, back up to GitHub, Nutstore connection check plus sync log, snapshot verification (enter a path) and pruning. Configuration: edit `backup.target/localDir/keep/mode/includeDshSessions/dshHome/dshProfile`, `nutstore.baseUrl/remoteRoot/username/credentialKey/retry/retryDelay`, and `git.backupRemote/backupBranch/backupRepoDir`, then save in bulk (via `dsh_csrw_config_set`). Base settings that should be set once and never change remain only in the DSH settings section.
 
-设置页里的工具面板（含工作台偏好）：
+Tool panel in the settings page (including workbench preferences):
 
-1. 顶部「偏好」卡片：界面语言（中文/English）、助手栏默认展开、清除示例数据；直接读写工作台状态，改语言后主面板即时生效。
-2. 选择工作区目录，并从列表选择一个已有会话作为命令的权限和审计上下文；不会启动模型对话。
-3. 点击"加载配置"读取工作区默认值/配置。按字段保存，字符串与布尔类型按白名单校验。密码不在界面中录入或保存。
-4. 工作台可检查 Git、Zotero 与 WebDAV，列远端目录、手动上传/下载、创建三类备份并校验快照。同步和备份先展示工作区与参数，确认后才执行。恢复保留在显式确认的工具中，不提供一键恢复。
-5. 「Obsidian 工具」卡片：双链/反链/死链/列目录/图谱/书签/Canvas（只读）与模板/日记/附件/重命名（写入确认）；「云端备份」卡片：备份参数/上传坚果云/备份 GitHub/一键备份；「文献笔记」卡片：按 Zotero key 生成文献笔记。
-6. 切换工作区会清除旧配置和结果；运行时支持取消，成功与失败独立展示。
+1. A Preferences card at the top: UI language (Chinese/English), assistant dock expanded by default, clear sample data; it reads and writes workbench state directly, and a language change applies to the main panel immediately.
+2. Pick a workspace directory and select an existing session from the list as the permission and audit context for commands; no model conversation is started.
+3. Click "Load config" to read workspace defaults/config. Fields are saved one at a time, with strings and booleans validated against a whitelist. Passwords are never entered or stored in the UI.
+4. The workbench can check Git, Zotero, and WebDAV, list remote directories, upload/download manually, create the three backup kinds, and verify snapshots. Sync and backup show the workspace and parameters first and run only after confirmation. Restore stays in tools that require explicit confirmation; there is no one-click restore.
+5. The "Obsidian tools" card: backlinks/links/broken links/list/graph/bookmarks/Canvas (read-only) plus template/daily/attachment/rename (write with confirmation); the "Cloud backup" card: backup parameters/upload to Nutstore/back up to GitHub/one-click backup; the "Literature notes" card: generate a paper note from a Zotero key.
+6. Switching the workspace clears the old config and results; execution can be cancelled at runtime, and success and failure are shown separately.
 
-界面通过 Host 人工命令 `/dsh-csrw` 调用现有工具定义，使用 DSH 现有远程授权，不绕开权限策略；命令不记录原始输入。它不是模型工具，也不增加 `dsh_csrw_` 工具数量。
+The UI invokes the existing tool definitions through the host's human command `/dsh-csrw`, reusing DSH's existing remote authorization and never bypassing the permission policy; the command does not record raw input. It is not a model tool and does not increase the `dsh_csrw_` tool count.
 
-命令接受两种写法，边界完全相同（同样受 READ/WRITE 操作白名单约束、同样要 `--confirm`、同样不暴露恢复）：
+The command accepts two forms with identical boundaries (same READ/WRITE operation whitelist, same `--confirm` requirement, same absence of restore):
 
 ```text
 /dsh-csrw help
@@ -111,148 +115,177 @@ node bin/dsh-csrw.js health
 /dsh-csrw backup obsidian --workspace C:\repo --confirm
 ```
 
-界面走整行 JSON（`{"operation":"…","args":{…},"confirmed":true}`），手敲可用上面的 `<模块> <操作> --参数` 形式；两种输入落到同一个执行函数。GUI 入口不隐式执行同步、备份、初始化或推送。工作台数据是本地状态，与 46 个无状态工具互不影响；需要同步到 Git 或坚果云时，仍显式调用 `dsh_csrw_git_*` / `dsh_csrw_nutstore_*`。
+The UI sends one line of JSON (`{"operation":"…","args":{…},"confirmed":true}`); typing by hand can use the `<module> <operation> --flag` form above. Both inputs land in the same execution function. GUI entry points never run sync, backup, init, or push implicitly. Workbench data is local state, independent of the 49 stateless tools; when you need it in Git or Nutstore, call `dsh_csrw_git_*` / `dsh_csrw_nutstore_*` explicitly.
 
-开发期 `client.js` 保存后由 DSH 客户端 HMR 自动重载；改 `lib/` 宿主代码需要重载插件或重启 DSH。三份设计文档在 `docs/`：`dsh-research-desk-design.md`（总体）、`dsh-research-desk-pages.md`（五页）、`dsh-research-desk-home.md`（首页）。
+During development, saving `client.js` triggers DSH client HMR automatically; changes under `lib/` (host code) require reloading the plugin or restarting DSH. The design document index is below.
 
-## 配置
+## Design documents
 
-首次读取返回默认值，不自动写配置。配置位于工作区 `.dsh-csrw/config.json`；`.dsh-csrw.example.json` 是可复制的完整示例。`dsh_csrw_config_set` 每次设置一个白名单字段，拒绝未知字段、类型不匹配和密码/令牌字段；`dsh_csrw_config_show` 返回脱敏结果。
+`docs/` is organized by topic, and every document corresponds to shipped UI or execution-layer code:
+
+| Document | Contents |
+| --- | --- |
+| `dsh-research-desk-design.md` | Overall: product positioning, page inventory, data model |
+| `dsh-research-desk-home.md` | Home (monitor) layout, scattered cards, one-line capture |
+| `dsh-research-desk-pages.md` | Per-page details, interactions, empty states (written before ideas and knowledge base merged; the two affected chapters defer to the merged editor/reader) |
+| `obsidian-local-features.md` | Obsidian local capability list and implementation status (all 21 implemented) |
+| `backup-architecture.md` | Backup system, manifest, and the local / Nutstore / GitHub split |
+| `nutstore-sync-test-plan.md` | Manual test flow and acceptance criteria for Nutstore WebDAV sync |
+
+## Configuration
+
+The first read returns defaults and never writes config automatically. Config lives in the workspace at `.dsh-csrw/config.json`; `.dsh-csrw.example.json` is a complete copyable example. `dsh_csrw_config_set` sets one whitelisted field per call and rejects unknown fields, type mismatches, and password/token fields; `dsh_csrw_config_show` returns a redacted view. Structural violations in existing config (a WebDAV host outside the whitelist, a non-compliant `git.backupRemote` URL) are never silently accepted: they are listed one by one in `policyViolations`, while the same values are rejected outright on write.
 
 ```powershell
 node bin/dsh-csrw.js config set --args '{"key":"obsidian.vaultPath","value":"vault"}'
 node bin/dsh-csrw.js config show
 ```
 
-Windows PowerShell 对内联 JSON 的引号处理因版本而异。也可把参数保存为 JSON 文件并使用 `--args-file params.json`。`--workspace` 指定工作区，省略时使用当前会话目录；CLI 则使用当前工作目录。
+Quoting of inline JSON in Windows PowerShell varies by version. You can also save arguments to a JSON file and use `--args-file params.json`. `--workspace` selects the workspace and defaults to the current session directory; the CLI uses the current working directory.
 
-| 配置 | 默认值 / 行为 |
+| Config | Default / behavior |
 | --- | --- |
-| `git.remote`, `git.branch` | `origin`, `main`；远端 URL 由 Git 自身配置 |
+| `git.remote`, `git.branch` | `origin`, `main`; the remote URL is configured by Git itself |
 | `git.autoInit`, `git.pullRebase` | `false`, `false` |
-| `git.backupRemote`, `git.backupBranch`, `git.backupRepoDir` | 空、`backup`、`.dsh-csrw/backup-repo`；GitHub 元数据备份的远程 URL/分支/本地仓库目录 |
-| `obsidian.vaultPath`, `obsidian.autoDetect` | 空路径、`true`；自动查找工作区及直接子目录的 `.obsidian`，多个候选时报错 |
-| `obsidian.trashDir` | `.trash`，相对 vault 的回收目录 |
-| `obsidian.ideasDir`, `obsidian.notesDir` | `ideas`、`kb`，相对 vault 或绝对路径；工作台「想法/知识库」与 Obsidian 双向同步的目标目录 |
-| `zotero.localApi`, `zotero.dataDir` | 本机 API 默认地址、空路径；数据库备份需明确定位数据目录 |
+| `git.backupRemote`, `git.backupBranch`, `git.backupRepoDir` | empty, `backup`, `.dsh-csrw/backup-repo`; remote URL, branch, and local repo directory for GitHub metadata backups |
+| `obsidian.vaultPath`, `obsidian.autoDetect` | empty path, `true`; auto-discovers `.obsidian` in the workspace and its direct subdirectories, and errors when several candidates exist |
+| `obsidian.trashDir` | `.trash`, the trash directory relative to the vault |
+| `obsidian.ideasDir`, `obsidian.notesDir` | `ideas`, `kb`, relative to the vault or absolute; targets for two-way sync between ideas/knowledge base and Obsidian |
+| `zotero.localApi`, `zotero.dataDir` | default local API address, empty path; database backup requires an explicit data directory |
 | `nutstore.baseUrl`, `nutstore.remoteRoot` | `https://dav.jianguoyun.com/dav/`, `dsh-csrw` |
-| `nutstore.username`, `nutstore.credentialKey` | 空用户名、`dsh-csrw/nutstore`；此 key 是引用名，不是密码 |
-| `backup.target`, `backup.localDir` | `local`, `.dsh-csrw/backups`；`target=nutstore` 时 `backup_all` 额外上传坚果云 |
-| `backup.includeDshSessions` | `false`；默认排除 sessions/storages |
-| `backup.dshHome`, `backup.dshProfile` | 空路径，自动发现无法唯一确定时要求显式配置 |
+| `nutstore.username`, `nutstore.credentialKey` | empty username, `dsh-csrw/nutstore`; the key is a reference, not a password |
+| `backup.target`, `backup.localDir` | `local`, `.dsh-csrw/backups`; with `target=nutstore`, `backup_all` also uploads to Nutstore |
+| `backup.keep`, `backup.mode` | `10`, `full`; keep the most recent N snapshots after creating one (`0` disables pruning); with `mode=incremental`, unchanged files are reused via hard links |
+| `nutstore.retry`, `nutstore.retryDelay` | `2`, `1000`; retry count and backoff base for failed Nutstore requests (only network/5xx/429 are retried, never 4xx) |
+| `backup.includeDshSessions` | `false`; sessions/storages are excluded by default |
+| `backup.dshHome`, `backup.dshProfile` | empty paths; an explicit value is required when auto-discovery cannot be unique |
 
-## 凭据
+## Credentials
 
-坚果云使用独立的应用密码，不写入项目配置、工具参数或日志。每次操作重新读取：
+Nutstore uses a dedicated app password that never goes into project config, tool arguments, or logs. It is re-read on every operation:
 
-1. DSH `credentials.readRecord(credentialKey)` 的 `api-key` 记录：`key` 存应用密码，`env.NUTSTORE_USERNAME` 存用户名；或从非敏感配置读取用户名。
-2. 未配置记录时读取 `NUTSTORE_USERNAME` / `NUTSTORE_PASSWORD` 环境变量。环境变量只影响继承它的进程，已运行的 DSH 需要由正确环境启动。
+1. An `api-key` record from DSH `credentials.readRecord(credentialKey)`: `key` holds the app password and `env.NUTSTORE_USERNAME` holds the username; or the username comes from non-secret config.
+2. With no stored record, the `NUTSTORE_USERNAME` / `NUTSTORE_PASSWORD` environment variables are used. Environment variables only affect processes that inherit them, so a running DSH must be started from that environment.
 
-Zotero 本机 API 不需要 API Key。WebDAV 强制 HTTPS（本机测试允许 HTTP），禁止 URL 中嵌入用户名、密码、查询串和片段，拒绝重定向。
+The Zotero local API needs no API key. WebDAV enforces HTTPS (HTTP is allowed for local testing only), forbids usernames, passwords, query strings, and fragments inside the URL, and rejects redirects.
 
-## 工具与使用边界
+WebDAV endpoints have a host whitelist: only `https://dav.jianguoyun.com/dav/` is supported (loopback is allowed for tests only). **Self-hosted WebDAV endpoints (Nextcloud and the like) are not supported.**
 
-| 组 | 工具 |
+## Tools and boundaries
+
+| Group | Tools |
 | --- | --- |
-| 检查与配置 | `dsh_csrw_health`, `dsh_csrw_config_show`, `dsh_csrw_config_set` |
-| Obsidian | `dsh_csrw_obsidian_search`, `read`, `write`, `append`, `move`, `trash`, `attributes`, `links`, `backlinks`, `list`, `template`, `daily`, `attach`, `rename`, `broken_links`, `graph`, `canvas`, `bookmarks`（每个短名均使用 `dsh_csrw_obsidian_` 前缀） |
-| 文献笔记 | `dsh_csrw_paper_to_note`（从 Zotero 条目生成 vault 文献笔记） |
-| Git | `dsh_csrw_git_status`, `init`, `commit`, `push`, `pull`（每个短名均使用 `dsh_csrw_git_` 前缀） |
-| Zotero | `dsh_csrw_zotero_search`, `item`, `notes`, `attachments`, `cite`（每个短名均使用 `dsh_csrw_zotero_` 前缀） |
-| 坚果云 | `dsh_csrw_nutstore_test`, `list`, `push`, `pull`（每个短名均使用 `dsh_csrw_nutstore_` 前缀） |
-| 备份与快照 | `dsh_csrw_backup_obsidian`, `dsh_csrw_backup_zotero`, `dsh_csrw_backup_dsh`, `dsh_csrw_backup_workspace`, `dsh_csrw_snapshot_create`, `dsh_csrw_snapshot_verify`, `dsh_csrw_snapshot_restore`, `dsh_csrw_backup_upload`, `dsh_csrw_backup_github`, `dsh_csrw_backup_all` |
+| Checks and config | `dsh_csrw_health`, `dsh_csrw_config_show`, `dsh_csrw_config_set` |
+| Obsidian | `dsh_csrw_obsidian_search`, `read`, `write`, `append`, `move`, `trash`, `attributes`, `links`, `backlinks`, `list`, `template`, `daily`, `attach`, `rename`, `broken_links`, `graph`, `canvas`, `bookmarks` (every short name uses the `dsh_csrw_obsidian_` prefix) |
+| Literature notes | `dsh_csrw_paper_to_note` (generate a vault paper note from a Zotero item) |
+| Git | `dsh_csrw_git_status`, `init`, `commit`, `push`, `pull` (every short name uses the `dsh_csrw_git_` prefix) |
+| Zotero | `dsh_csrw_zotero_search`, `item`, `notes`, `attachments`, `cite` (every short name uses the `dsh_csrw_zotero_` prefix) |
+| Nutstore | `dsh_csrw_nutstore_test`, `list`, `push`, `pull` (every short name uses the `dsh_csrw_nutstore_` prefix) |
+| Backup and snapshots | `dsh_csrw_backup_obsidian`, `dsh_csrw_backup_zotero`, `dsh_csrw_backup_dsh`, `dsh_csrw_backup_workspace`, `dsh_csrw_snapshot_create`, `dsh_csrw_snapshot_verify`, `dsh_csrw_snapshot_restore`, `dsh_csrw_snapshot_prune`, `dsh_csrw_backup_upload`, `dsh_csrw_backup_github`, `dsh_csrw_backup_all` |
 
-工具的模型可见参数说明和 CLI `--help` 是具体调用接口。所有操作返回单一 JSON；基础设施错误抛出，不把失败包装为成功。工具尊重取消信号。
+The model-visible parameter descriptions on each tool and the CLI `--help` output are the concrete call interfaces. Every operation returns a single JSON payload; infrastructure errors are thrown rather than wrapped as success. Tools honor cancellation signals.
 
 ### Obsidian
 
-路径相对 vault；拒绝 `..`、盘符越界、符号链接和目录联接。`write` 默认拒绝覆盖，只有 `overwrite:true` 才替换已有文件；`append` 要求已有笔记，文本原样追加。`move` 不覆盖目标，也**不重写 `[[双链]]`**（需要连链接一起改请用 `rename`）。`trash` 仅将文件移动到 vault 的回收目录，返回可恢复路径，不永久删除。搜索忽略内部目录及回收内容。`attributes` 读取或更新笔记的 frontmatter（`title`/`tags`/`aliases` 等 YAML 头）：省略 `set` 时只读，`set` 中值为 `null` 的键会被删除，`keys` 只返回指定键。
+Paths are relative to the vault; `..`, drive escapes, symlinks, and directory junctions are rejected. `write` refuses to overwrite by default and only replaces an existing file with `overwrite:true`; `append` requires an existing note and appends the text verbatim. `move` does not overwrite the target and **does not rewrite `[[wikilinks]]`** (use `rename` when links must follow). `trash` only moves a file into the vault trash directory and returns a recoverable path; it never deletes permanently. Search skips internal directories and trashed content. `attributes` reads or updates a note's frontmatter (`title`/`tags`/`aliases` and other YAML keys): omitting `set` makes it read-only, keys whose value is `null` in `set` are deleted, and `keys` returns only the requested keys.
 
-双链与检索（对应 `docs/obsidian-local-features.md` 的能力清单，全部已实现）：
+Links and retrieval (matching the capability list in `docs/obsidian-local-features.md`, all implemented):
 
-- `search` 支持按 `tag` / `scope`（目录）/ `property`（`key=value`）过滤，`query` 可留空仅按过滤列笔记。
-- `links` 解析单篇笔记的正向 `[[双链]]`（别名、段落、嵌入、显式路径），并消歧为真实文件路径。
-- `backlinks` 反推全库链接到目标笔记的笔记（嵌入不计入），并给出正文中未形成链接的「未链接提及」。
-- `rename` 移动文件并全库重写指向它的双链；别名引用保持不变（别名仍解析到该文件）。
-- `broken_links` 检测指向不存在文件的死链，并报告同名歧义候选。
-- `graph` 导出图谱节点/边数据（只算不画）。
-- `list` 列出目录下的 Markdown，可选读取多篇内容；`template` 用 `{{key}}` 变量渲染模板（内置 `date`/`time`/`title`）；`daily` 按 `.obsidian/daily-notes.json` 规则生成日记；`attach` 把本地图片/PDF 拷进 vault 附件目录；`canvas` 读写 `.canvas` JSON；`bookmarks` 只读展平 `.obsidian/bookmarks.json`。
+- `search` filters by `tag` / `scope` (directory) / `property` (`key=value`); `query` may be empty to list notes by filter alone.
+- `links` resolves a single note's outgoing `[[wikilinks]]` (aliases, block references, embeds, explicit paths) and disambiguates them to real file paths.
+- `backlinks` finds every note linking to the target (embeds excluded) and reports body mentions that are not links yet.
+- `rename` moves the file and rewrites links to it across the vault; alias references stay unchanged and still resolve to the file.
+- `broken_links` finds links pointing at missing files and reports ambiguous same-name candidates.
+- `graph` exports graph nodes/edges (it computes, it does not draw).
+- `list` lists Markdown files under a directory with optional content reads; `template` renders a template with `{{key}}` variables (built-ins `date`/`time`/`title`); `daily` creates a daily note following `.obsidian/daily-notes.json`; `attach` copies local images/PDFs into the vault attachment directory; `canvas` reads and writes `.canvas` JSON; `bookmarks` read-only flattens `.obsidian/bookmarks.json`.
 
-`paper_to_note` 从本机 Zotero 条目生成 vault 文献笔记（frontmatter + `[[cite:KEY]]` + 摘要 + `![[附件]]` 引用），不下载附件文件。双链解析先精确路径、再 basename 最短唯一路径、最后别名兜底；同名文件并列时标记 `ambiguous` 不静默选错。索引在内存中按需扫描，中小 vault（几百篇）单次调用够用。
+`paper_to_note` generates a vault paper note from a local Zotero item (frontmatter + `[[cite:KEY]]` + abstract + `![[attachment]]` reference) and never downloads attachments. Link resolution tries an exact path first, then the shortest unique basename path, then aliases; ties on same-name files are marked `ambiguous` instead of silently picking one. The index is scanned in memory on demand, which is enough for a single call on a small or medium vault (hundreds of notes).
 
 ```json
 {"path":"notes/example.md","text":"# Example\nResearch notes\n"}
 ```
 
-将上述内容保存为参数文件后运行 `dsh-csrw obsidian write --args-file params.json`。读取使用 `{"path":"notes/example.md"}`。
+Save the payload to a parameter file and run `dsh-csrw obsidian write --args-file params.json`; reading uses `{"path":"notes/example.md"}`.
 
 ### Git
 
-通过参数数组运行 Git，不拼接 shell。初始化幂等，补充本地忽略规则；`git.autoInit=true` 仅让显式提交在校验全部路径后初始化仓库，状态查询始终只读；提交不隐式推送。推送/拉取需要已配置远端；默认拒绝对脏工作树拉取，可显式配置 rebase 策略。凭据由 SSH agent / Git credential helper 管理，本插件不保存 Git 密码。实际 push 会修改远端仓库，应在用户授权范围内调用。
+Git runs through argument arrays, never through a shell. Initialization is idempotent and adds local ignore rules; `git.autoInit=true` only lets an explicit commit initialize the repository after validating every path, while status queries stay read-only; commits never push implicitly. Push/pull require a configured remote; pulling onto a dirty tree is refused by default, and the rebase strategy can be configured explicitly. Credentials are managed by the SSH agent or the Git credential helper; the plugin never stores Git passwords. An actual push modifies the remote repository and should only be called within the user's authorization.
+
+Remote URLs are validated in two tiers:
+
+- `git.backupRemote` (for backups): only `https://`, `ssh://`, or scp form (`git@host:path`).
+- Your own repositories (the `git.remote` used by `git.push` / `git.pull`): the above plus local bare repositories — `file://` (local machine), drive-letter absolute paths (`C:\bare.git`), and UNC share paths (`\\server\share\repo.git`).
+- Both tiers always reject: remote-helper syntax such as `ext::` / `fd::`, `http://`, `git://`, embedded passwords, relative paths, and addresses starting with `-`.
+
+Local remotes involve neither network nor credentials and have no remote-helper command execution, so they are allowed only for your own repositories; backup remotes keep the strict tier. Non-compliant addresses are rejected at write time, and existing values show up in `dsh_csrw_config_show`'s `policyViolations`.
 
 ### Zotero
 
-仅 GET 本机 API。搜索、条目、笔记、附件元数据和引用工具不会写入 Zotero，不下载附件，也不使用云端 fallback。返回的引用依据 API 的实际元数据，不能代替逐条文献核验。
+Only GET requests against the local API. Search, item, notes, attachment metadata, and citation tools never write to Zotero, never download attachments, and never fall back to the cloud. Returned citations follow the API's actual metadata and do not replace checking each reference by hand.
 
-### 坚果云
+### Nutstore
 
-`push` / `pull` 采用 `localPath`（本地目录）和可选 `remotePath`（相对配置 `remoteRoot` 的目录）。按 SHA-256 记录基线；相同文件跳过。覆盖远端需要 ETag 条件请求，首次写入使用 `If-None-Match: *`，上传后读取校验。
+`push` / `pull` take `localPath` (a local directory) and an optional `remotePath` (a directory relative to the configured `remoteRoot`). Baselines are tracked by SHA-256 and identical files are skipped. Overwriting the remote requires a conditional ETag request, using `If-None-Match: *` for the first write and re-reading for verification after upload.
 
-发现不一致且无法安全判断时，保留本地 `.local` 与远端 `.remote` 副本，并在 JSON 的 `conflicts` 中报告，不静默替换原文件。已有冲突副本会加唯一后缀。**不传播删除，不做后台或定时同步。** 本地状态保存在 `.dsh-csrw/sync/`。单文件/响应上限 32 MiB，目录列表上限 10000 项；大附件不适用此版本。目录同步忽略 `.git`、`.dsh-csrw`、`node_modules` 和常见凭据文件。
+When a mismatch cannot be resolved safely, `.local` and `.remote` copies are kept and reported in the JSON `conflicts` array instead of silently replacing files; existing conflict copies get a unique suffix. **Deletes are not propagated and there is no background or scheduled sync.** Local state lives in `.dsh-csrw/sync/`. Single files and responses are capped at 32 MiB and directory listings at 10000 entries; large attachments are out of scope for this version. Directory sync ignores `.git`, `.dsh-csrw`, `node_modules`, and common credential files.
 
-### 备份、校验与恢复
+### Backup, verification, and restore
 
-备份默认保存在本地，manifest 记录版本、时间、大小与每文件 SHA-256。Zotero SQLite 通过只读源连接和 SQLite 在线备份产生一致副本，避免直接复制运行中的数据库。该在线备份使用 Node 内置 `node:sqlite` 的 `backup()`；当前运行时没有该 API 时会明确报错，不会退化为直接复制运行中的数据库。DSH 备份覆盖实际发现/显式配置的 prompts、plugins、skills、soul（专家团）与配置，默认不含 sessions/storages；排除已知敏感路径及检测到敏感内容的文件（整文件跳过，不是字段脱敏）。包含 profile 的 `cordis.patch.yml`、package manifests 与 pnpm 锁文件；排除 `node_modules` 和 `.git`，依赖需要按清单重建。敏感识别为保守启发式，不能保证未知格式密钥 100% 召回，应检查排除报告后再上传。第四个源 `workspace` 备份工作区 `.dsh-csrw/config.json` 与同步基线，排除备份目录自身。
+Backups are local by default; the manifest records version, time, size, and a per-file SHA-256. Zotero SQLite is copied consistently through a read-only source connection plus SQLite online backup, avoiding a raw copy of a live database. That online backup uses `backup()` from the built-in `node:sqlite`; a runtime without it fails explicitly rather than degrading to copying a live database. DSH backups cover the prompts, plugins, skills, soul (expert team), and configuration that are actually discovered or explicitly configured, excluding sessions/storages by default; known sensitive paths and files whose content looks sensitive are skipped entirely (whole files, not field-level redaction). They include `cordis.patch.yml`, package manifests, and the pnpm lockfile if a profile is included, while excluding `node_modules` and `.git` — dependencies must be rebuilt from the manifests. Sensitive detection is a conservative heuristic and cannot guarantee 100% recall of unknown key formats; review the exclusion report before uploading. The fourth source, `workspace`, backs up the workspace `.dsh-csrw/config.json` and sync baselines, excluding the backup directory itself.
 
-恢复必须显式 `confirm:true`，先完成 manifest 与全部文件校验，再自动生成恢复前快照。只恢复清单内的文件，不删除目标中额外内容；不会对用户资料执行未获授权的真实恢复。多文件恢复不是文件系统事务，运行期 I/O、取消或并发变更可能造成部分完成，恢复前快照是回滚依据。SHA-256 用于完整性而非来源认证；不提供敌对并发下的完全 TOCTOU 防护。恢复 SQLite 前关闭 Zotero；活动 WAL/SHM 存在时拒绝恢复。大文件会读入内存。请先在独立目录验证备份内容和凭据排除报告。
+Restore requires an explicit `confirm:true`, verifies the manifest and every file first, and automatically takes a pre-restore snapshot. It restores only files listed in the manifest and never deletes extra content at the destination; it never performs an unauthorized real restore of user data. Multi-file restore is not a filesystem transaction: runtime I/O, cancellation, or concurrent changes can leave it partially complete, and the pre-restore snapshot is the rollback reference. SHA-256 provides integrity, not provenance, and does not offer full TOCTOU protection against hostile concurrency. Close Zotero before restoring SQLite; restore is refused while an active WAL/SHM exists. Large files are read into memory. Verify backup content and the credential exclusion report in a separate directory first.
 
-云端分工（见 `docs/backup-architecture.md`）：本地始终是主备份；`dsh_csrw_backup_upload` 把完整快照目录增量同步到坚果云（大附件、SQLite、全量）；`dsh_csrw_backup_github` 把工作区配置与快照 manifest 提交到 GitHub 私有仓库（小文件、版本化）。`dsh_csrw_backup_all` 一键执行本地快照并按 `backup.target` 与 `git.backupRemote` 分流，单步失败不影响其余步骤。两者均不传播删除、不做后台定时同步；GitHub push 需显式 `confirm`。
+Cloud division of labor (see `docs/backup-architecture.md`): local is always the primary backup; `dsh_csrw_backup_upload` incrementally syncs the full snapshot directory to Nutstore (large attachments, SQLite, everything), while `dsh_csrw_backup_github` commits the workspace config and snapshot manifests to a private GitHub repository (small files, versioned). `dsh_csrw_backup_all` takes a local snapshot in one step and fans out according to `backup.target` and `git.backupRemote`; a failing step does not block the others. Neither propagates deletes nor syncs on a schedule; GitHub push requires an explicit `confirm`.
 
-### 旧版本迁移
+Backup strategy: full snapshots by default (per-file SHA-256 plus a manifest); with `backup.mode=incremental`, unchanged files are hard-linked to save disk space (files inside an incremental snapshot share inodes with other snapshots, so do not edit snapshot directories by hand). After creating a snapshot, the most recent N are kept per `backup.keep` (`dsh_csrw_snapshot_prune` can also prune manually); only snapshot directories containing a `manifest.json` are deleted, while `.pending-*` and corrupted directories are left alone. The sync direction is fixed: local primary → remote copy. Nutstore push/pull is incremental by SHA-256 and keeps both `.local`/`.remote` copies on conflict instead of overwriting; network errors, timeouts, and 5xx/429 retry with exponential backoff per `nutstore.retry`, while authentication failures, 404, 412, and similar business errors fail immediately without retrying.
 
-工作台状态从旧目录 `$DSH_HOME/csrw-desk/state.json` 迁到 `$DSH_HOME/dsh-csrw/state.json`。迁移在首次读取时自动发生：目标已存在则跳过；旧文件解析失败会明确报错并保留原文件；写入用独占方式，成功后留下 `.migrated-from-csrw-desk` 标记。**旧目录不会被删除**，确认新目录工作正常后可由用户自行清理。
+Nutstore capabilities (full test flow in `docs/nutstore-sync-test-plan.md`): `nutstore_test` returns connection status, latency, and actionable hints (classified as authentication failure / permission / network / path); `nutstore_delete` deletes a remote file or directory after explicit confirmation (refusing to delete the remote root, treating 404 as already gone); `nutstore_push` with `prune=true + confirm=true` can delete extra remote files; every sync appends to `.dsh-csrw/logs/nutstore.log`, and `nutstore_logs` returns recent records. Credentials come only from the DSH credential store (api-key) or the `NUTSTORE_USERNAME` / `NUTSTORE_PASSWORD` environment variables, never from the UI.
 
-同时兼容三处旧命名，均为只读回退、不删除旧数据：
+### Migrating from older versions
 
-1. 工作区配置：新路径 `.dsh-csrw/config.json` 不存在时读取旧 `.csrw/config.json`，并尽力复制到新路径。
-2. 凭据：`dsh-csrw/nutstore` 读不到记录时回退旧键 `csrw/nutstore`。
-3. 远端目录：默认 `remoteRoot` 已从 `csrw` 改为 `dsh-csrw`，旧远端内容不会自动搬迁；需要保留历史同步时，请自行在 WebDAV 端重命名目录，或用 `dsh_csrw_nutstore_pull` 先拉到本地再推送。
+Workbench state moved from the legacy `$DSH_HOME/csrw-desk/state.json` to `$DSH_HOME/dsh-csrw/state.json`. The migration happens automatically on first read: it is skipped when the target already exists, a parse failure in the legacy file fails explicitly and keeps the original file, and the write is exclusive and leaves a `.migrated-from-csrw-desk` marker on success. **The old directory is never deleted**; clean it up yourself once the new directory works.
 
-CLI 可执行文件名从 `csrw` 改为 `dsh-csrw`，模型工具名从 `csrw_*` 改为 `dsh_csrw_*`，命令从 `/csrw-ui` 改为 `/dsh-csrw`，并同时接受 JSON 与 `dsh-csrw <模块> <操作>` 两种写法。这些都是 0.1.0 内的破坏性更名：旧的调用脚本、快捷指令和提示词需要同步更新。
+Three legacy names are also supported, all read-only fallbacks that never delete old data:
 
-### 工作台接口排障
+1. Workspace config: when the new `.dsh-csrw/config.json` is missing, the legacy `.csrw/config.json` is read and best-effort copied to the new path.
+2. Credentials: when no record exists for `dsh-csrw/nutstore`, the legacy key `csrw/nutstore` is used.
+3. Remote directory: the default `remoteRoot` changed from `csrw` to `dsh-csrw`, and old remote content is not migrated automatically. To keep historical syncs, rename the directory on the WebDAV side yourself, or `dsh_csrw_nutstore_pull` to the local machine first and push again.
 
-页面提示加载失败时，先在浏览器外确认路由本身是否存在：
+The CLI executable was renamed from `csrw` to `dsh-csrw`, model tools from `csrw_*` to `dsh_csrw_*`, and the command from `/csrw-ui` to `/dsh-csrw`, which now accepts both JSON and the `dsh-csrw <module> <operation>` form. These are breaking renames within 0.1.0: existing call scripts, shortcuts, and prompts must be updated.
+
+### Troubleshooting the workbench API
+
+When the page reports a load failure, first confirm outside the browser whether the route exists at all:
 
 ```text
 GET /dsh-csrw/api/state
-  404 + 空响应体  → 路由没注册，插件 Web 半片没挂上（宿主已加载工具但未加载路由）
-  401 + {"error":"未授权"} → 路由正常，只是请求没带会话凭据；在界面里点“加载配置”即可
+  404 + empty body          → route not registered; the plugin's web half is not mounted (host loaded tools but not routes)
+  401 + {"error":"unauthorized"} → route is fine, the request just lacks a session credential; click "Load config" in the UI
 ```
 
-路由通过 `ctx.inject(['webServer'], …)` 条件注入挂载：`webServer` 服务可能晚于本插件就绪，一次性
-`ctx.get('webServer')` 在那种加载顺序下会永久错过它，表现为工具全部可用但工作台永远 404。
-没有 Web GUI 的环境（CLI、单元测试）里条件注入不会触发，46 个工具与 `/dsh-csrw` 命令不受影响。
+Routes are mounted through conditional injection with `ctx.inject(['webServer'], …)`: the `webServer` service may become ready later than this plugin, and a one-shot
+`ctx.get('webServer')` permanently misses it in that startup order, which looks like every tool working while the workbench returns 404 forever.
+In environments without a web GUI (CLI, unit tests) the conditional injection never fires, and the 49 tools and the `/dsh-csrw` command are unaffected.
 
-## 验证与范围
+## Verification and scope
 
-自动测试使用工作区 `.test-artifacts/` 或系统临时目录下的隔离 fixture 和本机模拟服务；不推送真实外部仓库，不恢复用户真实 vault、Zotero 或 DSH profile。执行 `npm test` 查看当前结果。真实 Zotero 搜索/读取验收要求本机服务可用；真实坚果云往返要求用户自己的应用密码及测试目录。这些不能由 mock 通过替代。
+Automated tests use isolated fixtures under the workspace `.test-artifacts/` or the system temp directory plus local mock services; they never push to real external repositories or restore a real vault, Zotero library, or DSH profile. Run `npm test` for current results. Real Zotero search/read acceptance requires a running local service; a real Nutstore round trip requires your own app password and a test directory. Mocks cannot substitute for these.
 
-本版本提供的界面是待办页的三种视图加四个占位页；不含 MCP 服务、向量检索、聚类、Zotero 写入、自动定时同步或永久删除。Obsidian 双链（解析、消歧、反链、未链接提及、重写）、检索过滤、模板、日记、附件拷贝、死链检测、图谱数据、Canvas 与书签均已实现（见 `docs/obsidian-local-features.md`）。
+The UI in this version covers the three todo views, the ideas/knowledge-base editor/reader, and the Projects and Papers placeholder pages; it does not include an MCP server, vector retrieval, clustering, Zotero writes, scheduled sync, or permanent deletion. Obsidian wikilinks (resolution, disambiguation, backlinks, unlinked mentions, rewriting), search filters, templates, daily notes, attachment copies, broken-link detection, graph data, Canvas, and bookmarks are all implemented (see `docs/obsidian-local-features.md`).
 
-## 源码
+## Source layout
 
-`lib/index.js` 注册工具和工作台路由；`lib/tools/` 实现各模块（`obsidian.js` Obsidian 工具、`paper.js` 文献笔记、`git.js`、`zotero.js`、`nutstore.js`、`backup.js`、`config.js`）；`lib/desk/` 是工作台宿主半片（`host.js` 路由、`store.js` 持久化/撤销/迁移、`ops.js` 操作白名单、`seed.js` 示例数据、`ids.js` 全局标识）；`lib/services/config.js` 管理配置，`lib/services/snapshot.js` 管理备份；`lib/utils/` 提供路径边界、frontmatter 解析与双链引擎（`path.js`、`frontmatter.js`、`wikilink.js`）及哈希工具。`bin/dsh-csrw.js` 是 CLI；`client.js` 是浏览器半片；`patches/bundle.yaml` 是 DSH bundle 补丁；`docs/` 是工作台设计文档；`scripts/check.mjs` 与 `scripts/check-identifiers.mjs` 做结构与标识一致性检查，`scripts/verify-ui*.mjs` 校验界面注册与交互。GPL-3.0-only License（保留远端 GNU GPL v3 授权）。
+`lib/index.js` registers tools and workbench routes; `lib/tools/` implements the modules (`obsidian.js` for Obsidian tools, `paper.js` for literature notes, `git.js`, `zotero.js`, `nutstore.js`, `backup.js`, `config.js`); `lib/desk/` is the workbench host half (`host.js` routes, `store.js` persistence/undo/migration, `ops.js` operation whitelist, `seed.js` sample data, `ids.js` global identifiers); `lib/services/config.js` manages configuration and `lib/services/snapshot.js` manages backups; `lib/utils/` provides path boundaries, frontmatter parsing, the wikilink engine (`path.js`, `frontmatter.js`, `wikilink.js`), and hashing helpers. `bin/dsh-csrw.js` is the CLI; `client.js` is the browser half; `patches/bundle.yaml` is the DSH bundle patch; `docs/` holds the workbench design documents; `scripts/check.mjs` and `scripts/check-identifiers.mjs` run structural and identifier consistency checks, and `scripts/verify-ui*.mjs` verify UI registration and interaction. GPL-3.0-only License (keeping the upstream GNU GPL v3 grant).
 
-### 本次验收记录（2026-11-12）
+### Acceptance record (2026-11-12)
 
-- `npm run check` 通过：语法、包元数据、46 个 `dsh_csrw_` 工具、六个模块全部 `ready`；`identifiers` 通过（`dsh-csrw-ui`、`/dsh-csrw/api`、`dsh-csrw`）。
-- `npm run check:ui` 通过：五处界面注册、图标几何、标题、设置分区 id 与中英文案全部匹配。
-- `npm test`：74 个用例全部通过（0 skip、0 fail）。其中 5 个是 `lib/desk/` 用例，2 个是工作台状态迁移用例，2 个是配置兼容用例；12 个是新增 Obsidian 双链/检索/模板/日记/附件/重命名/死链/图谱/Canvas/书签用例，2 个是 `paper_to_note` 文献笔记用例（用本机 mock HTTP 验证 Zotero 请求路径与生成内容），3 个是新增备份云端用例，4 个是新增 vault 同步用例（pull 新建、push 写回、冲突保留副本、知识库 kb 字段）。"真实 Git 临时仓库集成"用例需要进程能用管道捕获子进程输出，在限制该能力的沙箱中按设计跳过，在普通终端通过。
-- 运行期实测：`GET /dsh-csrw/api/state` 返回 401（路由已注册，需鉴权），旧路由 `GET /csrw-desk/state` 返回 404；客户端插槽列表里 `sidebar.panellist`（order 45）、`settings.section`（order 17）、`settings.section.icon` 均为 `dsh-csrw-ui`；`dsh_csrw_health` 返回 46 工具、六模块 `ready`。
-- 状态迁移实机验证：从 `~/.dsh/csrw-desk/` 复制到 `~/.dsh/dsh-csrw/`，读到 6 个待办、3 篇文献、3 个想法；旧文件 SHA-256 前后一致（未被改写），新目录含 `state.json` 与 `.migrated-from-csrw-desk` 标记。
-- 界面人工验收：设置分区、侧栏入口、标题与图标名称、工作台加载配置均按预期显示；插件卡片描述 41 字未截断。
-- 外部服务边界：本机未运行 Zotero，真实 API 搜索/条目读取未验收；未提供坚果云应用密码，真实远端往返未验收；两者在不可用时都返回明确错误而不是假成功。Obsidian 端子验收使用临时 vault（非用户真实数据）：write/append/move/trash 正常，`../` 越界与默认覆盖被拒绝，`snapshot_verify` 能检出被篡改文件，`snapshot_restore` 未传 `confirm: true` 时拒绝。
-- 尚未实现：项目、文献、想法、知识库四页只有条数占位，没有列表与编辑界面（工作台界面层，与 Obsidian 执行层无关）。Obsidian 本地能力清单（`docs/obsidian-local-features.md`）已全部实现。
+- `npm run check` passed: syntax, package metadata, 49 `dsh_csrw_` tools, and all six modules `ready`; `identifiers` passed (`dsh-csrw-ui`, `/dsh-csrw/api`, `dsh-csrw`).
+- `npm run check:ui` passed: five UI registrations, icon geometry, titles, settings section id, and both language strings all matched.
+- `npm test`: all 88 cases passed (0 skipped, 0 failed). Of these, 5 cover `lib/desk/`, 2 cover workbench state migration, 2 cover config compatibility; 12 are new Obsidian wikilink/search/template/daily/attachment/rename/broken-link/graph/Canvas/bookmark cases; 2 are `paper_to_note` cases (verifying Zotero request paths and generated content against a local mock HTTP server); 3 are new cloud backup cases; 4 are new vault sync cases (pull creates, push writes back, conflicts keep a copy, knowledge-base `kb` field); 4 are new Nutstore cases (error classification, delete confirmation, root protection, missing log). The "real Git temporary repository integration" case needs a process that can capture subprocess output through pipes; it is skipped by design in sandboxes that restrict that capability and passes in a normal terminal.
+- Runtime checks: `GET /dsh-csrw/api/state` returned 401 (route registered, authorization required) and the legacy `GET /csrw-desk/state` returned 404; the client slot list showed `sidebar.panellist` (order 45), `settings.section` (order 17), and `settings.section.icon` all as `dsh-csrw-ui`; `dsh_csrw_health` reported 49 tools with all six modules `ready`.
+- State migration verified on a real machine: copied from `~/.dsh/csrw-desk/` to `~/.dsh/dsh-csrw/` and read 6 todos, 3 papers, and 3 ideas; the legacy file's SHA-256 was identical before and after (never rewritten), and the new directory contained `state.json` plus the `.migrated-from-csrw-desk` marker.
+- Manual UI acceptance: the settings section, sidebar entry, titles, and icon names displayed as expected, and loading config in the workbench worked; the plugin card description (41 characters) was not truncated.
+- External service boundaries: Zotero was not running locally, so real API search/item reads were not accepted; no Nutstore app password was provided, so a real remote round trip was not accepted. Both return explicit errors rather than fake success when unavailable. Obsidian-side acceptance used a temporary vault (never real user data): write/append/move/trash worked, `../` escapes and default overwrite were rejected, `snapshot_verify` detected tampered files, and `snapshot_restore` refused without `confirm: true`.
+- Not yet implemented: the Projects and Papers pages only hold counts, with no list or editing UI (ideas and the knowledge base are merged into an editor/reader with an entry list, Markdown edit/preview/split, and two-way Obsidian sync — this is the workbench UI layer and unrelated to the Obsidian execution layer). The Obsidian local capability list (`docs/obsidian-local-features.md`) is fully implemented.
 
 [![](https://img.shields.io/badge/powered_by-dsh-4D6BFE?style=flat-square&logo=deepseek&logoColor=white)](https://github.com/deepseek-ai/deepseek-harness) [![](https://img.shields.io/badge/powered_by-CodeBuddy-4D6BFE?style=flat-square&logo=codebuddy&logoColor=white)](https://www.codebuddy.cn/)

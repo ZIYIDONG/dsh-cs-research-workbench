@@ -1,6 +1,6 @@
 {
   "name": "dsh-cs-research-workbench",
-  "version": "0.1.1",
+  "version": "0.1.1-dev.0",
   "description": "An end-to-end research workbench for Computer Science: todos, papers, projects, ideas, knowledge base, sync and backup",
   "main": "./lib/index.js",
   "type": "module",
@@ -50,7 +50,7 @@
     "check:ui": "node scripts/verify-ui.mjs && node scripts/verify-ui-interaction.mjs"
   },
   "dsh": {
-    "name": "CS科研工作台 (dsh-cs-research-workbench)",
+    "name": "CS科研工作台 (dsh-cs-research-workbench) · 开发版",
     "category": "research",
     "bundle": {
       "patch": "./patches/bundle.yaml"

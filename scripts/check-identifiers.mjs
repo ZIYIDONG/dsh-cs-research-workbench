@@ -50,4 +50,13 @@ for (const needle of [UI_ID, API_PREFIX, `$DSH_HOME/${DATA_DIR}/`]) {
   assert.ok(readme.includes(needle), `README 未记录 ${needle}`)
 }
 
-console.log(JSON.stringify({ identifiers: 'passed', uiId: UI_ID, apiPrefix: API_PREFIX, dataDir: DATA_DIR }))
+// 版本号有 package.json / lib/index.js / README 三处来源，靠人工同步会在 -dev.N 递增时漏改。
+// 这里做纯文本比较，不 import lib/index.js，避免本脚本新增 @deepseek-ai/dsh-tools 运行时依赖。
+const pkg = JSON.parse(await read('package.json'))
+const versionDeclared = (await read('lib/index.js')).match(/export const VERSION\s*=\s*'([^']+)'/)
+assert.ok(versionDeclared, 'lib/index.js 必须导出 VERSION')
+assert.equal(versionDeclared[1], pkg.version, 'lib/index.js 的 VERSION 与 package.json.version 不一致')
+const escape = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+assert.match(readme, new RegExp(`(?:当前版本|Current version)[^\\n]{0,40}?${escape(pkg.version)}`), 'README 的当前版本必须与 package.json.version 同步')
+
+console.log(JSON.stringify({ identifiers: 'passed', version: pkg.version, uiId: UI_ID, apiPrefix: API_PREFIX, dataDir: DATA_DIR }))
