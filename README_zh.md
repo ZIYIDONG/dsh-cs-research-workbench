@@ -27,13 +27,13 @@ v0.1 分两层交付：**工作台界面**（本地状态、快速记录、助�
 | 入口 | 存什么 | 当前状态 |
 | --- | --- | --- |
 | 待办 `todo` | 任务标题、状态、优先级、截止时间、所属项目 | 已可用：散落画布、列表、日历三种视图，可拖动、可撤销 |
-| 项目 `project` | 项目本身的推进节奏 | 页面占位，只显示记录条数 |
-| 文献 `paper` | 题录、DOI/arXiv、阅读状态 | 页面占位，只显示记录条数 |
+| 项目 `project` | 名称、目标、状态、发表场所、里程碑 | 已可用：记录列表，可新建、编辑（字段白名单与状态下拉）、二次确认删除；空状态与窄屏适配 |
+| 文献 `paper` | 标题、作者、发表场所、年份、状态、DOI、URL、阅读截止日期、笔记 | 已可用：同样的记录列表，可新建、编辑（字段白名单与状态下拉）、二次确认删除；空状态与窄屏适配 |
 | 想法 · 知识库 `idea`/`kb` | 想法、假设、问题、方法；概念、坑、公式、工具、片段、模板 | 已可用：左侧条目列表 + 右侧 Markdown 编辑/预览/分栏，可增删改，支持与 vault 双向同步 |
 | 同步与备份 | 快照、远端副本 | 无页面，在设置页与 `dsh_csrw_nutstore_*` / `dsh_csrw_backup_*` 中 |
 | 设置页 | 工作台偏好、工作区与会话选择、Git/Zotero/WebDAV 检查、Obsidian 与云端备份卡片 | 已可用，DSH 设置页「CS科研工作台」分区 |
 
-占位页不是空壳数据：快速记录和助手对话都能写进这六类条目，只是项目与文献这两个页面目前只统计条数，还没有列表与编辑界面。想法与知识库可直接在合并页编辑。项目和文献的条目仍走快速记录新建、走助手查询。
+项目与文献是可编辑的列表页，而非仅统计条数的占位页：每页显示记录条数与卡片网格，带「新建」按钮、空状态，以及创建/编辑记录的对话框。对话框只编辑白名单字段集（项目：`name`、`goal`、`status`、`venue`、JSON 格式的 `milestones`；文献：`title`、`authors`、`venue`、`year`、`status`、`doi`、`url`、`readBy`、`notes`），校验 URL 协议 / 数字年份 / JSON 里程碑 / 必填名称，并提供状态下拉（项目：active/paused/done；文献：inbox/reading/read/cited）。删除为二次确认（「删除这条记录？之后仍可撤销。」），并始终受原生撤销保护。两页均适配窄屏。想法与知识库仍在合并页编辑。快速记录与助手依旧能写入全部六类条目。
 
 工作台数据与 49 个工具是两套独立状态：工具不读写 `$DSH_HOME/dsh-csrw/state.json`。要让条目落成文件、版本或远端副本时，显式调用对应工具：
 
@@ -90,17 +90,18 @@ node bin/dsh-csrw.js health
 主面板（`/dsh-csrw/api/*` 路由，数据在 `$DSH_HOME/dsh-csrw/state.json`；旧目录 `csrw-desk/` 会在首次读取时自动复制，且旧文件保留）：
 
 1. 顶栏导航区重组：「监控台」排最左，用分隔线与其余分组明确区分；随后是四个标签——待办、项目、文献、想法·知识库（想法与知识库合并为一个入口）。右侧是助手模型按钮、备份/同步按钮和助手开关（点击收起/唤起右侧助手 Dock，状态持久化到偏好）。
-2. 首屏两行数字：还有 N 件事等你推进、M 篇文献排在本周；下面是一句话记录框。
+2. 首屏两行数字：还有 N 件事等你推进（`todo`/`doing` 状态的待办），以及「{n} 篇文献排在本周」——状态为 `reading`、或 `inbox` 且 `readBy` 不晚于本周日的文献（按本地时间、周一为一周之始）；下面是一句话记录框。
 3. 一句话按内容分流：DOI/arXiv → 文献，`问题:`/`假设:`/`方法:`/`局限:` 或链接 → 想法，带日期/`@项目`/`#P0`/`~30min` → 任务，其余 → 任务。
 4. Todo 页为上下两段式毛玻璃面板（`20px` 圆角、`blur(24px)`、统一透明度，间距 `16px`）：上方面板是待办概览 + 输入区（散落画布可拖动卡片、滚轮平移、`Ctrl/⌘ + 滚轮` 缩放；右下角有缩放/重置按钮；一句话记录框居中），下方面板是五项待办分类列表（Todo: All / Projects / Paper / Idea / 知识库）。点击散落卡片或列表行打开编辑对话框，可改字段或删除；列表面板内部滚动，快速记录入口在列表头部；空状态按面板各自呈现。
 5. 想法·知识库合并页是一个「类似 Obsidian 的编辑阅读器」：左侧想法/知识库条目列表（可新建、选中），右侧 Markdown 编辑器，支持编辑/预览/分栏三种模式，渲染标题、列表、代码块、加粗、斜体、链接与双链 `[[...]]`，可直接新建、编辑、删除条目。页面顶部提供「同步」工具栏：选择想法/知识库目录后，可把工作台条目与本地 Obsidian 笔记双向同步（手动触发，走 `POST /api/vault-sync`）；冲突保留 `.conflict.md` 副本、不自动覆盖。
 6. 快速记录按类型分栏：任务（优先级、截止、项目、状态）、文献（DOI、URL、阅读状态）、想法（类型：想法/假设/问题/方法）、知识库（概念/坑/公式/工具/片段/模板），填完直接写进本地状态。
-7. 右侧助手 Dock：不选模型时用本地规则（建任务、查今天、统计待办），不联网；在顶栏选定模型后，助手只依据当前工作台数据作答，要求 120 字内、不编造条目，模型调用失败会回退本地规则并在返回里标明 `engine`。
+7. 右侧助手 Dock：不选模型时用本地规则（建任务、查今天、统计待办），不联网；在顶栏选定模型后，助手只依据当前工作台数据作答，要求 120 字内、不编造条目，模型调用失败会回退本地规则并在返回里标明 `engine`。`GET /dsh-csrw/api/state` 现在返回真实的 `modelOk` 布尔值（LLM 暴露 `prepareCall` **且**已选定非空的 provider/model）而非常量 `false`；当已选模型但 `modelOk` 为 `false` 时，模型选择处会提示「模型不可用，助手将回退本地规则」，而不是静默把模型伪装成在线。
 8. 工作台偏好（界面语言、助手栏默认展开、清除示例数据、撤销提示）不再占用顶栏入口，统一收进 DSH 设置页的「CS科研工作台」分区（见下）。
 9. 原生撤销 30 步（`Ctrl/⌘+Z`）、中英文案、窄屏适配（`<1020px` 两列、`<780px` 单列，窄屏默认收起助手）。
 10. 布局约定：所有全宽内容必须放进 `.rd-content`。助手 Dock 展开时内容区自动让出 `--dock-w`（336px），顶栏与 Toast 同步避让；不要用 `position: fixed` 或 `100vw` 自行铺满，否则会被右侧助手遮住。
 11. 监控台是首页（待办页）的默认落地视图：打开工作台默认展开，展示进行中/等待中/今日到期的任务、论文阅读进展（待读/精读/已读/已引用）、项目里程碑进度、最近备份摘要（走 `GET /dsh-csrw/api/backups`）。点顶栏的「待办」标签或监控台按钮可切换监控台与待办页；每次打开工作台都默认回到监控台。
 12. 备份中心：顶栏「备份/同步」按钮打开对话框（需先选会话作为权限上下文），分「操作」「配置」两页。操作页：一键备份、单源备份（Obsidian / Zotero / DSH / 工作区）、上传坚果云、备份 GitHub、坚果云连接检测与同步日志、快照校验（填路径）与清理。配置页：可编辑 `backup.target/localDir/keep/mode/includeDshSessions/dshHome/dshProfile`、`nutstore.baseUrl/remoteRoot/username/credentialKey/retry/retryDelay`、`git.backupRemote/backupBranch/backupRepoDir`，批量保存（走 `dsh_csrw_config_set`）。首次设置后不再变更的基础设置仍只保留在 DSH 设置区入口。
+13. 「项目」「文献」两个标签已是可用的记录列表页（不再是仅显示条数的占位页）：每页显示记录条数、「新建」按钮与带空状态的卡片网格；点击卡片或「新建」打开对话框，编辑白名单字段集——项目：`name`、`goal`、`status`、`venue`、`milestones`（JSON）；文献：`title`、`authors`、`venue`、`year`、`status`、`doi`、`url`、`readBy`、`notes`——并带校验（URL 协议、数字年份、JSON 里程碑、必填名称）、状态下拉（项目：active/paused/done；文献：inbox/reading/read/cited），以及仍可撤销的二次确认删除。写入统一走共享的 `/ops` 白名单，布局适配窄屏。
 
 设置页里的工具面板（含工作台偏好）：
 
@@ -129,16 +130,10 @@ node bin/dsh-csrw.js health
 
 ## 设计文档
 
-`docs/` 按主题分册，均对应已实现的界面与执行层：
+`docs/` 按主题分册，但并非全部描述已交付的 `dsh-csrw` 代码，分为两组：
 
-| 文档 | 内容 |
-| --- | --- |
-| `dsh-research-desk-design.md` | 总体：产品定位、页面清单与数据模型 |
-| `dsh-research-desk-home.md` | 首页（监控台）布局、散落卡片与一句话记录 |
-| `dsh-research-desk-pages.md` | 各页细则、交互与空状态（成文于想法·知识库合并前，相关两章以合并后的编辑阅读器为准） |
-| `obsidian-local-features.md` | Obsidian 本地能力清单与实现状态（21 项已全部实现） |
-| `backup-architecture.md` | 备份体系、manifest 与本地 / 坚果云 / GitHub 分工 |
-| `nutstore-sync-test-plan.md` | 坚果云 WebDAV 同步的人工测试流程与验收标准 |
+- **本包已实现（`dsh-csrw`）：** `obsidian-local-features.md`（Obsidian 本地能力清单与实现状态——21 项全部实现，外加已落地的磁盘索引缓存）、`backup-architecture.md`（备份体系、manifest 与本地 / 坚果云 / GitHub 分工）、`nutstore-sync-test-plan.md`（坚果云 WebDAV 同步测试流程、TC-01~TC-10 自动化用例映射与剩余手工验收项）。
+- **独立新包（`dsh-research-desk`）规划，尚未实施：** `dsh-research-desk-design.md`（总体产品定位、页面清单、数据模型）、`dsh-research-desk-home.md`（首页 / 监控台布局、散落卡片、一句话记录）、`dsh-research-desk-pages.md`（各页细则、交互与空状态）。这三份是**独立新包**的设计草稿，**未在 `dsh-csrw` 中实现**，请勿当作本仓库已交付的功能；本仓库的当前能力以本 README 所述为准。权威工具清单以 **49 个为准，由 `scripts/check.mjs` 断言（`assert.equal(tools.length, 49)`）**；docs 或注释里的任何计数都必须与该断言对齐。
 
 ## 配置
 
@@ -188,10 +183,10 @@ WebDAV 端点有 host 白名单：仅支持 `https://dav.jianguoyun.com/dav/`；
 | 文献笔记 | `dsh_csrw_paper_to_note`（从 Zotero 条目生成 vault 文献笔记） |
 | Git | `dsh_csrw_git_status`, `init`, `commit`, `push`, `pull`（每个短名均使用 `dsh_csrw_git_` 前缀） |
 | Zotero | `dsh_csrw_zotero_search`, `item`, `notes`, `attachments`, `cite`（每个短名均使用 `dsh_csrw_zotero_` 前缀） |
-| 坚果云 | `dsh_csrw_nutstore_test`, `list`, `push`, `pull`（每个短名均使用 `dsh_csrw_nutstore_` 前缀） |
+| 坚果云 | `dsh_csrw_nutstore_test`, `list`, `push`, `pull`, `delete`, `logs`（每个短名均使用 `dsh_csrw_nutstore_` 前缀） |
 | 备份与快照 | `dsh_csrw_backup_obsidian`, `dsh_csrw_backup_zotero`, `dsh_csrw_backup_dsh`, `dsh_csrw_backup_workspace`, `dsh_csrw_snapshot_create`, `dsh_csrw_snapshot_verify`, `dsh_csrw_snapshot_restore`, `dsh_csrw_snapshot_prune`, `dsh_csrw_backup_upload`, `dsh_csrw_backup_github`, `dsh_csrw_backup_all` |
 
-工具的模型可见参数说明和 CLI `--help` 是具体调用接口。所有操作返回单一 JSON；基础设施错误抛出，不把失败包装为成功。工具尊重取消信号。
+上表列出全部 49 个工具。**工具数量以 `scripts/check.mjs` 断言（`assert.equal(tools.length, 49)`）为准**——增删工具时以该断言为唯一真值，本 README 与 `docs/` 中的每一处计数都必须与它对齐。工具的模型可见参数说明和 CLI `--help` 是具体调用接口。所有操作返回单一 JSON；基础设施错误抛出，不把失败包装为成功。工具尊重取消信号。
 
 ### Obsidian
 
@@ -207,7 +202,7 @@ WebDAV 端点有 host 白名单：仅支持 `https://dav.jianguoyun.com/dav/`；
 - `graph` 导出图谱节点/边数据（只算不画）。
 - `list` 列出目录下的 Markdown，可选读取多篇内容；`template` 用 `{{key}}` 变量渲染模板（内置 `date`/`time`/`title`）；`daily` 按 `.obsidian/daily-notes.json` 规则生成日记；`attach` 把本地图片/PDF 拷进 vault 附件目录；`canvas` 读写 `.canvas` JSON；`bookmarks` 只读展平 `.obsidian/bookmarks.json`。
 
-`paper_to_note` 从本机 Zotero 条目生成 vault 文献笔记（frontmatter + `[[cite:KEY]]` + 摘要 + `![[附件]]` 引用），不下载附件文件。双链解析先精确路径、再 basename 最短唯一路径、最后别名兜底；同名文件并列时标记 `ambiguous` 不静默选错。索引在内存中按需扫描，中小 vault（几百篇）单次调用够用。
+`paper_to_note` 从本机 Zotero 条目生成 vault 文献笔记（frontmatter + `[[cite:KEY]]` + 摘要 + `![[附件]]` 引用），不下载附件文件。双链解析先精确路径、再 basename 最短唯一路径、最后别名兜底；同名文件并列时标记 `ambiguous` 不静默选错。索引已落地为磁盘缓存：固定在 `<workspace>/.dsh-csrw/obsidian-index.json`，按 `mtimeMs+size` 增量判定命中、只重新解析变化/新增文件；缓存只存结构化元数据（title/tags/links 等），不含笔记正文；原子写入（tmp + rename），损坏、不可写或落点不合规时降级为纯内存全量扫描。
 
 ```json
 {"path":"notes/example.md","text":"# Example\nResearch notes\n"}
@@ -239,15 +234,15 @@ WebDAV 端点有 host 白名单：仅支持 `https://dav.jianguoyun.com/dav/`；
 
 ### 备份、校验与恢复
 
-备份默认保存在本地，manifest 记录版本、时间、大小与每文件 SHA-256。Zotero SQLite 通过只读源连接和 SQLite 在线备份产生一致副本，避免直接复制运行中的数据库。该在线备份使用 Node 内置 `node:sqlite` 的 `backup()`；当前运行时没有该 API 时会明确报错，不会退化为直接复制运行中的数据库。DSH 备份覆盖实际发现/显式配置的 prompts、plugins、skills、soul（专家团）与配置，默认不含 sessions/storages；排除已知敏感路径及检测到敏感内容的文件（整文件跳过，不是字段脱敏）。包含 profile 的 `cordis.patch.yml`、package manifests 与 pnpm 锁文件；排除 `node_modules` 和 `.git`，依赖需要按清单重建。敏感识别为保守启发式，不能保证未知格式密钥 100% 召回，应检查排除报告后再上传。第四个源 `workspace` 备份工作区 `.dsh-csrw/config.json` 与同步基线，排除备份目录自身。
+备份默认保存在本地，manifest 记录版本、时间、大小与每文件 SHA-256。Zotero SQLite 通过只读源连接和 SQLite 在线备份产生一致副本，避免直接复制运行中的数据库。该在线备份使用 Node 内置 `node:sqlite` 的 `backup()`；当前运行时没有该 API 时会明确报错，不会退化为直接复制运行中的数据库。DSH 备份覆盖实际发现/显式配置的 prompts、plugins、skills、soul（专家团）与配置，默认不含 sessions/storages；排除已知敏感路径及检测到敏感内容的文件（整文件跳过，不是字段脱敏）。包含 profile 的 `cordis.patch.yml`、package manifests 与 pnpm 锁文件；排除 `node_modules` 和 `.git`，依赖需要按清单重建。敏感识别为保守启发式，不能保证未知格式密钥 100% 召回，应检查排除报告后再上传。第四个源 `workspace` 备份工作区 `.dsh-csrw/config.json` 与同步基线，排除备份目录自身。运行时状态文件 `obsidian-index.json`（磁盘索引缓存）与 `logs/nutstore.log`（同步日志）含本机路径/笔记元数据，workspace 快照与坚果云目录同步都按 basename 显式排除；命中项还会写入 `manifest.excluded` 并标 `reason:'runtime-state'`，便于核查而非静默丢弃。
 
 恢复必须显式 `confirm:true`，先完成 manifest 与全部文件校验，再自动生成恢复前快照。只恢复清单内的文件，不删除目标中额外内容；不会对用户资料执行未获授权的真实恢复。多文件恢复不是文件系统事务，运行期 I/O、取消或并发变更可能造成部分完成，恢复前快照是回滚依据。SHA-256 用于完整性而非来源认证；不提供敌对并发下的完全 TOCTOU 防护。恢复 SQLite 前关闭 Zotero；活动 WAL/SHM 存在时拒绝恢复。大文件会读入内存。请先在独立目录验证备份内容和凭据排除报告。
 
 云端分工（见 `docs/backup-architecture.md`）：本地始终是主备份；`dsh_csrw_backup_upload` 把完整快照目录增量同步到坚果云（大附件、SQLite、全量）；`dsh_csrw_backup_github` 把工作区配置与快照 manifest 提交到 GitHub 私有仓库（小文件、版本化）。`dsh_csrw_backup_all` 一键执行本地快照并按 `backup.target` 与 `git.backupRemote` 分流，单步失败不影响其余步骤。两者均不传播删除、不做后台定时同步；GitHub push 需显式 `confirm`。
 
-备份策略：默认全量快照（逐文件 SHA-256 + manifest），`backup.mode=incremental` 时对未变更文件用硬链接复用，降低磁盘占用（增量快照内文件与其他快照共享 inode，请勿手动改快照目录）。创建快照后按 `backup.keep` 自动保留最近 N 个（`dsh_csrw_snapshot_prune` 也可手动清理）；只删除带 `manifest.json` 的快照目录，`.pending-*` 与损坏目录不碰。同步方向固定为「本地为主 → 云端异地」，坚果云 push/pull 按 SHA-256 增量、冲突保留 `.local`/`.remote` 双份不覆盖；网络错误、超时、5xx/429 按 `nutstore.retry` 指数退避重试，认证失败/404/412 等业务错误直接报错不重试。
+备份策略：默认全量快照（逐文件 SHA-256 + manifest），`backup.mode=incremental` 时对未变更文件用硬链接复用，降低磁盘占用（增量快照内文件与其他快照共享 inode，请勿手动改快照目录）。创建快照后按 `backup.keep` 自动保留最近 N 个（`dsh_csrw_snapshot_prune` 也可手动清理）；只删除带 `manifest.json` 的快照目录，`.pending-*` 与损坏目录不碰。同步方向固定为「本地为主 → 云端异地」，坚果云 push/pull 按 SHA-256 增量、冲突保留 `.local`/`.remote` 双份不覆盖；网络/连接故障、超时与 5xx/429 按 `nutstore.retry` 指数退避重试；4xx（带 `status` 的认证失败/404/412 等）业务错误直接报错、不重试。
 
-坚果云同步能力（完整测试流程见 `docs/nutstore-sync-test-plan.md`）：`nutstore_test` 返回连接状态、延迟与可操作提示（认证失败/权限/网络/路径分类）；`nutstore_delete` 显式确认后删除远端文件或目录（拒绝删除远端根，404 视为已不存在）；`nutstore_push` 的 `prune=true + confirm=true` 可删除远端多余文件；每次同步写入 `.dsh-csrw/logs/nutstore.log`，`nutstore_logs` 可查最近记录。凭据只从 DSH 凭据存储（api-key）或 `NUTSTORE_USERNAME` / `NUTSTORE_PASSWORD` 环境变量读取，不在界面录入。
+坚果云同步能力（完整测试流程见 `docs/nutstore-sync-test-plan.md`）：`nutstore_test` 返回连接状态、延迟与可操作提示（归类为认证失败 / 权限 / 网络 / 路径 / `too-large` / `invalid-path`）；`nutstore_delete` 显式确认后删除远端文件或目录（拒绝删除远端根，404 视为已不存在）；`nutstore_push` 的 `prune=true + confirm=true` 可删除远端多余文件；每次同步追加写入 `.dsh-csrw/logs/nutstore.log`，`nutstore_logs` 可查最近记录。成功与失败的同步都会写一条日志：失败记录额外带 `ok:false` 与 `error` 字段，值为 `classifyError` 的 kind，绝不含凭据或 `Authorization` 值。日志里的 `root` 是相对工作区的路径或 12 位短标识，不是绝对本地路径，避免泄露系统用户名。超过 32 MiB 的文件报 `too-large` 错误；含中文、空格、`#`、`&` 或 emoji 的文件名可经 URL 编码正确 round-trip。凭据只从 DSH 凭据存储（api-key）或 `NUTSTORE_USERNAME` / `NUTSTORE_PASSWORD` 环境变量读取，不在界面录入。
 
 ### 旧版本迁移
 
@@ -279,11 +274,11 @@ GET /dsh-csrw/api/state
 
 自动测试使用工作区 `.test-artifacts/` 或系统临时目录下的隔离 fixture 和本机模拟服务；不推送真实外部仓库，不恢复用户真实 vault、Zotero 或 DSH profile。执行 `npm test` 查看当前结果。真实 Zotero 搜索/读取验收要求本机服务可用；真实坚果云往返要求用户自己的应用密码及测试目录。这些不能由 mock 通过替代。
 
-本版本提供的界面是待办页的三种视图、想法·知识库的编辑阅读器，以及项目、文献两个占位页；不含 MCP 服务、向量检索、聚类、Zotero 写入、自动定时同步或永久删除。Obsidian 双链（解析、消歧、反链、未链接提及、重写）、检索过滤、模板、日记、附件拷贝、死链检测、图谱数据、Canvas 与书签均已实现（见 `docs/obsidian-local-features.md`）。
+本版本提供的界面是待办页的三种视图、想法·知识库的编辑阅读器，以及项目、文献两页——两页现已是可用记录列表，支持新建/编辑/二次确认删除、字段白名单、状态下拉、空状态与窄屏适配（不再是仅显示条数的占位页）。不含 MCP 服务、向量检索、聚类、Zotero 写入、定时同步或永久删除——这些仍未实现。Obsidian 双链（解析、消歧、反链、未链接提及、重写）、检索过滤、模板、日记、附件拷贝、死链检测、图谱数据、Canvas 与书签均已实现（见 `docs/obsidian-local-features.md`）。
 
 ## 源码
 
-`lib/index.js` 注册工具和工作台路由；`lib/tools/` 实现各模块（`obsidian.js` Obsidian 工具、`paper.js` 文献笔记、`git.js`、`zotero.js`、`nutstore.js`、`backup.js`、`config.js`）；`lib/desk/` 是工作台宿主半片（`host.js` 路由、`store.js` 持久化/撤销/迁移、`ops.js` 操作白名单、`seed.js` 示例数据、`ids.js` 全局标识）；`lib/services/config.js` 管理配置，`lib/services/snapshot.js` 管理备份；`lib/utils/` 提供路径边界、frontmatter 解析与双链引擎（`path.js`、`frontmatter.js`、`wikilink.js`）及哈希工具。`bin/dsh-csrw.js` 是 CLI；`client.js` 是浏览器半片；`patches/bundle.yaml` 是 DSH bundle 补丁；`docs/` 是工作台设计文档；`scripts/check.mjs` 与 `scripts/check-identifiers.mjs` 做结构与标识一致性检查，`scripts/verify-ui*.mjs` 校验界面注册与交互。GPL-3.0-only License（保留远端 GNU GPL v3 授权）。
+`lib/index.js` 注册工具和工作台路由；`lib/tools/` 实现各模块（`obsidian.js` Obsidian 工具、`paper.js` 文献笔记、`git.js`、`zotero.js`、`nutstore.js`、`backup.js`、`config.js`）；`lib/desk/` 是工作台宿主半片（`host.js` 路由、`store.js` 持久化/撤销/迁移、`ops.js` 操作白名单、`seed.js` 示例数据、`ids.js` 全局标识）；`lib/services/config.js` 管理配置，`lib/services/snapshot.js` 管理备份；`lib/utils/` 提供路径边界、frontmatter 解析与双链引擎（`path.js`、`frontmatter.js`、`wikilink.js`）及哈希工具。`bin/dsh-csrw.js` 是 CLI；`client.js` 是浏览器半片；`patches/bundle.yaml` 是 DSH bundle 补丁；`docs/` 收录本包设计文档与独立新包规划草稿（分组见「设计文档」一节）；`scripts/check.mjs` 与 `scripts/check-identifiers.mjs` 做结构与标识一致性检查，`scripts/verify-ui*.mjs` 校验界面注册与交互。GPL-3.0-only License（保留远端 GNU GPL v3 授权）。
 
 ### 本次验收记录（2026-11-12）
 
@@ -295,3 +290,13 @@ GET /dsh-csrw/api/state
 - 界面人工验收：设置分区、侧栏入口、标题与图标名称、工作台加载配置均按预期显示；插件卡片描述 41 字未截断。
 - 外部服务边界：本机未运行 Zotero，真实 API 搜索/条目读取未验收；未提供坚果云应用密码，真实远端往返未验收；两者在不可用时都返回明确错误而不是假成功。Obsidian 端子验收使用临时 vault（非用户真实数据）：write/append/move/trash 正常，`../` 越界与默认覆盖被拒绝，`snapshot_verify` 能检出被篡改文件，`snapshot_restore` 未传 `confirm: true` 时拒绝。
 - 尚未实现：项目、文献两页只有条数占位，没有列表与编辑界面（想法·知识库已合并为编辑阅读器，具备条目列表、Markdown 编辑/预览/分栏与 Obsidian 双向同步；工作台界面层，与 Obsidian 执行层无关）。Obsidian 本地能力清单（`docs/obsidian-local-features.md`）已全部实现。
+
+### 验收记录（2026-11-13，列表页与加固轮）
+
+这是一条独立的新记录；上面的 2026-11-12 条目是时间点快照，结论保持原样、不改写。尤其是其中「尚未实现：项目、文献两页只有条数占位」描述的是本轮之前的状态，已由下面的实现取代，不应再视为当前状态。
+
+- `npm test`：230 个用例通过，0 失败、0 跳过。新增覆盖包括 `test/nutstore-plan.test.js`（18 条工具级用例自动化 TC-01~TC-10）、`test/desk-routes.test.js`（8 个 host 路由、鉴权/跨站/请求体上限、真实 `modelOk`）、`test/backup-tools.test.js`（备份工具组正向执行）、`test/obsidian-index-cache.test.js`（缓存命中、增量重建、正文不落盘、失败降级）与 `test/runtime-exclusions.test.js`（8 条固化运行时状态排除、日志去标识化与 4xx 显式 status）。
+- `npm run check` 与 `npm run check:ui` 全绿。`npm run check` 现在还报告 `exampleConfig:'passed'`：`.dsh-csrw.example.json` 与 `config.js` 的 `DEFAULTS` 逐字段（字段名集合与类型）校验一致。工具数量仍为 **49，以 `scripts/check.mjs` 断言（`assert.equal(tools.length, 49)`）为准**，六个模块全部 `ready`。
+- 项目与文献由仅显示条数的占位页改为可用记录列表：白名单字段集上的新建/编辑对话框、状态下拉（active/paused/done；inbox/reading/read/cited）、可撤销的二次确认删除、空状态与窄屏布局。首屏新增第二行数字（「{n} 篇文献排在本周」：状态 `reading`，或 `inbox` 且 `readBy` 不晚于本周日）；`GET /dsh-csrw/api/state` 现在返回真实 `modelOk` 布尔值，已选模型但不可用时给出本地规则回退提示，而非伪装成模型在线。
+- 本轮同时落地：Obsidian 磁盘索引缓存、坚果云 TC-01~TC-10 自动化用例、同步失败也写 `ok:false` 日志、运行时状态文件（索引缓存与同步日志）在 workspace 快照与坚果云同步中按 basename 排除并在 `manifest.excluded` 以 `reason:'runtime-state'` 可核查。
+- 范围与上文的硬边界一致：两页已实现；仍不含 MCP 服务、向量检索、聚类、Zotero 写入、定时同步或永久删除，恢复仍需 `confirm:true`，WebDAV 仍强制 HTTPS（仅本机回环可用 HTTP 测试）、4xx 不重试、凭据绝不写入日志。真实 Zotero 搜索/读取仍需本机服务可用、真实坚果云往返仍需用户自己的应用密码与测试目录，这些手工验收不能由 mock 替代。

@@ -24,7 +24,7 @@
 | 1. 不配置任何凭据，调 `nutstore_test` | 报错含 `auth-missing`，提示配置凭据 | 错误信息包含「DSH 凭据存储」或「NUTSTORE_USERNAME」关键字 |
 | 2. 配置错误应用密码，调 `nutstore_test` | 报错含 `auth-failed`（HTTP 401） | 提示「账号或应用密码错误」 |
 | 3. 配置错误 `baseUrl`（如 `https://dav.example.com/`） | 报错含 `network` 或 `not-found` | 提示「网络不可达」或「远端目录不存在」 |
-| 4. 配置 `remoteRoot` 含 `..`（如 `a/../b`） | 报错含 `invalid-path` | 拒绝同步，提示「相对子路径」 |
+| 4. 配置 `remoteRoot` 含 `..`（如 `a/../b`） | 写时门报 `Relative child path required`；服务层 `rel()` 报 `Remote path must be a relative child path`，归类 `invalid-path` | 拒绝同步且不发请求，提示「相对子路径」 |
 | 5. 正确配置，调 `nutstore_test` | `connected:true`、`remoteRootExists` 正确、有 `latencyMs` | 返回 `status: 207`（或 404 表示根不存在） |
 
 ### TC-02 首次全量同步（push）
@@ -95,7 +95,7 @@
 | 1. `nutstore_delete` 不传 `confirm` | 拒绝执行 | 报错「Delete requires confirm:true」 |
 | 2. `nutstore_delete` 传 `confirm:true` 删除指定文件 | 删除成功，`found:true` | `nutstore_list` 不再包含该文件 |
 | 3. 删除不存在的文件 | `found:false`，不报错 | `status: 404` |
-| 4. 删除远端根（`remotePath` 为空） | 拒绝 | 报错「Refusing to delete the configured remote root」 |
+| 4. 删除远端根（`remotePath` 为空） | 拒绝，且不发出 DELETE 请求（空路径先被 `rel()` 拦截） | 报 `Remote path must be a relative child path`，归类 `invalid-path`；远端根仍在 |
 | 5. `nutstore_push` 带 `prune:true` 但无 `confirm` | 拒绝 | 报错「prune requires confirm:true」 |
 | 6. `prune:true + confirm:true` | 删除远端多余文件 | `pruned` 非空，远端与本地一致 |
 
@@ -109,25 +109,36 @@
 
 ## 三、自动化测试对照
 
-| 用例 | 现有自动化 | 说明 |
-| --- | --- | --- |
-| TC-01 配置校验 | `test/nutstore.test.js`（mock DAV 401/403） | 认证失败、列表过滤 |
-| TC-02 首次全量 | `test/nutstore.test.js`（DAV roundtrip） | 首次 push/pull 全量 |
-| TC-03 增量 | `test/nutstore.test.js`（`skipped` 断言） | 二次 push 跳过 |
-| TC-05 冲突 | `test/nutstore.test.js`（`conflicts` + `.local/.remote`） | 双向冲突副本 |
-| TC-06 重试 | `test/retry.test.js` | 网络错误重试、4xx 不重试 |
-| TC-07 特殊字符 | 需手工（mock 未覆盖） | 建议补 1 个编码用例 |
-| TC-08 权限 | 需手工 | mock 403 已有部分覆盖 |
+TC-01~TC-10 已全部自动化：主载体是 `test/nutstore-plan.test.js`（工具级、独立 `.test-artifacts` 工作区 + 本地 mock DAV，共 **18 条**用例），另有 `test/nutstore.test.js`（DAV roundtrip / 冲突 / `skipped`）、`test/retry.test.js`（重试分类）、`test/nutstore-extra.test.js`（错误分类）等既有自动化兜底。所有用例都走工具真实的 schema 校验与 `execute()`，不触碰真实坚果云。
 
-**手工验收补充**：TC-07 的 emoji/特殊字符、TC-08 的只读共享、TC-09 的真实删除，需在坚果云测试目录手工跑一遍。
+| 用例 | 现有自动化 | 覆盖内容 |
+| --- | --- | --- |
+| TC-01 配置校验 | `test/nutstore-plan.test.js`（5 条）+ `test/nutstore.test.js` | 无凭据 `auth-missing`、401 `auth-failed`、错误 `baseUrl` 的 `network`/`not-found`、`remoteRoot` 含 `..` 的 `Remote path must be a relative child path`→`invalid-path`（且不发请求）、正确配置 `connected`/`remoteRootExists`/`latencyMs`/`status` |
+| TC-02 首次全量 | `test/nutstore-plan.test.js` + `test/nutstore.test.js` | 10 文件全 `transferred`、`nutstore_list` 结构一致、SHA-256 一致、同步基线 10 条哈希 |
+| TC-03 增量 | `test/nutstore-plan.test.js` + `test/nutstore.test.js` | 二次全 `skipped`、改 1 传 1、新增 1 传 1、删本地不带 `prune` 时远端保留 |
+| TC-04 下载 | `test/nutstore-plan.test.js` | pull 远端新增落地、再 pull 全 `skipped`、远端删除本地保留（不传播删除） |
+| TC-05 冲突 | `test/nutstore-plan.test.js` + `test/nutstore.test.js` | 双向改生成 `.local/.remote`、再次 push 不静默覆盖、人工合并后 `transferred` |
+| TC-06 网络中断与恢复 | `test/nutstore-plan.test.js` + `test/retry.test.js` | 故障 `network` 可重试、已传文件不回滚/基线保留、恢复幂等；**失败也写一条 `ok:false` + `error:'network'` 且与成功记录同构的日志（断言已补）**；`nutstore_logs` ≥ 2 条含方向与计数 |
+| TC-07 大文件与特殊字符 | `test/nutstore-plan.test.js`（2 条） | > 32 MiB 抛 `too-large` 且提示 32 MiB、不进 PUT；中文/空格/`#`/`&`/emoji 文件名 push-list-pull round-trip 无乱码 |
+| TC-08 权限异常 | `test/nutstore-plan.test.js`（2 条） | mock 403 → `forbidden`、push 不静默成功；远端根不存在时 push 自动创建、list 返回可读 404 |
+| TC-09 删除 | `test/nutstore-plan.test.js`（2 条） | `confirm` 门、删除成功 `found:true`、不存在 404、`remotePath` 为空拒绝删根（`Remote path must be a relative child path`）、`prune` 无 `confirm` 被拒、`prune + confirm` 后 `pruned` 非空 |
+| TC-10 日志与反馈 | `test/nutstore-plan.test.js` + `test/backup-sensitive.test.js` | `nutstore_logs` 返回方向/计数、日志文件存在且每行 JSON、失败后记录仍在、`limit` clamp；另有补充回归验证应用密码/Basic 凭据不出现在日志、配置、同步基线 |
+
+**手工验收补充**（自动化用本地 mock DAV，以下仍需真实账号或人工确认）：
+- 真实坚果云账号下 `nutstore_test` 返回 `connected:true`（真实应用密码与网络）。
+- 真实 push + pull 往返一次，无冲突、无报错。
+- 真实只读共享目录的 ACL（403 `forbidden`）行为。
+- 真实服务端对 emoji 文件名、> 32 MiB 文件的行为（自动化只覆盖本地拦截与 mock 编码，不覆盖服务端策略）。
+- 设置页「坚果云」卡片中 UI 结果卡片的人工查看（`transferred/skipped/conflicts` 可读）。
 
 ## 四、回归清单（每次改动后）
 
-- [ ] `npm test` 全绿（含 `nutstore.test.js` / `retry.test.js`）
-- [ ] `npm run check` 工具数与标识一致
-- [ ] `nutstore_test` 在真实账号下返回 `connected:true`
-- [ ] 一次 push + 一次 pull 无冲突、无报错
-- [ ] `nutstore_logs` 有对应记录
+- [ ] `npm test` 全绿：**230 用例，0 fail / 0 skip**（含 `test/nutstore-plan.test.js` 18 条、`test/runtime-exclusions.test.js` 8 条，以及 `test/nutstore.test.js` / `retry.test.js` / `nutstore-extra.test.js`）
+- [ ] `npm run check` 全绿：除语法、元数据、49 工具、六模块 `ready`、标识一致外，新增 `exampleConfig:'passed'` 断言——`.dsh-csrw.example.json` 与 `config.js` `DEFAULTS` 逐字段（字段名集合与类型）同构；**工具数量以 `scripts/check.mjs` 的 `assert.equal(tools.length, 49)` 为准**
+- [ ] `npm run check:ui` 全绿
+- [ ] `nutstore_test` 在真实账号下返回 `connected:true`（手工）
+- [ ] 一次 push + 一次 pull 无冲突、无报错（手工）
+- [ ] `nutstore_logs` 有对应记录（含失败时的 `ok:false` 记录）
 
 ## 五、验收标准汇总
 

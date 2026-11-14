@@ -3,7 +3,7 @@
 > 本文档梳理「工作台 ↔ Obsidian vault」集成中，**仅凭直接读写本地 `.md` 文件就能实现**的能力，
 > 作为逐步实现的规划依据。判断标准与"做不了"的边界见文末。
 >
-> **状态：§2 清单中的 21 项能力已全部实现**（对应 `lib/utils/wikilink.js` 与 `lib/tools/obsidian.js` / `paper.js`）。
+> **状态：§2 清单中的 21 项能力已全部实现**（对应 `lib/utils/wikilink.js` 与 `lib/tools/obsidian.js` / `paper.js`）；**§6.4 的磁盘索引缓存也已落地**（原为规划），不再是待实现项。
 
 ## 1. 判断标准
 
@@ -90,10 +90,15 @@ Obsidian 的功能分两层：
 - 反链不是存储的，是扫描后反推：解析每篇笔记的正向链接 → 按"解析后的真实路径"反聚合。
 - 别名链接、显式路径链接都要归到真实目标头上；嵌入 `![[...]]` 不计入反链。
 
-### 6.4 性能与缓存
+### 6.4 性能与磁盘索引缓存（已落地）
 
-- 全量扫描 O(总字节数)，中小 vault（几百篇）单次调用够用。
-- 规模大时加磁盘索引缓存：`文件路径 → mtime → 链接列表` 存 `.dsh-csrw/obsidian-index.json`，只重解析 mtime 变化的文件。
+- 全量扫描 O(总字节数)，中小 vault（几百篇）单次调用够用；`links` / `backlinks` / `graph` 等需要建索引的工具走同一入口 `buildIndex`（`lib/utils/wikilink.js`）。
+- **磁盘索引缓存已实现**，不再是规划项：
+  - **文件名与位置**：固定在 `<workspace>/.dsh-csrw/obsidian-index.json`，以 workspace（而非 vault root）为基准，保证缓存文件本身不成为 vault 的笔记内容；只有落点在 vault 之外、或位于已被 `excludeDirs` 排除的 `.dsh-csrw` 插件数据目录时才启用，否则退化为纯内存全量扫描（`lib/tools/obsidian.js` 的 `indexOf`）。
+  - **增量依据**：按 `stat` 的 `mtimeMs + size` 判定命中，命中则不重新解析；变化/新增文件重新解析，已删除文件不写回、自然从缓存剔除。命中时还复核 `Buffer.byteLength(text) === stat.size`，防 `stat` 与 `read` 之间被改动导致脏数据（`lib/utils/wikilink.js`）。
+  - **只存结构化元数据，不存正文**：缓存项仅含 `mtimeMs / size / bodyLine / title / tags / aliases / links` 等解析结果与元数据；命中时按正文起始行偏移 `bodyLine` 从原文件还原正文，绝不把笔记正文写入缓存文件。
+  - **原子写 + 失败降级**：通过 `atomicJson`（`tmp + rename`，`lib/utils/path.js`）整份覆写；缓存缺失、损坏、格式不符一律当作「无缓存」，本次全量解析并自愈，写失败或路径非法则降级为纯内存全量扫描，**不让工具调用失败**（`test/obsidian-index-cache.test.js` 覆盖损坏/不可写/路径非法降级与命中）。
+  - **被备份与同步排除**：`obsidian-index.json` 与坚果云同步日志 `nutstore.log` 含 vault 绝对路径、笔记相对路径、title/tags/links 等元数据，属于运行时状态。workspace 快照与坚果云同步都按 **basename 精确命中** 这两个文件名排除（不引入 `logs/` 目录段，避免误伤用户在其它源里同名的正常目录）；快照侧还把命中项记进 `manifest.excluded` 并标 `reason:'runtime-state'`，便于核查而非静默丢弃（`lib/services/snapshot.js`、`lib/services/nutstore.js` 的 `RUNTIME_BASENAMES`）。
 
 ### 6.5 安全边界（沿用现有红线）
 

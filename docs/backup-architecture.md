@@ -4,19 +4,26 @@
 
 ## 一、现状盘点
 
+> 本节记录实现落地后的现状；下面的「原缺口」清单是历史记录，所列各项均已补齐，不再视为待办。
+
 | 能力 | 现状 | 位置 |
 | --- | --- | --- |
-| 本地快照备份 | ✅ 3 源（obsidian/zotero/dsh）、逐文件 SHA-256、敏感排除、恢复前自动快照 | `lib/services/snapshot.js` |
+| 本地快照备份 | ✅ 4 源（obsidian/zotero/dsh/workspace）、逐文件 SHA-256、敏感排除、恢复前自动快照 | `lib/services/snapshot.js`（`KINDS`） |
 | 坚果云 WebDAV | ✅ 目录级增量同步 push/pull（SHA-256 增量、冲突保留 .local/.remote） | `lib/tools/nutstore.js` |
 | Git | ✅ status/init/commit/push/pull（SSH agent 凭据） | `lib/tools/git.js` |
-| 插件/skills/提示词备份 | ✅ 含在 `dsh` 源（`DSH_PARTS`） | `lib/services/snapshot.js` |
+| 插件/skills/提示词/专家团备份 | ✅ 含在 `dsh` 源，`DSH_PARTS` 已含 `soul` | `lib/services/snapshot.js` |
+| 云端目标与分流 | ✅ `backup.target` 支持 `local | nutstore`；`backup_all` 按配置分流到坚果云与 GitHub；`dsh_csrw_backup_upload` / `dsh_csrw_backup_github` 均已实现 | `lib/tools/backup.js`、`lib/services/config.js` |
+| 工作区配置备份 | ✅ 第四源 `workspace` 备份 `.dsh-csrw/config.json` 与同步基线（排除备份目录自身） | `lib/services/snapshot.js` |
+| 运行时状态文件排除（本轮新增） | ✅ 索引缓存 `obsidian-index.json` 与同步日志 `nutstore.log` 按 basename 精确排除于 workspace 快照与坚果云同步；命中项写入 `manifest.excluded` 并标 `reason:'runtime-state'`，可核查而非静默丢弃 | `lib/services/snapshot.js`、`lib/services/nutstore.js` 的 `RUNTIME_BASENAMES` |
 
-**缺口**：
-1. `backup.target` 只支持 `local`，云端目标未实现（`backup.js` enum 仅 `local`；`snapshot.js` 的 `backupBase` 明确抛错「Nutstore snapshot transport is not implemented」）。
-2. GitHub 备份未实现。
-3. 工作区配置 `.dsh-csrw/config.json`（本地导出参数）不在备份范围。
-4. 「专家团」`soul/`（SOUL.md/USER.md/IDENTITY.md/RULES.md/memory）不在 `DSH_PARTS`。
-5. 云端分工策略未定义。
+**原缺口（均已落地，保留作历史记录）**：
+1. ~~`backup.target` 只支持 `local`，云端目标未实现~~ → 现支持 `local | nutstore`（写时枚举校验），`backup_all` 在 `target=nutstore` 时上传坚果云，并可由 `git.backupRemote` 触发 GitHub 备份；`backupBase` 不再抛「Nutstore snapshot transport is not implemented」。
+2. ~~GitHub 备份未实现~~ → 已实现 `dsh_csrw_backup_github`（纳入 git 仓库并 commit + push 到私有远程，实际 push 需 `confirm`）。
+3. ~~工作区配置 `.dsh-csrw/config.json` 不在备份范围~~ → 已作为第四源 `workspace` 纳入。
+4. ~~「专家团」`soul/` 不在 `DSH_PARTS`~~ → `DSH_PARTS` 已含 `soul`（SOUL.md/USER.md/IDENTITY.md/RULES.md/memory）。
+5. ~~云端分工策略未定义~~ → 已在 §三「整体架构」与 §七「策略与配置（已实现）」定义（本地为主、坚果云完整异地、GitHub 元数据版本化）。
+
+> §二～§六 保留实现前的设计/规划记录；最终落地形态以本表与 §七 为准。
 
 ## 二、三个适配方案
 
@@ -68,7 +75,7 @@ GitHub 私有仓库承担「小体积高价值」元数据异地 + 版本化备�
 
 ### 备份范围
 - 四源：`obsidian`（vault）、`zotero`（SQLite 一致副本）、`dsh`（prompts/plugins/skills/soul/config）、`workspace`（`.dsh-csrw/config.json` + 同步基线）
-- 排除：凭据路径、检测到敏感内容的文件、`node_modules`/`.git`、备份目录自身
+- 排除：凭据路径、检测到敏感内容的文件、`node_modules`/`.git`、备份目录自身；以及运行时状态文件 `obsidian-index.json`（磁盘索引缓存）、`nutstore.log`（同步日志）——按 basename 精确排除（同时被坚果云同步排除），命中项记入 `manifest.excluded` 并标 `reason:'runtime-state'`，理由为两者含本机绝对路径/笔记元数据，不属需备份的资产（依据 `lib/services/snapshot.js`、`lib/services/nutstore.js`）。
 
 ### 备份策略
 | 项 | 配置 | 默认 | 说明 |

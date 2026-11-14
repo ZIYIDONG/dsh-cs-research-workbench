@@ -80,6 +80,7 @@ window.__ModuleLoader__.load({
       zoomIn: '放大', zoomOut: '缩小', zoomFit: '回到中心',
       model: '模型', modelPick: '选择助手模型', modelLocal: '本地规则', modelEmpty: '没有可用的模型',
       modelHint: '选中后助手用该模型回答；不选则用本地规则。',
+      modelUnavailable: '模型当前不可用，助手将回退本地规则',
       clearSamples: '清空示例数据', undoHint: '撤销：Ctrl / Cmd + Z',
       loading: '正在铺开研究台…',
       error: '工作台加载失败：{error}', retry: '重试',
@@ -118,6 +119,15 @@ window.__ModuleLoader__.load({
       pathChangeTitle: '读写位置变更（该位置在工作区之外）',
       pruneConfirm: '将删除保留数量以外的旧快照，操作不可恢复。确认执行？',
       uploadConfirm: '将把本地备份目录增量上传到坚果云；内容冲突时保留 .local/.remote 副本，上传期间远端被改动会报错并要求重跑。确认执行？',
+      // 项目 / 文献列表页与 hero 第二行；与 en 保持完全一致的 key 结构。pageSoon 保留但不再被引用。
+      papersThisWeekLine: '{n} 篇文献排在本周',
+      listCount: '{n} 条记录', listNew: '＋ 新建', listEdit: '编辑',
+      listEmptyProject: '还没有项目，点「＋ 新建」建立第一个项目。', listEmptyPaper: '还没有文献，点「＋ 新建」加入第一篇文献。',
+      recordNew: '新建记录', recordEdit: '编辑记录', recordSaved: '已保存', recordDeleted: '已删除',
+      recordDeleteConfirm: '确定删除这条记录吗？删除后仍可用撤销找回。', recordDeleteYes: '确认删除',
+      recordName: '项目名', paperTitle: '文献标题', goal: '目标', milestones: '里程碑（JSON 数组）', readBy: '阅读截止',
+      invalidUrl: '链接需以 http:// 或 https:// 开头', invalidJson: '里程碑需为 JSON 数组', invalidYear: '年份需为数字', requiredName: '请填写名称',
+      errNeedLoad: '登录状态已失效，请在界面里点加载配置', errRouteMissing: '路由未注册',
       pageSoon: '这一页的骨架下一轮补上。现在先把首页做扎实。',
     }
     const en = {
@@ -136,6 +146,7 @@ window.__ModuleLoader__.load({
       zoomIn: 'Zoom in', zoomOut: 'Zoom out', zoomFit: 'Reset view',
       model: 'Model', modelPick: 'Pick an assistant model', modelLocal: 'Local rules', modelEmpty: 'No model available',
       modelHint: 'The assistant answers with this model; unset falls back to local rules.',
+      modelUnavailable: 'Model unavailable; the assistant will fall back to local rules.',
       clearSamples: 'Clear sample data', undoHint: 'Undo: Ctrl / Cmd + Z',
       loading: 'Unfolding the desk…',
       error: 'Failed to load the desk: {error}', retry: 'Retry',
@@ -172,6 +183,14 @@ window.__ModuleLoader__.load({
       pathChangeTitle: 'Read/write location change (that location is outside the workspace)',
       pruneConfirm: 'Snapshots beyond the keep count will be permanently deleted. This cannot be undone. Continue?',
       uploadConfirm: 'Upload the local backup directory to Nutstore; content conflicts keep .local/.remote copies, but a mid-upload remote change errors out and must be retried.',
+      papersThisWeekLine: '{n} papers lined up this week',
+      listCount: '{n} records', listNew: '＋ New', listEdit: 'Edit',
+      listEmptyProject: 'No projects yet. Click "+ New" to create the first one.', listEmptyPaper: 'No papers yet. Click "+ New" to add the first one.',
+      recordNew: 'New record', recordEdit: 'Edit record', recordSaved: 'Saved', recordDeleted: 'Deleted',
+      recordDeleteConfirm: 'Delete this record? You can still undo it afterwards.', recordDeleteYes: 'Delete',
+      recordName: 'Project name', paperTitle: 'Paper title', goal: 'Goal', milestones: 'Milestones (JSON array)', readBy: 'Read by',
+      invalidUrl: 'URL must start with http:// or https://', invalidJson: 'Milestones must be a JSON array', invalidYear: 'Year must be a number', requiredName: 'Name is required',
+      errNeedLoad: 'Session expired. Click "Load configuration" in the UI.', errRouteMissing: 'Route not registered',
       pageSoon: 'This page is coming in the next round; the home page comes first.',
     }
     let language = 'zh'
@@ -197,7 +216,7 @@ window.__ModuleLoader__.load({
       state: null, canUndo: false, error: null, view: 'todo', mode: 'scatter', kindFilter: 'all',
       query: '', related: null, capture: null, dockOpen: true, chatInput: '', thinking: false,
       toast: null, focusId: null, dashboardOpen: true, cam: { x: 0, y: 0, z: 1 }, camAnim: false,
-      modelsOpen: false, models: [], modelsLoading: false, backupOpen: false, editing: null,
+      modelsOpen: false, models: [], modelsLoading: false, modelOk: false, backupOpen: false, editing: null, recordDialog: null,
       month: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
     }
     const listeners = new Set()
@@ -213,7 +232,13 @@ window.__ModuleLoader__.load({
         method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body),
       })
       const data = await res.json().catch(() => ({}))
-      if (!res.ok) throw new Error(data.error || `请求失败（${res.status}）`)
+      if (!res.ok) {
+        // 401 需要用户在界面里重新「加载配置」建立上下文；404 且响应体为空通常是宿主路由未注册。
+        // 两者都不要退化成通用网络错误，否则用户会去排查网络而不是操作界面。
+        if (res.status === 401) throw new Error(t('errNeedLoad'))
+        if (res.status === 404 && !Object.keys(data).length) throw new Error(t('errRouteMissing'))
+        throw new Error(data.error || `请求失败（${res.status}）`)
+      }
       return data
     }
 
@@ -228,7 +253,7 @@ window.__ModuleLoader__.load({
       try {
         const data = await request(ROUTES.state)
         if (data.state?.settings?.language) language = data.state.settings.language
-        setDesk({ state: data.state, canUndo: data.canUndo, error: null, dockOpen: data.state?.settings?.dockOpen !== false, dashboardOpen: true })
+        setDesk({ state: data.state, canUndo: data.canUndo, error: null, modelOk: data.modelOk === true, dockOpen: data.state?.settings?.dockOpen !== false, dashboardOpen: true })
       } catch (err) {
         setDesk({ error: err.message })
       }
@@ -282,7 +307,10 @@ window.__ModuleLoader__.load({
 
     async function chooseModel(entry) {
       setDesk({ modelsOpen: false })
-      await saveSettings({ assistant: entry ? { provider: entry.provider, model: entry.id } : null })
+      const ok = await saveSettings({ assistant: entry ? { provider: entry.provider, model: entry.id } : null })
+      if (ok) {
+        try { const latest = await request(ROUTES.state); setDesk({ modelOk: latest.modelOk === true }) } catch { /* 刷新失败不影响模型选择结果 */ }
+      }
     }
 
     async function sendChat(message) {
@@ -421,11 +449,23 @@ window.__ModuleLoader__.load({
       return `${Math.round(diff / DAY)} ${dict() === en ? 'd ago' : '天前'}`
     }
 
+    // 本周日按本地时间计算，周一为周首：周日当天就是本周日，周一还需 6 天，周六还需 1 天。
+    function sundayKey(now) {
+      const day = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+      const offset = day.getDay() === 0 ? 0 : 7 - day.getDay()
+      day.setDate(day.getDate() + offset)
+      return `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, '0')}-${String(day.getDate()).padStart(2, '0')}`
+    }
+
     function heroNumbers(state) {
-      if (!state) return { pending: 0 }
+      if (!state) return { pending: 0, papersThisWeek: 0 }
       const todos = state.todos ?? []
       const pending = todos.filter((row) => row.status === 'todo' || row.status === 'doing').length
-      return { pending }
+      const papers = state.papers ?? []
+      const sunday = sundayKey(new Date())
+      // 口径：精读中的文献，或待读且 readBy 非空且不晚于本周日的文献；ISO 日期串按字典序比较即可。
+      const papersThisWeek = papers.filter((row) => row.status === 'reading' || (row.status === 'inbox' && Boolean(row.readBy) && String(row.readBy) <= sunday)).length
+      return { pending, papersThisWeek }
     }
 
     function classify(text) {
@@ -748,6 +788,27 @@ window.__ModuleLoader__.load({
 .rd-root.is-compact .rd-dock{width:min(320px,88%);box-shadow:-12px 0 40px rgb(0 0 0 / 16%)}
 .rd-root.is-compact.has-dock .rd-content{right:0}
 .rd-root.is-compact.has-dock .rd-topbar{right:0}
+/* 项目 / 文献列表页：整体挂在 .rd-content 内，随 has-dock 自动让出 --dock-w；
+   断点沿用 Desk 的 is-narrow(<1020) / is-compact(<780)。 */
+.rd-records{position:absolute;inset:0;overflow:auto;padding:96px 28px 120px}
+.rd-records-inner{max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.rd-records-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.rd-records-head h2{margin:0;font-size:20px;font-weight:600}
+.rd-records-count{font-size:12px;color:var(--dsw-alias-label-tertiary,#9a9a9a);font-variant-numeric:tabular-nums}
+.rd-records-add{margin-left:auto}
+.rd-records-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:start}
+.rd-record-card{display:flex;flex-direction:column;gap:8px;padding:14px 16px;border-radius:14px;background:var(--glass);border:.5px solid var(--dsw-alias-border-l1);box-shadow:0 8px 26px rgb(0 0 0 / 6%);cursor:pointer}
+.rd-record-card:focus-visible{outline:2px solid var(--dsw-alias-brand-primary);outline-offset:2px}
+.rd-record-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rd-record-title{font-size:14px;font-weight:600;line-height:1.45;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rd-record-meta{font-size:12px;color:var(--dsw-alias-label-secondary);line-height:1.5;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:0}
+.rd-record-foot{display:flex;align-items:center;gap:8px;margin-top:auto}
+.rd-record-foot .rd-btn{height:28px;font-size:12px;padding:0 10px}
+.rd-records-empty{padding:40px 16px;border-radius:14px;background:var(--glass);border:.5px solid var(--dsw-alias-border-l1);color:var(--dsw-alias-label-secondary);font-size:13px;line-height:1.7;text-align:center}
+.rd-records-confirm{color:var(--dsw-alias-state-error-primary);font-size:13px;line-height:1.6;margin:6px 0 0}
+.rd-root.is-narrow .rd-records-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.rd-root.is-compact .rd-records{padding:80px 14px 110px}
+.rd-root.is-compact .rd-records-grid{grid-template-columns:1fr}
 @media (prefers-reduced-motion:reduce){.rd-ambient i{animation:none}.rd-node,.rd-hero-input,.rd-world,.rd-content,.rd-thinking-dot,.rd-spinner{transition:none}.rd-thinking-dot,.rd-spinner{animation:none}}
 `
 
@@ -794,7 +855,8 @@ window.__ModuleLoader__.load({
         h('div', { className: 'rd-hero' },
           h('div', { className: 'rd-hero-date' }, dateLine),
           h('h1', { className: 'rd-hero-line' },
-            heroRow('n1', '', t('pendingLine'), numbers.pending)),
+            heroRow('n1', '', t('pendingLine'), numbers.pending),
+            heroRow('n2', '', t('papersThisWeekLine'), numbers.papersThisWeek)),
           h('div', { className: 'rd-hero-input' },
             h(Icon, { name: 'spark', size: 17 }),
             h('input', {
@@ -1427,6 +1489,7 @@ window.__ModuleLoader__.load({
       const open = useSel((s) => s.modelsOpen)
       const models = useSel((s) => s.models)
       const loading = useSel((s) => s.modelsLoading)
+      const modelOk = useSel((s) => s.modelOk)
       const state = useSel((s) => s.state)
       if (!open) return null
       const chosen = state?.settings?.assistant
@@ -1435,6 +1498,7 @@ window.__ModuleLoader__.load({
         h('div', { className: 'rd-dialog rd-model-dialog' },
           h('h3', null, t('modelPick')),
           h('p', { className: 'rd-model-hint' }, t('modelHint')),
+          chosen && modelOk === false ? h('p', { className: 'rd-model-empty', role: 'status' }, t('modelUnavailable')) : null,
           loading
             ? h('p', { className: 'rd-model-empty' }, '…')
             : models.length
@@ -1700,20 +1764,162 @@ window.__ModuleLoader__.load({
           h('div', { className: 'rd-form-foot' }, h('button', { type: 'button', className: 'rd-btn', onClick: () => setDesk({ backupOpen: false }) }, t('cancel')))))
     }
 
-    function PlaceholderView() {
-      const state = useSel((s) => s.state)
+    // ---------- 项目 / 文献列表页：字段严格遵循 host applyOps 白名单 ----------
+    // project 用 name、paper 用 title；更新 / 删除必须带 id；枚举只允许下拉选值。
+    // milestones 是数组但契约未给元素结构，按 JSON 文本原样编辑，不擅自编造字段。
+    const RECORD_SPECS = {
+      project: {
+        kind: 'project', list: 'projects', titleKey: 'navProject', emptyKey: 'listEmptyProject', statusKey: 'project',
+        statuses: ['active', 'paused', 'done'], nameField: 'name', nameLabel: 'recordName',
+        fields: ['name', 'goal', 'status', 'venue', 'milestones'],
+        defaults: { name: '', goal: '', status: 'active', venue: '', milestones: '[]' },
+      },
+      paper: {
+        kind: 'paper', list: 'papers', titleKey: 'navPaper', emptyKey: 'listEmptyPaper', statusKey: 'paper',
+        statuses: ['inbox', 'reading', 'read', 'cited'], nameField: 'title', nameLabel: 'paperTitle',
+        fields: ['title', 'authors', 'venue', 'year', 'status', 'doi', 'url', 'readBy', 'notes'],
+        defaults: { title: '', authors: '', venue: '', year: '', status: 'inbox', doi: '', url: '', readBy: '', notes: '' },
+      },
+    }
+
+    function RecordListView() {
       const view = useSel((s) => s.view)
-      const counts = {
-        project: (state?.projects ?? []).length,
-        paper: (state?.papers ?? []).length,
-        idea: (state?.ideas ?? []).length,
-        kb: (state?.notes ?? []).length,
-        todo: (state?.todos ?? []).length,
+      const state = useSel((s) => s.state)
+      const spec = RECORD_SPECS[view] ?? RECORD_SPECS.project
+      const rows = state?.[spec.list] ?? []
+      const open = (id) => setDesk({ recordDialog: { kind: spec.kind, id } })
+      const primary = (row) => row[spec.nameField] || t('none')
+      const meta = (row) => spec.kind === 'project'
+        ? [row.venue, row.goal].filter(Boolean).join(' · ')
+        : [row.authors, [row.venue, row.year].filter(Boolean).join(' ')].filter(Boolean).join(' · ')
+      const extra = (row) => spec.kind === 'paper' ? String(row.doi ?? '') : ''
+      return h('div', { className: 'rd-records', 'aria-label': t(spec.titleKey) },
+        h('div', { className: 'rd-records-inner' },
+          h('div', { className: 'rd-records-head' },
+            h('h2', null, t(spec.titleKey)),
+            h('span', { className: 'rd-records-count' }, t('listCount', { n: rows.length })),
+            h('button', { type: 'button', className: 'rd-btn is-primary rd-records-add', onClick: () => open(null) }, t('listNew'))),
+          rows.length
+            ? h('div', { className: 'rd-records-grid' }, ...rows.map((row) =>
+                h('div', {
+                  key: row.id, className: 'rd-record-card', role: 'button', tabIndex: 0,
+                  onClick: () => open(row.id),
+                  onKeyDown: (event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); open(row.id) } },
+                },
+                  h('div', { className: 'rd-record-top' },
+                    h('span', { className: 'rd-tag' }, statusText(spec.statusKey, row.status) || t('none'))),
+                  h('h3', { className: 'rd-record-title' }, primary(row)),
+                  meta(row) ? h('p', { className: 'rd-record-meta' }, meta(row)) : null,
+                  h('div', { className: 'rd-record-foot' },
+                    extra(row) ? h('span', { className: 'rd-record-meta' }, extra(row).slice(0, 40)) : null,
+                    h('span', { style: { flex: 1 } }),
+                    h('button', { type: 'button', className: 'rd-btn', onClick: (event) => { event.stopPropagation(); open(row.id) } }, t('listEdit'))))))
+            : h('div', { className: 'rd-records-empty' }, t(spec.emptyKey))))
+    }
+
+    function RecordDialog() {
+      const recordDialog = useSel((s) => s.recordDialog)
+      const state = useSel((s) => s.state)
+      const [form, setForm] = useState({})
+      const [confirmDelete, setConfirmDelete] = useState(false)
+      const [busy, setBusy] = useState(false)
+      const spec = recordDialog ? RECORD_SPECS[recordDialog.kind] : null
+      const isNew = Boolean(recordDialog && !recordDialog.id)
+      const row = recordDialog && recordDialog.id && spec ? (state?.[spec.list] ?? []).find((x) => x.id === recordDialog.id) ?? null : null
+      useEffect(() => {
+        if (!recordDialog || !spec) return
+        setConfirmDelete(false)
+        if (!isNew && row) {
+          const next = {}
+          for (const key of spec.fields) next[key] = key === 'milestones' ? JSON.stringify(Array.isArray(row.milestones) ? row.milestones : [], null, 2) : (row[key] ?? '')
+          setForm(next)
+        } else {
+          setForm({ ...spec.defaults })
+        }
+      }, [recordDialog])
+      if (!recordDialog || !spec || (!isNew && !row)) return null
+      const set = (key, value) => setForm((previous) => ({ ...previous, [key]: value }))
+      const close = () => setDesk({ recordDialog: null })
+      const commit = async (op, messageKey) => {
+        setBusy(true)
+        try {
+          const data = await request(ROUTES.ops, { label: 'labelOpDefault', undoable: true, ops: [op] })
+          const errors = Array.isArray(data && data.errors) ? data.errors : []
+          if (errors.length) { toast(String(errors[0]), { error: true }); return }
+          close()
+          await loadDesk()
+          toast(t(messageKey))
+        } catch (err) {
+          toast(err?.message || String(err), { error: true })
+        } finally {
+          setBusy(false)
+        }
       }
-      const titles = { todo: t('navTodo'), project: t('navProject'), paper: t('navPaper'), idea: t('navIdea'), kb: t('navKb') }
-      return h('div', { className: 'rd-page' },
-        h('h2', { style: { fontSize: 20, margin: '0 0 8px' } }, titles[view] ?? view),
-        h('p', { style: { color: 'var(--dsw-alias-label-secondary)' } }, `${counts[view] ?? 0} 条记录 · ${t('pageSoon')}`))
+      const save = async () => {
+        const fields = {}
+        for (const key of spec.fields) {
+          const value = form[key]
+          if (key === 'milestones') {
+            let parsed
+            try { parsed = JSON.parse(String(value ?? '[]')) } catch { toast(t('invalidJson'), { error: true }); return }
+            if (!Array.isArray(parsed)) { toast(t('invalidJson'), { error: true }); return }
+            fields.milestones = parsed
+          } else if (key === 'year') {
+            if (value !== '' && value !== null && value !== undefined) {
+              const year = Number(value)
+              if (!Number.isFinite(year)) { toast(t('invalidYear'), { error: true }); return }
+              fields.year = year
+            }
+          } else if (key === 'readBy') {
+            fields.readBy = value ? String(value) : null
+          } else {
+            fields[key] = String(value ?? '')
+          }
+        }
+        if (!String(fields[spec.nameField] ?? '').trim()) { toast(t('requiredName'), { error: true }); return }
+        if (fields.url && !/^https?:\/\//i.test(fields.url)) { toast(t('invalidUrl'), { error: true }); return }
+        const op = isNew
+          ? { op: 'add_item', kind: spec.kind, ...fields }
+          : { op: 'update_item', kind: spec.kind, id: recordDialog.id, patch: fields }
+        await commit(op, 'recordSaved')
+      }
+      const remove = async () => {
+        if (!confirmDelete) { setConfirmDelete(true); return }
+        await commit({ op: 'delete_item', kind: spec.kind, id: recordDialog.id }, 'recordDeleted')
+      }
+      const field = (label, control) => h('label', { className: 'rd-field' }, h('span', null, label), control)
+      const input = (key, props = {}) => h('input', { value: form[key] ?? '', onChange: (event) => set(key, event.target.value), ...props })
+      const statusSelect = (fallback) => h('select', { value: form.status ?? fallback, onChange: (event) => set('status', event.target.value) },
+        ...spec.statuses.map((value) => h('option', { key: value, value }, statusText(spec.statusKey, value))))
+      return h('div', { className: 'rd-dialog-backdrop', onPointerDown: (event) => { if (event.target === event.currentTarget) close() } },
+        h('form', { className: 'rd-dialog', onSubmit: (event) => { event.preventDefault(); save() } },
+          h('h3', null, t(isNew ? 'recordNew' : 'recordEdit'), ' · ', t(spec.titleKey)),
+          field(t(spec.nameLabel), input(spec.nameField, { autoFocus: true, required: true })),
+          spec.kind === 'project'
+            ? h('div', null,
+                field(t('goal'), h('textarea', { value: form.goal ?? '', onChange: (event) => set('goal', event.target.value) })),
+                h('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 } },
+                  field(t('status'), statusSelect('active')),
+                  field(t('venue'), input('venue'))),
+                field(t('milestones'), h('textarea', { value: form.milestones ?? '[]', onChange: (event) => set('milestones', event.target.value) })))
+            : h('div', null,
+                h('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 } },
+                  field(t('authors'), input('authors')),
+                  field(t('venue'), input('venue')),
+                  field(t('year'), input('year', { type: 'number', min: 1900, max: 2100 })),
+                  field(t('status'), statusSelect('inbox')),
+                  field(t('doi'), input('doi')),
+                  field(t('url'), input('url', { type: 'url' })),
+                  field(t('readBy'), input('readBy', { type: 'date' }))),
+                field(t('notes'), h('textarea', { value: form.notes ?? '', onChange: (event) => set('notes', event.target.value) }))),
+          confirmDelete ? h('p', { className: 'rd-records-confirm', role: 'alert' }, t('recordDeleteConfirm')) : null,
+          h('div', { className: 'rd-form-foot' },
+            isNew ? null : h('button', { type: 'button', className: 'rd-btn is-danger', disabled: busy, onClick: remove }, t(confirmDelete ? 'recordDeleteYes' : 'deleteEntry')),
+            h('span', { style: { flex: 1 } }),
+            confirmDelete
+              ? h('button', { type: 'button', className: 'rd-btn', onClick: () => setConfirmDelete(false) }, t('cancel'))
+              : h('button', { type: 'button', className: 'rd-btn', onClick: close }, t('cancel')),
+            confirmDelete ? null : h('button', { type: 'submit', className: 'rd-btn is-primary', disabled: busy }, t('save')))))
     }
 
     function Dashboard() {
@@ -1813,7 +2019,7 @@ window.__ModuleLoader__.load({
         return () => window.removeEventListener('keydown', onKey)
       }, [])
       const showDock = dockOpen && !snapshot.focusId
-      const Active = error ? null : view === 'todo' ? null : (view === 'idea' || view === 'kb') ? BrainView : PlaceholderView
+      const Active = error ? null : view === 'todo' ? null : (view === 'idea' || view === 'kb') ? BrainView : RecordListView
       return h('div', { ref: rootRef, className: 'rd-shell' },
         h('div', { className: `rd-root ${narrow ? 'is-narrow' : ''} ${compact ? 'is-compact' : ''} ${showDock ? 'has-dock' : ''}` },
         h('style', null, CSS),
@@ -1829,6 +2035,7 @@ window.__ModuleLoader__.load({
         ready ? h(AssistantDock) : null,
         ready ? h(CaptureDialog) : null,
         ready ? h(ItemDialog) : null,
+        ready ? h(RecordDialog) : null,
         ready ? h(ModelPicker) : null,
         ready ? h(BackupDialog) : null,
         h(Toast))))

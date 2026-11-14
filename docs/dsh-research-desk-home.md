@@ -1,5 +1,7 @@
 # 首页设计（仿 dsh-media-desk 首页）v1.0
 
+> **状态：独立新包规划，非本仓库已实现功能。** 本文档描述的是**独立新包 `dsh-research-desk` 的设计规划**，尚未实施，也**未在 `dsh-csrw` 中实现**；本仓库当前能力一律以 `README.md` 为准，请勿把本文当作 `dsh-csrw` 已交付的功能。工具数量以 `scripts/check.mjs` 的 `assert.equal(tools.length, 49)` 断言为准。
+
 > 目标：**直接复刻 dsh-media-desk 的首页形态**——首屏一句话 + 一句话记录 + 散落卡片墙 + 底部 dock + 右侧助手——把"灵感"换成"研究"。
 > 首页 = **TODO 页的默认视图**（不新增第六个页面）；同一页还有「列表」「日历」两种模式，规格见 [dsh-research-desk-pages.md](dsh-research-desk-pages.md)。
 > 参考实现：`dsh-media-desk/client/canvas.jsx`（HomeView/Scatter/Feed/Hero）、`card.jsx`、`layout.js`、`styles.css`（78KB）。

@@ -1,5 +1,7 @@
 # dsh-research-desk 页面设计 v0.3
 
+> **状态：独立新包规划，非本仓库已实现功能。** 本文档描述的是**独立新包 `dsh-research-desk` 的设计规划**，尚未实施，也**未在 `dsh-csrw` 中实现**；本仓库当前能力一律以 `README.md` 为准，请勿把本文当作 `dsh-csrw` 已交付的功能。工具数量以 `scripts/check.mjs` 的 `assert.equal(tools.length, 49)` 断言为准。
+
 > 五页详细设计：布局、组件、交互、数据映射、空状态与验收标准。
 > 架构与数据模型见 [dsh-research-desk-design.md](dsh-research-desk-design.md)；本文只回答"每一页长什么样、怎么点"。
 

@@ -7,7 +7,8 @@ const pluginDir=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 let entry;const states=[],effects=[],calls=[];let cursor=0;
 const React={createElement:(type,props,...children)=>({type,props:props||{},children:children.flat(Infinity).filter(v=>v!==null&&v!==undefined&&v!==false)}),useState(initial){const i=cursor++;if(!(i in states))states[i]=initial;return[states[i],value=>{states[i]=typeof value==='function'?value(states[i]):value;}];},useRef(initial){const i=cursor++;return states[i]??(states[i]={current:initial});},useEffect(fn,deps){const i=cursor++;const old=states[i];if(!old||deps.some((v,j)=>v!==old[j])){states[i]=deps;effects.push(fn);}},useSyncExternalStore(subscribe,get){const i=cursor++;if(!(i in states))states[i]=get();return states[i];},useCallback(fn){return fn;},useMemo(fn){return fn();}};
 const fetch=async()=>({ok:true,status:200,json:async()=>({state:null,canUndo:false,model:null,modelOk:false}),text:async()=>''});
-vm.runInNewContext(await fs.readFile(path.join(pluginDir,'client.js'),'utf8'),{window:{__ModuleLoader__:{load(value){entry=value;}}},AbortController,fetch,setTimeout,console});
+const source=await fs.readFile(path.join(pluginDir,'client.js'),'utf8');
+vm.runInNewContext(source,{window:{__ModuleLoader__:{load(value){entry=value;}}},AbortController,fetch,setTimeout,console});
 const slots=[],translations={};
 entry.factory(()=>React).apply({effect:fn=>fn(),get:()=>undefined,locale:{register:(_ns,lang,dict)=>{translations[lang]=dict;return()=>{};},bind:()=>key=>key,subscribe:()=>()=>{}},slots:{inject:(_name,fn)=>fn(),register:(opts,component)=>{slots.push({opts,component});return()=>{};}},remote:{commands:{async execute(id,line,attachments,signal){assert.equal(id,'session-fixture');assert.ok(line.startsWith('/dsh-csrw '),'client uses the unified command name');assert.ok(signal instanceof AbortSignal);const request=JSON.parse(line.slice('/dsh-csrw '.length));calls.push(request);const value=request.operation==='dsh_csrw_config_show'?{config:{obsidian:{vaultPath:'/vault',autoDetect:true},nutstore:{baseUrl:'https://example.invalid/dav/'}}}:{key:request.args.key,value:request.args.value,saved:true};return{ok:true,value:{result:{kind:'success',text:JSON.stringify(value)}}};}}}});
 
@@ -64,4 +65,34 @@ assert.equal(translations.zh.title,'CS\u79d1\u7814\u5de5\u4f5c\u53f0');
 const head=nodes().find(n=>n.props&&n.props.className==='dsh-csrw-head');assert.ok(head,'panel header renders');
 assert.equal(head.children.length,1);assert.equal(head.children[0].type,'h1');assert.equal(head.children[0].children[0],'title');
 assert.ok(!nodes().some(n=>n.props?.className==='dsh-csrw-logo'),'no page-header icon');
-console.log(JSON.stringify({render:'passed',workbenchSlot:'passed',sessionSelection:'passed',remoteStringId:'passed',remoteResultUnwrap:'passed',load:'passed',confirmationGate:'passed',save:'passed',workspaceIsolation:'passed',icon:'passed',titleOnlyHeader:'passed',settingsIconId:'passed',localizedTitle:'passed'}));
+// ---------- 逐一补齐：项目 / 文献列表页 + hero 第二行的静态特征断言 ----------
+// 只匹配稳定的组件名、字段白名单、op/kind 与文案 key；不断言行号、缩进或具体样式串。
+const specBlock=source.slice(source.indexOf('const RECORD_SPECS'),source.indexOf('function RecordListView'));
+assert.ok(specBlock.length>0,'record specs block is present');
+assert.ok(source.includes('function RecordListView'),'record list view component exists');
+assert.ok(source.includes('function RecordDialog'),'record dialog component exists');
+assert.match(specBlock,/kind: 'project'/,'project kind declared');
+assert.match(specBlock,/kind: 'paper'/,'paper kind declared');
+assert.ok(specBlock.includes("list: 'projects'")&&specBlock.includes("list: 'papers'"),'both state lists are wired');
+for(const needle of ['name','goal','status','venue','milestones','title','authors','year','doi','url','readBy','notes'])assert.ok(specBlock.includes(needle+':'),'whitelist field '+needle);
+const dialogBlock=source.slice(source.indexOf('function RecordDialog'),source.indexOf('function Dashboard'));
+assert.ok(dialogBlock.length>0,'record dialog block is present');
+assert.ok(dialogBlock.includes("op: 'add_item'"),'add_item op is used');
+assert.ok(dialogBlock.includes("op: 'update_item'"),'update_item op is used');
+assert.ok(dialogBlock.includes("op: 'delete_item'"),'delete_item op is used');
+assert.ok(dialogBlock.includes('ROUTES.ops'),'writes go through the ops route');
+assert.ok(dialogBlock.includes('labelOpDefault'),'ops body uses the agreed label');
+assert.ok(dialogBlock.includes('data.errors'),'data.errors is inspected before treating a write as success');
+assert.ok(dialogBlock.includes('loadDesk()'),'state is reloaded after save / delete');
+assert.ok(dialogBlock.includes('recordDeleteConfirm'),'delete requires an explicit confirmation button');
+assert.ok(source.includes('function sundayKey'),'local week boundary helper exists');
+assert.ok(source.includes('return { pending, papersThisWeek }'),'heroNumbers returns both numbers');
+assert.ok(source.includes('return { pending: 0, papersThisWeek: 0 }'),'heroNumbers empty state returns both numbers');
+assert.ok(source.includes('numbers.papersThisWeek'),'hero renders the second line even when it is 0');
+assert.ok(!source.includes('requestAnimationFrame'),'no number roll animation is introduced');
+const zhBlock=source.slice(source.indexOf('const zh = {'),source.indexOf('const en = {'));
+const enBlock=source.slice(source.indexOf('const en = {'),source.indexOf('let language'));
+const newKeys=['papersThisWeekLine','listCount','listNew','listEdit','listEmptyProject','listEmptyPaper','recordNew','recordEdit','recordSaved','recordDeleted','recordDeleteConfirm','recordDeleteYes','recordName','paperTitle','goal','milestones','readBy','invalidUrl','invalidJson','invalidYear','requiredName','errNeedLoad','errRouteMissing'];
+for(const key of newKeys){const re=new RegExp('(^|[\\s,{])'+key+'\\s*:');assert.match(zhBlock,re,'zh dictionary key '+key);assert.match(enBlock,re,'en dictionary key '+key);}
+assert.ok(zhBlock.includes('pageSoon')&&enBlock.includes('pageSoon'),'legacy pageSoon key is kept in both dictionaries');
+console.log(JSON.stringify({render:'passed',workbenchSlot:'passed',sessionSelection:'passed',remoteStringId:'passed',remoteResultUnwrap:'passed',load:'passed',confirmationGate:'passed',save:'passed',workspaceIsolation:'passed',icon:'passed',titleOnlyHeader:'passed',settingsIconId:'passed',localizedTitle:'passed',recordList:'passed',recordOps:'passed',recordWhitelist:'passed',heroSecondLine:'passed',bilingualKeys:'passed'}));
